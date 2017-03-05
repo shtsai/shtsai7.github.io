@@ -1,2 +1,4 @@
 name: Shang-Hung Tsai
 markdown: kramdown
+
+permalink: /blog/:year/:month/:day/:title
