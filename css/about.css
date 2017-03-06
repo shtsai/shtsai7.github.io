@@ -1,0 +1,15 @@
+table#nyu td{
+    padding: 20px;
+}
+
+table#bu td{
+    padding: 20px;
+}
+
+table#name td{
+    padding: 20px;
+}
+
+.img-circle {
+    border-radius: 50%;
+}
