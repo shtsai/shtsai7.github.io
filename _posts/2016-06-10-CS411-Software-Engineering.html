@@ -1,0 +1,1272 @@
+---
+layout: post
+title: "CS330: Analysis of Algorithm"
+date: 2016-06-10
+---
+<link rel="stylesheet" type="text/css" href="/css/post.css">
+<div>
+<p>This is a summary of CS411: Software Engineering taught by Professor Donham at Boston University in Spring 2016.</p>
+<hr>
+<!--more-->
+
+<p>Table of Content</p>
+<ul>
+ 	<li><a href="#application_stacks">Application Stacks</a></li>
+ 	<li><a href="#introduction">Introduction</a></li>
+ 	<li><a href="#processes">Processes</a></li>
+ 	<li><a href="#agile">Agile</a></li>
+ 	<li><a href="#requirement_engineering">Requirement Engineering</a></li>
+ 	<li><a href="#system_modeling">System Modeling</a></li>
+ 	<li><a href="#architectural_design">Architectural Design</a></li>
+ 	<li><a href="#ui_ux">UI/UX Design</a></li>
+ 	<li><a href="#data_source">Data Source</a></li>
+ 	<li><a href="#testing">Testing</a></li>
+ 	<li><a href="#migration_strategy">Migration Strategy</a></li>
+ 	<li><a href="#configuration">Configuration</a></li>
+ 	<li><a href="#project_planning">Project Planning</a></li>
+ 	<li><a href="#security_engineering">Security Engineering</a></li>
+ 	<li><a href="#reliability">Reliability</a></li>
+</ul>
+<hr>
+
+<strong><a name="application_stacks"></a>Application Stacks</strong>
+<ul>
+ 	<li>Started with libraries, then grow and become a framework (application-specific)</li>
+ 	<li>A stack consists of several tools or frameworks (ex. OS, database, web server, scripting language)
+<ul>
+ 	<li>Offer URL routing, JSON/XML support for RESTful transactions, sessions, DB connect</li>
+ 	<li>REST(representational state transfer), it is an architecture style of designing network application, it replies on stateless, client-server HTTP protocol to make calls between machines</li>
+</ul>
+</li>
+</ul>
+<p>Example of stacks</p>
+<ul>
+ 	<li>JOLT: Java, Oracle, Linux, Tomcat(servlet container and app router)</li>
+ 	<li>Ruby on Rails (RoR)</li>
+ 	<li>LAMP: Linux, Apache, MySQL, PHP(Perl), usually entirely back-end</li>
+ 	<li>MEAN: Mongo (schema-less DB, store in JSON), Express (provide routing to support web-based app), Angular (provide support for MVC &amp; MVV, “live object”, front-end component), Node.js(server-side Javascript)</li>
+</ul>
+<p>JSON: Javascript Object Notation, use key:values pairs to represent objects, lighter weight and simpler to parse than XML</p>
+
+<p>QWAN: quality without a name</p>
+
+<br>
+
+<strong> </strong>
+
+<strong><a name="introduction"></a>Chapter 1 Introduction</strong>
+<ul>
+ 	<li>Software is
+<ul>
+ 	<li><strong>Instructions</strong> (computer programs, provide desired features, function, and performance)</li>
+ 	<li><strong>Data structures </strong>(enable programs to adequately manipulate information)</li>
+ 	<li><strong>Documentation</strong> (describes the operation and use)</li>
+</ul>
+</li>
+ 	<li>Software Engineering is an engineering discipline that is concerned with all aspects of software production
+<ul>
+ 	<li><strong>process</strong></li>
+ 	<li><strong>methods</strong> to implement the processes</li>
+ 	<li><strong>tools </strong>to facilitate the methods</li>
+</ul>
+</li>
+ 	<li>Software doesn’t wear out, but can become obsolete</li>
+ 	<li>People want to DO things, not run software, software need to be robust enough to fade into the background, feature vs benefit (Sony vs Apple)</li>
+ 	<li>Software costs more than computer system, costs more to maintain than to develop</li>
+ 	<li>System become more complex, it does not use software engineering methods, software is more expensive and less reliable</li>
+ 	<li>Generic product: stand-alone system, developer owns specification and decide changes</li>
+ 	<li>Customized product: commissioned by a specific customer to meet their needs, customer owns specification and decide changes</li>
+ 	<li>Essential attributes of good software
+<ul>
+ 	<li><strong>Maintainability</strong></li>
+ 	<li><strong>Dependability</strong> and security</li>
+ 	<li><strong>Efficiency</strong></li>
+ 	<li><strong>Acceptability</strong> (understandable, usable, and compatible with other systems)</li>
+</ul>
+</li>
+ 	<li>Software process activities
+<ul>
+ 	<li><strong>Specification</strong>: define software</li>
+ 	<li><strong>Development</strong>: design and program</li>
+ 	<li><strong>Validation</strong>: check</li>
+ 	<li><strong>Evolution</strong>: modify</li>
+</ul>
+</li>
+ 	<li>Application types
+<ul>
+ 	<li>Stand-alone application: local computer, do not connect to network</li>
+ 	<li>Interactive transaction-based application: execute on a remote computer, accessed by users, ex. E-commerce applications</li>
+ 	<li>Embedded control system: control and manage hardware device</li>
+ 	<li>Batch processing system: process data in large batches</li>
+ 	<li>Entertainment system</li>
+ 	<li>Systems for modelling and simulation: for scientist</li>
+ 	<li>Data collection system: collect data using sensors and send that data to other systems for processing</li>
+ 	<li>Systems of systems: composed of many other software systems</li>
+</ul>
+</li>
+ 	<li>Web software engineering
+<ul>
+ 	<li>Software reuse: assemble from pre-existing software components</li>
+ 	<li>Incremental and agile development: impractical to specify all requirement in advance</li>
+ 	<li>Service-oriented system: software components are stand-alone web services</li>
+ 	<li>Rich interfaces: AJAX, HTML5</li>
+</ul>
+</li>
+</ul>
+<strong> </strong>
+
+<strong> </strong>
+
+<strong><a name="processes"></a>Chapter 2 Processes</strong>
+<ul>
+ 	<li>Software process activities
+<ul>
+ 	<li>Specification: establishing what services are required</li>
+ 	<li>Development: convert system specification into an executable system, design architecture, database, interface.</li>
+ 	<li>Validation: verification and validation, show system conform to its specification, test component and system</li>
+ 	<li>Evolution: modify</li>
+</ul>
+</li>
+ 	<li>Plan-driven, or prescriptive: all process activities are planned in advance, progress measured against plan</li>
+ 	<li>Agile process: planning is incremental, easier to change process to reflect changing customer requirement</li>
+ 	<li>Software process models
+<ul>
+ 	<li>Waterfall model: plan-driven, fail-late
+<ul>
+ 	<li>separate phases of specification and development, performed in sequence</li>
+ 	<li>problems
+<ul>
+ 	<li>hard to accommodate change, inflexible</li>
+ 	<li>over-engineering, late integration and test, hard to estimate</li>
+ 	<li>appropriate when only limited changes</li>
+</ul>
+</li>
+ 	<li>Incremental development: specification, development and validation are interleaved, may be plan-driven or agile
+<ul>
+ 	<li>Benefits
+<ul>
+ 	<li>Reduced cost of accommodating changing requirement</li>
+ 	<li>Easier to get customer feedback</li>
+ 	<li>More rapid delivery of useful software</li>
+</ul>
+</li>
+ 	<li>Problems
+<ul>
+ 	<li>The process is not visible</li>
+ 	<li>System structure tends to degrade as new increments are added</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<strong> </strong>
+<ul>
+ 	<li>Integration and configuration: assembled from existing configurable components, may be plan-driven or agile
+<ul>
+ 	<li>Based on software reuse, Commercial-off-the-shelf (COTS)</li>
+ 	<li>Advantages
+<ul>
+ 	<li>Reduced costs and risks</li>
+ 	<li>Faster delivery</li>
+</ul>
+</li>
+ 	<li>Disadvantages
+<ul>
+ 	<li>Requirement compromises are inevitable, may not meet real needs of users</li>
+ 	<li>Loss of control over evolution</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+ 	<li>Rational Unified Process (RUP): use-case driven, architecture-centric, iterative and increment:
+<ul>
+ 	<li>Four phases, (several iterations, spins):
+<ul>
+ 	<li>Inception: establish business case, plan, estimate, schedule</li>
+ 	<li>Elaboration: understand problem, requirement model, architecture</li>
+ 	<li>Construction: system design, program, testing, prepare delivery</li>
+ 	<li>Transition: deploy the system</li>
+</ul>
+</li>
+ 	<li>Develop iteratively</li>
+ 	<li>Manage requirements: track requirement change, analyze impact</li>
+ 	<li>Use component-based architectures</li>
+ 	<li>Visually model software (UML)</li>
+ 	<li>Control changes to software</li>
+</ul>
+</li>
+</ul>
+<ul>
+ 	<li>Software prototyping:
+<ul>
+ 	<li>A prototype is an initial version of a system</li>
+ 	<li>Can be used to demonstrate concepts and try out design options</li>
+ 	<li>It should be discarded after development</li>
+</ul>
+</li>
+ 	<li>Incremental delivery: break down delivery into increments, each increment delivering part has part of the required functionality
+<ul>
+ 	<li>Advantages:
+<ul>
+ 	<li>System functionality is available earlier</li>
+ 	<li>Early increments act as a prototype</li>
+ 	<li>Lower risk of overall project failure</li>
+</ul>
+</li>
+ 	<li>Problems
+<ul>
+ 	<li>Hard to identify common facilities that are needed by all increments</li>
+ 	<li>Specification is developed in conjunction with the software</li>
+</ul>
+</li>
+ 	<li>Process improvement activities
+<ul>
+ 	<li>Process measurement: measure attributes of the software process or produce, forms a baseline that helps decide if process improvement has been effective
+<ul>
+ 	<li>Time taken for process to be completed</li>
+ 	<li>Resources required (ex. Person-days)</li>
+ 	<li>Number of occurrences of a particular event (ex. defects)</li>
+</ul>
+</li>
+ 	<li>Process analysis: assess current process, identify weaknesses and bottlenecks</li>
+ 	<li>Process change: change to address identified weakness</li>
+</ul>
+</li>
+ 	<li>SEI capability maturity model: identifies maturity levels that essentially correspond to the use of good software engineering practice
+<ul>
+ 	<li>Initial</li>
+ 	<li>Repeatable</li>
+ 	<li>Defined</li>
+ 	<li>Managed</li>
+ 	<li>Optimizing</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<strong> </strong>
+
+<strong> </strong>
+
+<strong><a name="agile"></a>Chapter 3 Agile</strong>
+<ul>
+ 	<li>Agile development
+<ul>
+ 	<li>Rapid development and delivery</li>
+ 	<li>Program specification, design and implementation are inter-leaved, reduce overheads in the software process</li>
+ 	<li>Frequent delivery of new versions for evaluation</li>
+ 	<li>Minimal documentation, focus on working code rather than design</li>
+ 	<li>Based on iterative approach</li>
+</ul>
+</li>
+ 	<li>Extreme programming
+<ul>
+ 	<li>Extreme approach to iterative development, more a technical focus</li>
+ 	<li>Users stories for specification</li>
+ 	<li>Refactoring (continuous improvement): constant code improvement, improve understandability, reduce need for documentation</li>
+ 	<li>Test-first development: central to XP, test after every change has been made, user involvement, writing tests before code clarifies requirement, test are executable components</li>
+ 	<li>Pair programming, code review</li>
+</ul>
+</li>
+ 	<li>Scrum
+<ul>
+ 	<li>An agile method that manages iterative development</li>
+ 	<li>Three phases
+<ul>
+ 	<li>Outline planning, establish objectives, product backlog,</li>
+ 	<li>Sprint cycles, each cycle develops an increment, isolated, communication channeled through “scrum master”</li>
+ 	<li>Project closure, wrap up and complete required documentation</li>
+</ul>
+</li>
+ 	<li>Daily meeting that review progress and prioritizes work to be done with whole team</li>
+ 	<li>Benefits
+<ul>
+ 	<li>Product broken down to small pieces</li>
+ 	<li>Communication improved</li>
+ 	<li>Constant customer feedback</li>
+</ul>
+</li>
+ 	<li>Problems
+<ul>
+ 	<li>Incompatible with large companies contract definition</li>
+ 	<li>Appropriate for new development rather than maintenance, hard to maintain because no documentation, keep the development team</li>
+ 	<li>Only good for small co-located teams</li>
+ 	<li>Hard to scale agile method for large systems</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<br>
+<br>
+
+<strong><a name="requirement_engineering"></a>Chapter 4 Requirement Engineering</strong>
+
+<p>Software Development Lifecycle (SDLC)</p>
+<ul>
+ 	<li>Four phases
+<ul>
+ 	<li>Define (Inception)
+<ul>
+ 	<li>Get all stakeholder to agree (end users, manager, owner, other)</li>
+ 	<li>Gather requirement(ask why, not how, don't start implementation too early)</li>
+</ul>
+</li>
+ 	<li>Design (Elaboration)</li>
+ 	<li>Develop (Construction)</li>
+ 	<li>Deliver (Transition)</li>
+</ul>
+</li>
+</ul>
+<br>
+
+<p>Want requirements to be complete and consistent</p>
+<ul>
+ 	<li>User requirement</li>
+ 	<li>System requirement</li>
+ 	<li>Functional requirement, services <u>to provide</u>, how to react, its functionality</li>
+ 	<li>Non-function requirement, <u>constraint</u> on service or function or development process, apply to the system as a whole, eg. Scalability, security, performance more critical than functional requirement
+<ul>
+ 	<li>Product requirement, eg. Speed, reliability,</li>
+ 	<li>Organizational requirement, eg. Process standard used, implementation requirement</li>
+ 	<li>External requirement, eg. External to the system and process</li>
+</ul>
+</li>
+ 	<li>Goal vs Non-goals
+<ul>
+ 	<li>Important to state what system will do and not do, general intention</li>
+ 	<li>Help set both expectation and boundaries</li>
+</ul>
+</li>
+ 	<li>Goal vs Requirement
+<ul>
+ 	<li>Goal: nice to do (uses “should”)</li>
+ 	<li>Requirement: must do (uses “shall”)</li>
+</ul>
+</li>
+</ul>
+<br>
+
+<p>Requirement engineering process, iterative activity</p>
+<ul>
+ 	<li>Elicitation(inception), requirement discovery, classification, negotiation, specification, translation from business language to technical language</li>
+ 	<li>Analysis: use case</li>
+ 	<li>Validation: concerned with if do what customer really want
+<ul>
+ 	<li>Review check: verifiability, comprehensibility, traceability, adaptability</li>
+</ul>
+</li>
+ 	<li>Management: manage changing requirements</li>
+</ul>
+<p>Ways of writing system requirement:</p>
+<ul>
+ 	<li>Natural language (lack of clarity, confusion)</li>
+ 	<li>Graphical notation</li>
+ 	<li>Structured natural language</li>
+</ul>
+<br>
+
+<p>Use case: a kind of scenario that is included in UML, high-level graphical model</p>
+<ul>
+ 	<li>Identify actors in interaction, describe all possible interactions</li>
+ 	<li>Represents a discrete task that involves external interaction</li>
+</ul>
+<p>Software requirements document: set <u>WHAT</u> the system should do, rather than <u>HOW</u> it should do it.</p>
+<br>
+<br>
+
+<strong><a name="system_modeling"></a>Chapter 5 System Modeling</strong>
+
+<p>System modeling is the process of developing abstract models of a system, with each model presenting a different view of the system without details.</p>
+
+<p>It is usually based on notations in the UML</p>
+<ul>
+ 	<li>Activity diagrams</li>
+ 	<li>Use case diagrams: show interactions between a system and its environment</li>
+ 	<li>Sequence diagrams: show sequence of interactions between actors and system objects</li>
+ 	<li>Class diagrams: show object classes, important for object-oriented programming</li>
+ 	<li>State diagrams: show how system reacts to events</li>
+</ul>
+<br>
+
+<p>Context models:</p>
+<ul>
+ 	<li>shows the operational context of a system</li>
+ 	<li>set up system boundaries: define what is inside and what is outside the system</li>
+</ul>
+<br>
+
+<p>Interaction models:</p>
+<ul>
+ 	<li>helps identify user requirements</li>
+ 	<li>can employ <strong>use case</strong> diagrams and <strong>sequence diagrams</strong></li>
+</ul>
+<br>
+
+<p>Structural models:</p>
+<ul>
+ 	<li>shows organization of system components, can use <strong>class diagram</strong></li>
+ 	<li>class diagrams can be used; object represent something in the real world</li>
+ 	<li>object characteristics
+<ul>
+ 	<li>attributes: data</li>
+ 	<li>behaviors: methods, interfaces</li>
+ 	<li>relationship
+<ul>
+ 	<li>is-a: inheritance relationship</li>
+ 	<li>has-a: composites relationship, contain other object</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<br>
+
+<p>Behavioral models</p>
+<ul>
+ 	<li>shows the dynamic behavior of a system as it is executing</li>
+ 	<li>shows that happens or what should happen when system responds to a stimulus
+<ul>
+ 	<li>There are two types of stimuli
+<ul>
+ 	<li>Data: arrive</li>
+ 	<li>Events: happens and triggers</li>
+</ul>
+</li>
+ 	<li>Data driven modeling: shows sequence of actions processing input data and generate an output, can use activity diagram</li>
+ 	<li>Event driven modeling:
+<ul>
+ 	<li>show how a system responds to events</li>
+ 	<li>Uses State machine models, show how state changes</li>
+ 	<li>Can use state diagrams</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<br>
+
+<p>Model-Driven engineering</p>
+<ul>
+ 	<li>Models are the principal outputs of the development process</li>
+ 	<li>Programs are generated automatically from the models</li>
+ 	<li>Pros
+<ul>
+ 	<li>Allows systems to be considered at high level of abstraction</li>
+ 	<li>Generate code automatically, cheaper to adapt to new platforms</li>
+</ul>
+</li>
+ 	<li>Cons
+<ul>
+ 	<li>Models for abstraction might not be right for implementation</li>
+ 	<li>Costs of developing translators could be higher than writing code</li>
+</ul>
+</li>
+</ul>
+<br>
+<br>
+
+<strong><a name="architectural_design"></a>Chapter 6 Architectural Design</strong>
+
+<p>Architectural design:</p>
+<ul>
+ 	<li>understanding how a software system should be organized and designing the overall structure</li>
+ 	<li>it is the critical link between design and requirement engineering</li>
+ 	<li>output an architectural model that describes how the system is organized</li>
+</ul>
+<br>
+
+<p>Advantages of explicit architecture:</p>
+<ul>
+ 	<li>stakeholder communication, facilitate discussion about system design</li>
+ 	<li>system analysis</li>
+ 	<li>large-scale reuse</li>
+</ul>
+<br>
+
+<p>Architecture and system characteristics</p>
+<ul>
+ 	<li>performance</li>
+ 	<li>security</li>
+ 	<li>safety</li>
+ 	<li>availability: fault tolerance</li>
+ 	<li>maintainability: use replaceable components</li>
+</ul>
+<br>
+
+<p>Architectural views (4+1):</p>
+<ul>
+ 	<li>logical view: show key abstractions in system as objects</li>
+ 	<li>physical view: shows the system hardware and how software components are distributed across the processors in the system</li>
+ 	<li>development view: shows how the software is decomposed for development</li>
+ 	<li>process view: shows how the system is composed of interacting process</li>
+ 	<li>related using use cases or scenarios</li>
+</ul>
+<p>Prof don't think UML is good for representing architectural views because it does not include good abstractions for high-level system description</p>
+
+<p>Architectural description languages(ADLs) might be better but not widely used.</p>
+
+<br>
+
+<p>Architectural pattern: a stylized description of good design practice, which has been tried and tested</p>
+<ul>
+ 	<li>Data-Centered Architecture: perform operation inside database, manipulating data fast, centralized processing
+<ul>
+ 	<li>but don't scale very well</li>
+</ul>
+</li>
+ 	<li>Call and Return Architecture: split the work up for efficiency, let the user see the faster result first, and lower result below, distributed processing
+<ul>
+ 	<li>need to manager traffic, call and return might fail</li>
+</ul>
+</li>
+ 	<li>Client-server architecture (e.g. most web): client actively makes requests, server passively satisfies requests</li>
+ 	<li>Tiered web architecture: implemented with several tier, each tier is platform with a unique responsibility (client or server)
+<ul>
+ 	<li>2-Tier C-S: cheap, but limited scalability, small users</li>
+ 	<li>3-Tier C-S (client, application server, data server): better performance, scalability, no redundancy</li>
+ 	<li>multitier C-S: replication, servers are specialized</li>
+</ul>
+</li>
+ 	<li>pub-sub architecture: publisher and subscriber, used in systems that provides a pipeline of data, subscriber can choose which data to be notified of, publisher holds a model, when that model changes, notify subscribers of the change</li>
+</ul>
+<p>Push waiting out to the internet if possible, give some rooms for app server and database by allowing fewer connections to them</p>
+
+<p>Thick vs Thin:</p>
+<ul>
+ 	<li>In a thin client, the work is done on the server and client just displays result</li>
+ 	<li>In a thick client, the work in done on the client and server just supplies data</li>
+</ul>
+<br>
+
+<p>Model-View-Controller (MVC) pattern</p>
+<ul>
+ 	<li>Model
+<ul>
+ 	<li>It is the code that perform some task</li>
+ 	<li>It is an object representing data or activity, holds the state</li>
+ 	<li>Has no knowledge about its controllers or views</li>
+ 	<li>Can have several views</li>
+ 	<li>Some object, some variable</li>
+</ul>
+</li>
+ 	<li>View
+<ul>
+ 	<li>Visualization of the state of the model</li>
+ 	<li>View provides GUI components for a model</li>
+ 	<li>A http page</li>
+</ul>
+</li>
+ 	<li>Controllers
+<ul>
+ 	<li>request the model to update when a user interacts with an associated view</li>
+ 	<li>Offers facilities to change the state of the model</li>
+ 	<li>Button, input form</li>
+</ul>
+</li>
+</ul>
+<br>
+
+<p>Layered architecture</p>
+<ul>
+ 	<li>Organize system into a set of layers, each of which provide a set of service</li>
+ 	<li>Write interfaces to connect layers, does not matter what underlying technology is</li>
+</ul>
+<br>
+
+<p>Repository architecture</p>
+<ul>
+ 	<li>Has a central control, sub-systems exchange data through central control, does not know each other</li>
+</ul>
+<br>
+
+<p>Pipe and filter architecture</p>
+<ul>
+ 	<li>Functional transformations process their inputs to produce outputs</li>
+ 	<li>Data flows from one component to another for processing</li>
+</ul>
+<br>
+<br>
+<strong><a name="ui_ux"></a>UI/UX Design</strong>
+
+<p>A few guidelines</p>
+<ul>
+ 	<li>Keep it simple</li>
+ 	<li>Keep it consistent, people learn to use an app, but hard to transit</li>
+ 	<li>Creativity is constrained by usability, no surprises, no unexpected results</li>
+ 	<li>Contextual UI: When possible, hide functionality that is not necessary for the current task, should understand the context of the current task</li>
+ 	<li>Do not provide multiple different ways to accomplish a task, just choose one and be consistent</li>
+ 	<li>Develop a design language, carry that throughout app, packaging and marketing</li>
+</ul>
+<p>Testing UI</p>
+<ul>
+ 	<li>Should involve untouched users</li>
+ 	<li>Ask users to perform some tasks, see how they do it</li>
+ 	<li>Test multiple UI versions to capture differences</li>
+</ul>
+<br>
+<br>
+
+<strong><a name="data_source"></a>Data Source</strong>
+
+<p>Every web app is backed by a database</p>
+
+<p>Types of data</p>
+<ul>
+ 	<li>User data: things that are specific to user</li>
+ 	<li>Common data: contents that are present for all users</li>
+ 	<li>Infrastructure data: data required to operate the site</li>
+</ul>
+<p>Four data activities: <strong>CRUD</strong></p>
+<ul>
+ 	<li>Create</li>
+ 	<li>Read</li>
+ 	<li>Update</li>
+ 	<li>delete</li>
+</ul>
+<br>
+<p>Atomicity</p>
+
+<p>Multi-threads programs running, need to guarantee that data update by a process will complete before another process start to update the same data.</p>
+<br>
+<p>Locking<p>
+<ul>
+ 	<li>Database is locked when one thread is working on a dataset, preventing other threads from changing the data mid-stream.</li>
+ 	<li>Locks can be either at the table level or row level</li>
+</ul>
+<br>
+<p>Traditional data sources:</p>
+<ul>
+ 	<li>Mainframes
+<ul>
+ 	<li>Mainframes are optimized for data</li>
+ 	<li>Applications with mainframes are tightly coupled (can’t separate data from app)</li>
+ 	<li>Hard to transform to web app</li>
+ 	<li>Use XML as medium to communicate between client and DB</li>
+</ul>
+</li>
+ 	<li>Relation Database(RDB)
+<ul>
+ 	<li>Table are related by their keys, normalized</li>
+ 	<li>Avoid duplicates</li>
+ 	<li>Use SQL (structure query language)</li>
+ 	<li>Use ERD (entity-relationship diagram), graphical representation</li>
+ 	<li>Good for structuring data</li>
+ 	<li>Bad because query can become very complex and slow</li>
+</ul>
+</li>
+</ul>
+<p>Views</p>
+
+<p>It is abstraction of the query. Save time from writing query every time. E.g. getUserReturn()</p>
+
+<br>
+
+<p>Data warehouses</p>
+<ul>
+ 	<li>Read-only data.</li>
+ 	<li>Collects and combines data from several sources into views</li>
+ 	<li>Views are pushed into function-specific data marts for consumption by apps</li>
+</ul>
+<br>
+
+<p>Non-relational DBs</p>
+<ul>
+ 	<li>Document-based rather than table based, denormalized data</li>
+ 	<li>No relation in the back-end</li>
+ 	<li>There are potentially be a lot of duplication</li>
+ 	<li>Trade simplicity for performance</li>
+ 	<li>No restriction on type and length(reduce impedance)</li>
+ 	<li>GIGO (garbage in, garbage out), no filter</li>
+</ul>
+<br>
+
+<p>Impedance mismatch: the data types in the DB does not match the way we want to use them</p>
+<br>
+<p>JSON: javascript object notation</p>
+
+<p>Human-readable way to store and transmit data that maps directly to an object</p>
+
+<p>Basic format for noSQL databases</p>
+<br>
+<p><strong>Node.js / Express</strong></p>
+<ul>
+ 	<li>Server-side JavaScript engine (Google V8)</li>
+ 	<li>HTML router using express</li>
+ 	<li>Supported by modules and the node package manager(npm)</li>
+ 	<li>Node handles the back end by providing a RESTful API</li>
+ 	<li>The front end acts as controller and view, and calls the API on the back end to do work</li>
+ 	<li>Use JSON as the transport language for the API</li>
+</ul>
+<br>
+
+<p>Routing</p>
+<ul>
+ 	<li>Routes are the way Node responds to HTTP requests</li>
+ 	<li>Methods are GET, PUT, POST, DELETE, etc</li>
+</ul>
+<p>Middleware</p>
+<ul>
+ 	<li>Manipulate requests before sending responds</li>
+</ul>
+<p>Callbacks</p>
+<ul>
+ 	<li>Most functions in express returns a callback function</li>
+</ul>
+<br>
+<br>
+<p><strong><a name="testing"></a>Testing</strong></p>
+
+<p>Show errors, requirement conformance, performance, quality</p>
+<br>
+
+<p>Strategy</p>
+
+<p>Begin by “testing-in-the-small” and move toward “testing-in-the-large”</p>
+<ul>
+ 	<li>Unit test</li>
+ 	<li>Integration test</li>
+ 	<li>Validation test</li>
+ 	<li>System test</li>
+</ul>
+<br>
+
+<p>Need quantifiable requirements first to start testing</p>
+
+<p>V &amp; V:</p>
+<ul>
+ 	<li>verification(technical): ensure software correctly implements functions</li>
+ 	<li>validation(business): ensure software meets customer requirements</li>
+</ul>
+<br>
+
+<p>Use independent tester, because developer understand the system and test “gently”, that are driven by “delivery”. Independent tester will attempt to break the system, is driven by quality.</p>
+<br>
+
+<p>Smoke Testing: Testing the basic functionality of the build, see if it works</p>
+<br>
+<p>Unit testing</p>
+<ul>
+ 	<li>Test-Driven Development (TDD): Write test first, and then run test. Will failure, then fix each failure and bug, until pass all tests. Low level test. Check data format, boundary.</li>
+ 	<li>Assertion: if triggered, it will halt the program</li>
+ 	<li>Stubs: reflectors, use an interfaces to represents a subsystem in testing</li>
+</ul>
+<br>
+
+<p>Integration Testing</p>
+<ul>
+ 	<li>Combines units and subsystem, integrates them into one testable thing</li>
+ 	<li>Behavior-Driven Development (BDD): more functional, several units required, focus on the behavior of software. High level test. Think of use case</li>
+ 	<li>Sandwich testing: combine top down integration and bottom up integration</li>
+ 	<li>Regression testing: test software in its target environment, test in an environment that is as close as possible to production (same software versions, hardware), use scrubbed live data to simulate the production environment</li>
+ 	<li>End-to-end testing: test software in the context of the business process</li>
+</ul>
+<br>
+<br>
+
+<p><strong><a name="migration_strategy"></a>Migration strategy</strong></p>
+
+<p>Migration involves moving from something that we have to something that we want or need (market pressure, old system)</p>
+<br>
+
+<p>Gap Analysis</p>
+<ul>
+ 	<li>Baseline: what do we got? Where are we right now? Can use automation.</li>
+ 	<li>Future state: describe closely what the future state should be. What do you want?</li>
+ 	<li>Gap: how do we get from present to future? Produce a strategy, a series of steps, gap analysis becomes the plan for migration</li>
+</ul>
+<br>
+
+<p>Approaches</p>
+<ul>
+ 	<li>Modify existing system
+<ul>
+ 	<li>If the gap is small and the infrastructure can support the end state</li>
+ 	<li>Low risk and easy to back out</li>
+ 	<li>Usually stuck with the existing technology</li>
+ 	<li>At some point, hard to modify anymore, need to move on</li>
+</ul>
+</li>
+ 	<li>Scrap the existing system and start over (green field)
+<ul>
+ 	<li>Has most constraints, need to preserve the functionality of the old system</li>
+ 	<li>Also provides opportunity to future-proof the system by using newer methods and technologies</li>
+ 	<li>Testing, work on your app, provide correct interfaces for upstream and downstream systems</li>
+</ul>
+</li>
+ 	<li>Wrap, Add an adapter layer to existing system to provide new functionality
+<ul>
+ 	<li>Leave existing system, add a wrapper that provides additional capabilities</li>
+ 	<li>Write a translator in the intermediate layer (eg. Translate main frame language to html)</li>
+ 	<li>Use abstraction layers, use a common language such as XML to frame requests and responses</li>
+ 	<li>Gain in the short term by deploying a simpler solution, but in the long term might be very expensive to maintain, replace, performance could suffer</li>
+</ul>
+</li>
+</ul>
+<br>
+
+<p>Questions</p>
+<ul>
+ 	<li>Is there a substantial sunk cost (eg. Software license)</li>
+ 	<li>will the existing system be supported in the future?</li>
+ 	<li>Can we leverage this work to add functionality to other system?</li>
+ 	<li>Can we move further from the end state?</li>
+</ul>
+<br>
+
+<p>Migrating Data</p>
+<ul>
+ 	<li>Difficult to migrate data, data is valuable</li>
+ 	<li>Extract, Transform, Load (ETL)
+<ul>
+ 	<li>Tools between the legacy and new database</li>
+ 	<li>Let us write rules for transforming one to the other, including relational information</li>
+ 	<li>Allows you to adjust schemas</li>
+</ul>
+</li>
+</ul>
+<p>Dependency</p>
+<ul>
+ 	<li>Change in platform or application could introduce dependency problem</li>
+ 	<li>Problem exist upstream and downstream</li>
+ 	<li>Freeze packages, do not update without a valid reason</li>
+ 	<li>Check backwards compatibility</li>
+</ul>
+<br>
+<br>
+
+<p><strong><a name="configuration"></a>Configuration</strong></p>
+
+<p>Newbie programmers hard-code everything, easier to understand, everything in one place, less work</p>
+
+<br>
+
+<p>However, here are some reasons for use configs</p>
+<ul>
+ 	<li>Security: hind keys</li>
+ 	<li>Changing environment (dev, test, production)</li>
+ 	<li>Flexibility</li>
+ 	<li>Localization/internationalization</li>
+</ul>
+<br>
+
+<p>Config everything that is not code: API key, token, environment</p>
+
+&nbsp;
+
+Make:  a build tool
+<ul>
+ 	<li>Provide a way to configure building an app based on dependencies</li>
+ 	<li>Default configuration file is called Makefile</li>
+ 	<li>User define how to build the app</li>
+</ul>
+&nbsp;
+
+ANT:
+<ul>
+ 	<li>a Java based tool for automating the build process</li>
+ 	<li>XML based format</li>
+</ul>
+&nbsp;
+
+Locale: a parameter that define preference (language, formats, unit)
+
+Language: en,sp
+
+Country: US, CA, FR
+
+&nbsp;
+
+Localization (L10n) (because 10 characters between L and n)
+<ul>
+ 	<li>adapt system for a new locale</li>
+ 	<li>Unit, calendar, time, color, formats,</li>
+</ul>
+&nbsp;
+
+Internationalization (I18n)
+<ul>
+ 	<li>The process of designing and developing an app so that it can be localized</li>
+ 	<li>I18n is preparation for L10n</li>
+</ul>
+&nbsp;
+
+&nbsp;
+
+<strong><a name="project_planning"></a>Project planning</strong>
+<ul>
+ 	<li>Break down the work into parts and assign to team members</li>
+ 	<li>Anticipate problems that might arise and prepare tentative solutions</li>
+ 	<li>Provide information for setting a price (estimate cost)</li>
+</ul>
+&nbsp;
+
+Bidding strategies
+
+RFP = Request for proposal
+
+RFQ = Request for Quote
+
+Estimate all costs (hardware, software, travel, training, effort)
+
+&nbsp;
+
+Factor affecting pricing
+<ul>
+ 	<li>Contractual terms: ownership of the source code</li>
+ 	<li>Cost estimate uncertainty</li>
+ 	<li>Financial health</li>
+ 	<li>Market opportunity</li>
+ 	<li>Requirement volatility</li>
+</ul>
+&nbsp;
+
+Pricing strategy
+<ul>
+ 	<li>Lower price
+<ul>
+ 	<li>Gain a contract</li>
+ 	<li>Gain access to a new market area</li>
+</ul>
+</li>
+ 	<li>Increase price
+<ul>
+ 	<li>Fixed-price contract, lower unexpected risk</li>
+</ul>
+</li>
+</ul>
+&nbsp;
+
+Cost plus: The contractor paid for T&amp;M (Time + material) with a fixed profit margin (ie 10%)
+
+&nbsp;
+
+Project scheduling:
+<ul>
+ 	<li>The process of deciding how the work will be organized as separate tasks, and when and how they will be executed.</li>
+ 	<li>Organize concurrently, minimize task dependencies</li>
+ 	<li>Productivity is not proportional to number of workers, communication overheads</li>
+ 	<li>The unexpected always happens, always allow contingency</li>
+</ul>
+&nbsp;
+
+Parkinson’s Law
+
+Work expands so as to fill the time available for its completion. Use up all the time available.
+
+&nbsp;
+
+Hofstadter’s Law
+
+It always takes longer than you expect, even when you take into account Hofstadter’s Law.
+
+&nbsp;
+
+Hard to estimate time and budget
+
+&nbsp;
+
+Types of budgeting
+<ul>
+ 	<li>Top-down (Macro)
+<ul>
+ 	<li>Start with a number</li>
+ 	<li>Divide budget into different sections</li>
+ 	<li>Overall budget can be controlled very accurately, more control</li>
+ 	<li>BUT, more difficult to get buy in, lead to low level competition</li>
+</ul>
+</li>
+ 	<li>Button-up
+<ul>
+ 	<li>Start with all the test and work</li>
+ 	<li>Add all low level prices (padding: add extra time and budge)</li>
+ 	<li>Overhead and profits are added</li>
+</ul>
+</li>
+</ul>
+Estimation techniques
+<ul>
+ 	<li>Experience-based techniques
+<ul>
+ 	<li>Reply on judgments based on experience of past projects</li>
+ 	<li>Document deliverables and software components in a spreadsheet</li>
+ 	<li>BUT, technology changes fast, previous projects not be similar to new ones</li>
+</ul>
+</li>
+ 	<li>Algorithmic cost modeling
+<ul>
+ 	<li>Cost is estimated as a math function of product, project, and process</li>
+ 	<li>Effectiveness is questionable</li>
+</ul>
+</li>
+</ul>
+&nbsp;
+
+PERT (Program evaluation Review Technique)
+
+Get three number to finish the project
+<ul>
+ 	<li>Optimistic (50% confidence)</li>
+ 	<li>Pessimistic (90% confidence)</li>
+ 	<li>most likely</li>
+</ul>
+T = (Optimistic + 4*Likely + Pessimistic) / 6
+
+&nbsp;
+
+Slack: how late a particular task can start without affecting those that follow
+
+Used to provide some flexibility in scheduling resources
+
+&nbsp;
+
+Critical path: the path through the project that has the least slack is called the critical path, any task on critical path that starts late will delay the entire project
+
+&nbsp;
+
+&nbsp;
+
+<strong><a name="security_engineering"></a>Security Engineering</strong>
+
+Requirements
+<ul>
+ 	<li>exposure: value of time and cost to recreate a lost system</li>
+ 	<li>attack surface: total vulnerability of an app</li>
+ 	<li>threat analysis: process of determining the threats</li>
+ 	<li>controls: actions created to avoid attacks</li>
+</ul>
+Analysis
+<ul>
+ 	<li>requirement elicitation</li>
+ 	<li>security modeling</li>
+ 	<li>measures design</li>
+ 	<li>correctness check</li>
+</ul>
+&nbsp;
+
+Service Level Agreement (SLA): licensing and agreements provide a set of agreed-on metrics for measures
+
+&nbsp;
+
+Security risk analysis
+<ul>
+ 	<li>identify assets</li>
+ 	<li>create architecture overview</li>
+ 	<li>application decomposition</li>
+ 	<li>identify threats</li>
+ 	<li>document threats</li>
+ 	<li>rate threats</li>
+</ul>
+Tradeoffs
+<ul>
+ 	<li>services offered vs level of security</li>
+ 	<li>ease of use vs security</li>
+ 	<li>cost of security vs cost of loss</li>
+</ul>
+&nbsp;
+
+physical threats: somebody can touch it, then it has been compromised
+
+&nbsp;
+
+Types of attacks (network)
+<ul>
+ 	<li>cookie poisoning: modify cookie to get unauthorized access, log back on the site</li>
+ 	<li>parameter tampering: change parameters in URL request strings</li>
+ 	<li>buffer overflows: super long URL, overwrites a portion of stack, crash</li>
+ 	<li>cross-site scripts: insert script code into form fields, executed when sb views</li>
+ 	<li>code injection URL: pass extra SQL commands on http request string</li>
+ 	<li>file enumeration: examine source code to find file names, directories</li>
+ 	<li>forceful browsing: attacker "forces" a URL by accessing it directly instead of following links</li>
+ 	<li>DNS poisoning and MITM: DNS uses glue records to both reduce network traffic and facilitate follow-on requests (cached), will send back unrelated glue records</li>
+</ul>
+&nbsp;
+
+Steps to help deflect attacks (validate inputs):
+<ul>
+ 	<li>Type check</li>
+ 	<li>Allowed character check</li>
+ 	<li>Format check</li>
+ 	<li>Limits check</li>
+ 	<li>Presence check (required data)</li>
+ 	<li>Verification check (two items match)</li>
+ 	<li>Logic check</li>
+ 	<li>Resource check (resource file exists)</li>
+</ul>
+&nbsp;
+
+Check on the front end and back end
+
+&nbsp;
+
+Securing communications
+
+HTTPS/SSL serve two purposes
+<ul>
+ 	<li>Trust: server is the correct one
+<ul>
+ 	<li>Certificate is signed by Certificate Authorities (CAs)</li>
+</ul>
+</li>
+ 	<li>Privacy: communication is encrypted</li>
+</ul>
+&nbsp;
+
+Cryptography
+
+Symmetric
+<ul>
+ 	<li>Algorithm uses same key on both sides of transaction</li>
+ 	<li>Keys must be exchanged in trusted manner</li>
+ 	<li>Rotation keys often used</li>
+</ul>
+Asymmetric
+<ul>
+ 	<li>Only one key is available to public</li>
+ 	<li>No need to exchange keys, one public key, one private key</li>
+ 	<li>PGP/PKI is example</li>
+</ul>
+&nbsp;
+
+PGP
+<ul>
+ 	<li>Pretty good privacy</li>
+ 	<li>Uses private/public key encryption</li>
+ 	<li>Both for encryption and digital signature</li>
+</ul>
+&nbsp;
+
+&nbsp;
+
+<strong><a name="reliability"></a>Reliability</strong>
+<ul>
+ 	<li>Human error or mistake</li>
+ 	<li>Fault: software leads to a system error</li>
+ 	<li>Error: an erroneous system state</li>
+ 	<li>Failure: system does not deliver expected service</li>
+</ul>
+&nbsp;
+
+Fault management
+<ul>
+ 	<li>Fault avoidance: avoid human error and minimize system faults</li>
+ 	<li>Fault detection: V&amp;V to discover and remove faults</li>
+ 	<li>Fault tolerance: design so that faults do not result in error and then failure</li>
+</ul>
+&nbsp;
+
+Non-functional requirement
+
+<strong>Reliability</strong>: the probability that the thing works, failure-free
+
+User might have different perception of reliability, perceived reliability  formal reliability
+
+Some functions are given greater weight by users than others, some code are never encountered
+
+&nbsp;
+
+Reliability metrics
+<ul>
+ 	<li>POFOD (probability of failure on demand)
+<ul>
+ 	<li>Failure when a service request is made, useful when demand is infrequent</li>
+ 	<li>Appropriate for protection systems</li>
+ 	<li>0.001, one in every 1000 requests, the service fails</li>
+</ul>
+</li>
+ 	<li>ROCOF (rate of occurrence of failure)
+<ul>
+ 	<li>Relevant for systems that process many similar requests in a short time (credit card processing system)</li>
+ 	<li>0.002, 2 failures in each 1000 operational time units</li>
+</ul>
+</li>
+ 	<li>MTTF(mean time to failure)
+<ul>
+ 	<li>Reciprocal of ROCOF, relevant for systems with long transaction</li>
+</ul>
+</li>
+</ul>
+&nbsp;
+
+<strong>Availability</strong>: the probability that system will be operational, up and running
+
+Takes repair and restart time into account
+
+Eg. AVAIL=0.998, software is available for 998 out of 1000 time units
+
+Relevant for non-stop, continuously running systems
+
+&nbsp;
+
+Benefits of reliability specification
+<ul>
+ 	<li>Decide the level of reliability wanted</li>
+ 	<li>Provide basis for assessing then to stop testing, stop when reach required reliability</li>
+ 	<li>Assess different design strategies</li>
+ 	<li>Get system certification and approval</li>
+</ul>
+&nbsp;
+
+Functional reliability requirement
+<ul>
+ 	<li>Checking: check input data</li>
+ 	<li>Recovery: recover after a failure</li>
+ 	<li>Redundancy:</li>
+ 	<li>Process: specify development process</li>
+</ul>
+&nbsp;
+
+Fault-tolerant architectures (redundancy and diversity)
+<ul>
+ 	<li>Fault tolerance: system can continue running in spite of software failure</li>
+ 	<li>Protection system:
+<ul>
+ 	<li>A specialized system, take emergency action during failure</li>
+ 	<li>Independently monitor the controlled system and the environment</li>
+ 	<li>System to shut down a reactor if temperature is too high</li>
+ 	<li>Should be diverse and use different technology from the control software</li>
+</ul>
+</li>
+ 	<li>Self-monitoring architecture:
+<ul>
+ 	<li>Multi-channel architectures, system monitors its own operations and takes action if inconsistencies are detected</li>
+ 	<li>Each channel carries out same computation and compare results, if results are different, a failure is assumed</li>
+</ul>
+</li>
+ 	<li>N-version programming:
+<ul>
+ 	<li>multiple versions of software carry out computations and compare results, majority result is taken to be the correct result</li>
+ 	<li>Triple modular redundancy (used in hardware system)</li>
+ 	<li>Diversity: different programming language, different design and tools, different algorithms</li>
+ 	<li>Problem: might solve problem in same way, might make same mistake,</li>
+</ul>
+</li>
+</ul>
+Software diversity (remove bias in the solutions, same implementation might fail in the same way)
+<ul>
+ 	<li>Different programming languages</li>
+ 	<li>Different design methods and tools</li>
+ 	<li>Explicit specification of different algorithms</li>
+</ul>
+<br>
+
+<p>Programming for reliability</p>
+
+<p>Good practice guidelines for dependable programming</p>
+<ol>
+ 	<li>Limit the visibility of information in a program: private fields</li>
+ 	<li>Check all inputs for validity: range, size, representation, reasonableness</li>
+ 	<li>Provide a handler for all exceptions</li>
+ 	<li>Minimize the use of error-prone constructs: float, pointers, dynamic memory allocation, parallelism, recursion, interrupts, inheritance, aliasing, unbounded array</li>
+ 	<li>Provide restart capabilities</li>
+ 	<li>Check array bounds</li>
+ 	<li>Include timeouts when calling external components</li>
+ 	<li>Name all constants that represent real-world values</li>
+</ol>
+</div>
