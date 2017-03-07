@@ -1,0 +1,201 @@
+---
+layout: post
+title: "CS330: Analysis of Algorithm"
+date: 2016-05-28
+---
+<link rel="stylesheet" type="text/css" href="/css/post.css">
+
+<div>
+<p>This is a summary of CS330: Analysis of Algorithm taught by Professor Byers at Boston University in Spring 2016.</p>
+
+<hr>
+<!--more-->
+
+<p>Table of Content</p>
+<ul>
+    <li><a href="#simple_algorithms">Simple Algorithms</a></li>
+    <li><a href="#graph_algorithms">Graph Algorithms</a></li>
+    <li><a href="#greedy_algorithms">Greedy Algorithms</a></li>
+    <li><a href="#divide_n_conquer">Divide-and-Conquer</a></li>
+    <li><a href="#dynamic_programming">Dynamic Programming</a></li>
+    <li><a href="#network_flow">Network Flow</a></li>
+    <li><a href="#np">NP and Computational Intractability</a></li>
+    <li><a href="#approximation">Approximation Algorithms</a></li>
+</ul>
+
+<hr>
+
+<strong><a name="simple_algorithms"></a>Simple Algorithms</strong>
+<ul>
+    <li>Stable matching
+	<ul>
+	    <li>Gale-Shapley: propose-and-reject algorithm O(n²)</li>
+	    <li>MSSI (Maximum Sum Sub-Interval)</li>
+	</ul>
+    </li>
+</ul>
+<strong><a name="graph_algorithms"></a>Graph Algorithms</strong> (M=Edge, N=vertex)
+<ul>
+    <li>Graph represenation
+	<ul>
+	    <li>adjacency matrix
+		<ul>
+		    <li>n by n matrix with A_uv = 1 if (u, v) is an edge</li>
+		    <li>check an edge takes O(1) time</li>
+		    <li>space: n²</li>
+		    <li>identifying all edges: O(n²) time</li>
+		</ul>
+	    </li>
+	    <li>adjacency list
+		<ul>
+		    <li>node indexed array of lists</li>
+		    <li>check an edge takes O(deg(u)) time, where deg(u)=degree of u=num of neighbors of u</li>
+		    <li>space: m+n</li>
+		    <li>identify all edges: O(m+n) time</li>
+		</ul>
+	    </li>
+	</ul>
+    </li>
+    <li>Graph traversal
+	<ul>
+	    <li>BFS (Breath First Search) O(m+n)</li>
+	    <li>DFS (Depth First Search) O(m+n)</li>
+	</ul>
+    </li>
+</ul>
+<ul>
+    <li>Bipartite: No <span style="text-decoration: underline;">odd</span> length cycle, use BFS and check edges within the same level</li>
+    <li>DAG (Directed Acyclic Graph): directed graph that doesn't contain directed cycle
+	<ul>
+	    <li>topological sort: O(m+n)
+		<ul>
+		    <li>find a node v with no incoming edges and order it first</li>
+		    <li>delete v from G</li>
+		    <li>recursively compute a topological ordering of G-{v} and append this after v</li>
+		</ul>
+	    </li>
+	</ul>
+    </li>
+</ul>
+<strong><a name="greedy_algorithms"></a>Greedy Algorithms</strong>
+<ul>
+    <li>Exchange arguments: eg. minimize lateness
+	<ol>
+	    <li>label your solution and a general solution</li>
+	    <li>compare two solutions and find an inversion</li>
+	    <li>exchange</li>
+	</ol>
+    </li>
+    <li>Greedy stays ahead: eg. interval scheduling
+	<ol>
+	    <li>define your solution and an optimal solution OPT</li>
+	    <li>find a measure that your greedy solution stays ahead of OPT</li>
+	    <li>prove that your greedy solution is always at least as good as OPT</li>
+	    <li>prove optimality, your greedy solution is optimal</li>
+	</ol>
+    </li>
+    <li>Shortest path: <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm">Dijkstra's algorithm</a></li>
+    <li>MST (Minimun spanning tree) O(nlogn):
+	<ul>
+	    <li>Prim's: repeatedly find the minimum-weight edge that connects to a vertex that is not yet in the tree, and add that edge into the tree</li>
+	    <li>Kruskal's:
+		<ul>
+		    <li>sort the edges in ascending order of weights</li>
+		    <li>if adding an edge creates a cycle, discard it</li>
+		    <li>else, insert this edge into spanning tree</li>
+		</ul>
+	    </li>
+	    <li>Reverse-delete:
+		<ul>
+		    <li>begin with full graph</li>
+		    <li>sort the edges in descending order of weights</li>
+		    <li>delete an edge as long as not disconnect the graph</li>
+		</ul>
+	    </li>
+	    <li>use lexicographic tiebreaking if edge weights are not distinct</li>
+	</ul>
+    </li>
+    <li>Huffman codes: minimize Average Bits per Letter
+	<ul>
+	    <li>create tree bottom up</li>
+	    <li>make two leaves for two elements with lowest frequency</li>
+	    <li>use meta symbol to represent the parent node of these two elements</li>
+	    <li>repeat the process</li>
+	</ul>
+    </li>
+</ul>
+<strong><a name="divide_n_conquer"></a>Divide-and-Conquer</strong>
+<ul>
+    <li>Master theorem: $latex T(n) = a T(n/b) + O(n^c log^d n)$
+	<ul>
+	    <li>if $latex log_b a &gt; c: O(n^{log_b a})$</li>
+	    <li>if $latex log_b a &lt; c: O(n^c log^d n)$</li>
+	    <li>if $latex log_b a = c: O(n^c log^{d+1} n)$</li>
+	</ul>
+    </li>
+    <li><a href="https://en.wikipedia.org/wiki/Closest_pair_of_points_problem">Closest pair of points</a></li>
+    <li>Integer multiplication: <a href="https://en.wikipedia.org/wiki/Karatsuba_algorithm">Karatsuba algorithm</a></li>
+    <li>Matrix multiplication: <a href="https://en.wikipedia.org/wiki/Strassen_algorithm">Strassen algorithm</a></li>
+</ul>
+<strong><a name="dynamic_programming"></a>Dynamic Programming</strong>
+<p>Break up a problem into a series of overlapping sub-problems, and build up solutions to larger and larger sub-problems. Store intermediate results in cache to memoize.</p>
+<ul>
+    <li>binary choice: eg. weighted interval scheduling, O(nlogn)</li>
+    <li>multiway choice: eg. segmented least square, O(n³)</li>
+    <li>use new variable, 2D: eg. knapsack problem, O(nW) where W=max weight, pseudo-polynomial</li>
+    <li>over interval: eg. RNA sequence alignment, O(n³)</li>
+    <li><a href="https://en.wikipedia.org/wiki/Bellman–Ford_algorithm">Bellman-Ford</a>:
+	<ul>
+	    <li>shortest path problem, slower than Dijkstra's, but can handle negative edge weights</li>
+	    <li>to detect negative cycle, run n iteration</li>
+	    <li>O(mn) time, O(m+n) space</li>
+	</ul>
+    </li>
+</ul>
+<strong><a name="network_flow"></a>Network Flow</strong>
+<p>Max flow, Min cut</p>
+<ul>
+    <li><a href="https://en.wikipedia.org/wiki/Ford–Fulkerson_algorithm">Ford-Fulkerson</a>: create residue graph</li>
+    <li>example problems
+	<ul>
+	    <li>bipartite matching</li>
+	    <li>perfect matching</li>
+	    <li>disjoint path</li>
+	    <li>network connectivity</li>
+	</ul>
+    </li>
+</ul>
+<strong><a name="np"></a>NP and Computational Intractability</strong>
+<ul>
+    <li>Polynomial-time reduction: problem X polynomial reduces to problem Y if arbitrary instance of X can be solve using polynomial number of standard computation steps plus polynomial number of calls to oracle that solves problem Y.</li>
+    <li>If X ≤p Y and Y can be solve in polynomial time, then X can be also solved in polynomial time</li>
+    <li>If X ≤p Y and X cannot be solve in polynomial time, then Y cannot be solved in polynomial time</li>
+    <li>To prove a problem is easy, put target on left and a known easy problem on right</li>
+    <li>To prove a problem is hard, put target on right and a known hard problem on left</li>
+    <li>NP-complete problems:
+	<ul>
+	    <li><a href="https://en.wikipedia.org/wiki/Vertex_cover">Vertex cover</a></li>
+	    <li><a href="https://en.wikipedia.org/wiki/Independent_set_(graph_theory)">Independent set</a></li>
+	    <li><a href="https://en.wikipedia.org/wiki/Set_cover_problem">Set cover</a></li>
+	    <li>3-SAT</li>
+	    <li>Directed Hamiltonian Cycle</li>
+	    <li><a href="https://en.wikipedia.org/wiki/Hamiltonian_path_problem">Hamiltonian Cycle</a></li>
+	    <li><a href="https://en.wikipedia.org/wiki/Travelling_salesman_problem">TSP</a> (Traveling Salesman Problem)</li>
+	</ul>
+    </li>
+</ul>
+<strong><a name="approximation"></a>Approximation Algorithms</strong>
+<ul>
+    <li>Local search: improve your solution locally, move to a better "nearby" solution</li>
+    <li>Gradient descent: if there is a neighbor S' that is better than S, replace S with S'</li>
+    <li>Metropolis Algorithm</li>
+    <li>Simulated annealing</li>
+    <li>example problems:
+	<ul>
+	    <li>load balance</li>
+	    <li>center selection</li>
+	</ul>
+    </li>
+</ul>
+</div>
+<br>
