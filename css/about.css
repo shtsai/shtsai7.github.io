@@ -13,3 +13,10 @@ table#name td{
 .img-circle {
     border-radius: 50%;
 }
+
+div#nyublock:hover {
+    background-color: #f9f9f9;
+}
+div#bublock:hover {
+    background-color: #f9f9f9;
+}
