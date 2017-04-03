@@ -1,0 +1,139 @@
+---
+layout: default
+title: WikiGeo
+---
+<link rel="stylesheet" type="text/css" href="/css/project.css">
+<div class="blurb">
+    <h1 id="title">WikiGeo</h1>
+   
+    <div id="wikigeo_content">
+    <p>WikiGeo is a class project that I developed with my teammates for CS411:Software Engineering in Spring 2016 at Boston University.</p>
+    <br>
+
+    <div style="background-color:#f9f9f9">
+    <br>
+    <center>
+	<img src="../images/project/wikigeo/WikiGeo.jpg" alt="WikiGeo" width="85%" height="85%"/>
+	</center>
+	<br>
+	</div>
+
+	<p>
+    The basic idea behind this application is to help people learn more about
+    the places near them. For example, when you travel to a new city, you might
+    get curious about the places that you are visiting. What kind of monuments 
+    are there? Did any historical events happen around the area? When you have
+    these kinds of questions, WikiGeo is here to help!
+    <br>
+    <br>
+    This web application use geolocation and find where the user currently is,
+    then it will display an interactive map showing markers of historical events 
+    or monuments nearby. By clicking on the marker, a detailed description and 
+    pictures of that specific event/monument will pop up, and the user can then 
+    learn more about that location.
+    <br>
+    <br>
+    We also include the feature that allows users to create their own markers of
+    the locations they know. They can create a discription and upload photos of
+    the place. This marker will then become public and be shared with other 
+    users in the community. 
+    </p>
+
+    <div style="background-color:#f9f9f9">
+    <br>
+	<h2>How to Use this App?</h2>
+	<p><i>Below is a quick guide.</i></p>
+	<center>
+	<img src="../images/project/wikigeo/guide.jpg" alt="guide" width="85%" height="85%"/>
+	</center>
+	<br>
+	</div>
+
+	<h3><i>Search Page</i></h3>
+	<center>
+	<img src="../images/project/wikigeo/main-interface.jpg" alt="main interface" width="85%" height="85%" />
+	</center>
+	<p>
+    When you log in to the app, here is the main page you will see. 
+    By default, the search area will be your current location.
+    You can also change your search area 
+    by moving the little black circle on the map. The circle will move to place 
+    you clicked, and it updates the searching area. 
+    <br>
+    <br>
+    Whenever you are lost on the map, you can always go back to 
+    your current location by simply clicking "Show my location" button, 
+    and it will bring you back to your current location.
+	</p>
+
+	<div style="background-color:#f9f9f9">
+	<br>
+	<h3><i>Search Result</i></h3>
+	<center>
+	<img src="../images/project/wikigeo/search-result.jpg" alt="search result" width="85%" height="85%"/>
+	<img src="../images/project/wikigeo/search-result2.jpg" alt="search result2" width="85%" height="85%"/>
+	</center>	    
+	<p>
+    After you decide your search area, click on the "WikiGeo" button. A number
+    of markers will pop up on your map. When you scroll down, there will also be
+    a reference table. 
+	</p>
+	<br>
+	</div>
+
+	<h3><i>Learn more about the search result</i></h3>
+	<center>
+	<img src="../images/project/wikigeo/search-result3.jpg" alt="search result3" width="85%" height="85%"/>
+	</center>
+	<p>
+    When you click on a marker, the name of the marker will show up. You can then
+    click on that name, and it will take you that marker page.
+	</p>
+
+	<center>
+	<img src="../images/project/wikigeo/search-result4.jpg" alt="search result4" width="85%" height="85%"/>		  
+	<img src="../images/project/wikigeo/search-result5.jpg" alt="search result5" width="85%" height="85%"/>
+	</center>
+	<p>
+    On the marker page, you can find a picture of that monument/event. There 
+    is also a description of the place you just found.
+		<br>
+		<i>(This building is a gift from the Tsai Family. Wow!)</i>
+	</p>
+
+	<div style="background-color:#f9f9f9">
+	<br>
+	<h3><i>Adding your own markers</i></h3>
+	<center>
+	<img src="../images/project/wikigeo/addmarker.jpg" alt="addmarker" width="85%" height="85%"/>
+	</center>
+	<p>
+	To add a marker, click on the "Add Marker" button and it will take you to the Add Marker Page.
+	</p>
+	<center>
+	<img src="../images/project/wikigeo/addmarker2.jpg" alt="addmarker2" width="85%" height="85%"/>
+	</center>	    
+	<p>
+    Choose the location on the map, and then fill in the information about this place.
+	</p>
+	<center>
+	<img src="../images/project/wikigeo/addmarker3.jpg" alt="addmarker3" width="85%" height="85%"/>
+	</center>	    
+	<p>
+    Finally, your marker is added successfully! Now, other users can also see this marker
+    and learn about this place.
+	</p>
+	<br>
+	</div>
+
+	<h2>Technical Stuff</h2>
+	<p>
+	This web application is developed using MEAN stack (MongoDB, Express, Angular, Node.js).
+	We use Google Maps API to acquire user's geolocation and cross reference the geolocation
+	with the data pulled from wikipedia API. The result is then displayed on an interactive
+	Google Map. 
+	</p>
+	<p>You can check out my Github repo if you want to learn more about this project.</p>
+	<br>
+	</div>
+</div><!-- /.blurb -->
