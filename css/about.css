@@ -1,9 +1,29 @@
+h1#title {
+	padding-left: 120px;
+    padding-right: 100px;
+}
+
+table#nyu {
+	padding-left: 100px;
+    padding-right: 100px;
+}
+
 table#nyu td{
     padding: 20px;
 }
 
+table#bu {
+	padding-left: 100px;
+    padding-right: 100px;
+}
+
 table#bu td{
     padding: 20px;
+}
+
+table#name {
+	padding-left: 100px;
+    padding-right: 100px;
 }
 
 table#name td{
