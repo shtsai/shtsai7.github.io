@@ -1,5 +1,7 @@
 name: Shang-Hung Tsai
 markdown: kramdown
+title: Shang-Hung Tsai
+author: Shang-Hung Tsai
 
 permalink: /blog/:year/:month/:day/:title
 
