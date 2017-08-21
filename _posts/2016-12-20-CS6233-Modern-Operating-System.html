@@ -1,0 +1,2047 @@
+---
+layout: post
+title: "CS6233: Operating Systems I"
+date: 2016-12-20
+---
+<link rel="stylesheet" type="text/css" href="/css/post.css">
+<div>
+<p>This is my notes and a summary for CS6233: Operating Systems I in Fall 2017.</p>
+<p>Special thanks to Professor Tannenbaum and his book <i>Modern Operating Systems.</i></p>
+<hr>
+<!--more-->
+<br>
+<div>
+<div><b>Chapter 1 Introduction</b></div>
+<div>
+<div>Operating System:</div>
+<ul>
+<li>a layer of software that computers are equipped with, whose job is to provide user programs with a better, simpler, cleaner, model of the computer and to handle managing all the resources.</li>
+<li>Can be viewed as a resource manager, whose job is to manage the different parts of the system efficiently</li>
+<li>Can also be viewed as an extended-machine, whose job is to provide users with abstractions that are more convenient to use than the actual machine.</li>
+</ul>
+<div><br/></div>
+<div>Shell: the program that uses interact with, either text based or GUI</div>
+<div><br/></div>
+<div>Kernel mode: most fundamental piece of software runs in kernel mode. Has complete access to all the hardware and can execute any instruction the machine is capable of executing.</div>
+<div>User mode: the rest of the software runs in users mode, only a subset of the machine instructions is available. Instructions that affect control of the machine or do (I/O) are forbidden to user-mode programs.</div>
+<div><br/></div>
+<div>architecture: instruction set, memory organization, I/O, and bus structure at the machine-language level. It is primitive and awkward to program.</div>
+<div><br/></div>
+<div>Disk driver: a piece of software deals with the hardware and provides an interface to read and write disk blocks, without getting into the details. OS contains many drivers for controlling I/O devices.</div>
+<div><br/></div>
+<div>Multiplexing: sharing resources in two different time and space, part of the job of resource management.</div>
+<ul>
+<li>time multiplexing: different program or users take turns using it</li>
+<li>space multiplexing: each program or users gets part of the resource</li>
+</ul>
+<div><br/></div>
+<div>History</div>
+<ul>
+<li>First generation: vacuum tubes</li>
+<li>Second generation
+<ul>
+<li>Transistor: its invention changed the picture of computers.</li>
+<li>Mainframes: old, large computer across different rooms during 1955-65. write program on paper then punch it on cards.</li>
+<li>Batch system: collect a tray full of jobs in the input room and then read them onto a <u>magnetic tape</u> using a small computer (which good at reading cards and printing output, but not at calculation). Then mount the tape on a tape drive, and the output was written onto a second tape. When the whole batch was done, remove input and output tape, replace with new tapes.</li>
+</ul>
+</li>
+<li>Third Generation:
+<ul>
+<li>Integrated circuits: provides a price/performance advantage, which were built up from individual transistors</li>
+<li>multiprogramming: partition memory into several pieces, with a different job in each partition. While one job was waiting for I/O to complete, another job could be using the CPU.</li>
+<li>Spooling: the ability to read jobs from cards onto the disk as soon as the were brought to the computer room, then whenever a job finished, the OS could load a new job from the disk into the now-empty partition and run it.</li>
+</ul>
+</li>
+<li>Four Generation: PC
+<ul>
+<li>Large Scale Integration (LSI) circuits: chips containing thousands of transistors on a small piece of silicon.</li>
+</ul>
+</li>
+<li>Fifth generation: mobile computers</li>
+</ul>
+<div><br/></div>
+<div><b>Computer hardware review</b></div>
+<ul>
+<li>Computers are built up of processors, memories, and I/O devices, which are connected by buses.</li>
+<li><b>processes</b>: the “brain"
+<ul>
+<li>fetch instructions from memory and executes them</li>
+<li>program counter: contains the memory address of the next instruction to be fetched.</li>
+<li>stack pointer: points to the top of the current stack in memory</li>
+<li>PSW (program status word): contains the condition code bits, which are set by comparison instructions, the CPU priority, the mode, and other control bits.</li>
+<li>system call: used for a user program to obtain services from the operating system, traps into the kernel and invokes the operating system</li>
+<li>multithreading: allow the CPU to hold the state of two different threads and then switch back and forth on a nanosecond time scale. Each thread appears to the OS as a separate CPU.</li>
+<li>multicode chip: CPU chips that contains multiple cores, each with its own independent CPU. </li>
+<li>GPU (Graphics Processing Unit): a processor with thousands of tiny cores, good at small computations done in parallel, like rendering polygons in graphics applications, not good at serial tasks.</li>
+</ul>
+</li>
+<li><b>memory</b>:
+<ul>
+<li>Registers: internal to the CPU, 32*32 bits on 32-bit CPU and 64*64 bits on 64-bit CPU</li>
+<li>Cache: mostly controlled by hardware. When a program needs to read a memory word, the cache hardware checks to see if the line needed is in the cache. 
+<ul>
+<li>cache hit, takes about 2 clock cycles</li>
+<li>cache miss, have to got to memory, time penalty</li>
+</ul>
+</li>
+<li>Main memory: workhorse of the memory system
+<ul>
+<li>usually called RAM (random access memory)</li>
+</ul>
+</li>
+<li>Non-volatile random-access memory: does not lose contents when power off
+<ul>
+<li>ROM (read only memory) can not be changed</li>
+<li>Flash memory: non-volatile, but can be erased and rewritten, speed between RAM and disk</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Disk:</b> (magnetic disk, hard disk)
+<ul>
+<li>cheap and slow, a mechanical device</li>
+<li>track: at any given arm position, each of the heads can read an annular region called track</li>
+<li>cylinder: all the tracks for a given arm position</li>
+<li>SSD (Solid state disk): actually not disks because no moving parts, and store data in flash memory.</li>
+<li>Virtual memory: places programs on the disk and using main memory as a kind of cache for the most heavily executed parts. Mapping is done by a part of CPU called MMU (memory management unit)</li>
+</ul>
+</li>
+<li><b>I/O devices</b>
+<ul>
+<li>Controller: a chip that physically controls the device, accept command from the OS, often contain small embedded computers that are programmed to do their work.
+<ul>
+<li>each controller has a small number of registers. The collection of all device registers form the I/O port space.</li>
+</ul>
+</li>
+<li>device: have simple interface, same standard. so all SATA disk controller can handle any SATA disk. </li>
+<li>device driver: a piece of software that talks to a controller, giving it commands and accepting responses. Drivers are put into the OS so it can run in kernel mode.
+<ul>
+<li>Three ways the driver can be put into the kernel
+<ul>
+<li>relink the kernel with new driver and then reboot the system (old UNIX system)</li>
+<li>make an entry in an OS file telling it that it needs the driver and then reboot the system. The system loads them at boot time. (Windows)</li>
+<li>make OS capable of accepting new drivers while running and install them on the fly without the need to reboot. (more and more common)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Buses</b>
+<ul>
+<li>OS must be aware of all of them for configuration and management</li>
+<li>PCIe (peripheral component interconnect express) bus
+<ul>
+<li>main bus, capable of transferring tens of gigabits per second.</li>
+<li>makes use of dedicated, point-to-point connections</li>
+<li>uses a serial bus architecture and sends all bits in a message through a single connection, known as a lane.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Booting the computer</b>
+<ul>
+<li>On the motherboard is a program called the system <u>BIOS</u> (basic input output system). It contains low-level I/O software, including procedures to read the keyboard, write to the screen, and do disk I/O. Nowadays, it is held in a flash RAM, which is nonvolatile but which can be updated by the OS when bugs are found in the BIOS.</li>
+<li>When the computer is booted, the BIOS is started. It first checks to see how much RAM is installed and whether the keyboard and other devices are installed and responding correctly. It starts out by scanning the PCIe and PCI buses to detect all devices attached to them. If the devices present are  different from when the system was last booted, the new devices are configured.</li>
+<li>The BIOS then determines the boot device. Typically, an attempt is made to boot from a CD-ROM or USB drive, if one is present. If that fails, the system boots from the hard disk. The first sector from the boot device is read into memory and executed. This sector contains a program that normally examines the partition table at the end of the boot sector to determine which partition is active. Then a secondary boot loader is read in from that partition. This loader reads in the OS from the active partition and starts it.</li>
+<li>The OS then queries the BIOS to get the configuration information. For each device, it checks to see if it has the device driver. If not, it asks the user to insert a CD-ROM containing the driver or download it. Once it has all the device driver, the OS loads them into the kernel. Then initializes its tables, creates whatever background processes are needed, and starts up a login program or GUI.</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>OS Concepts</b></div>
+</div>
+<ul>
+<li>processes:
+<ul>
+<li>a program in execution, fundamentally a <u>container</u> that holds all the information needed to run a program.</li>
+<li>Associated with each process is its address spaces, a list of memory locations from 0 to some maximum, which the process can read and write. The address spaces contains the executable program, data, and its stack. Also associated with each process is a set of resource, commonly including registers (pc and sp), a list of open files, outstanding alarms, list of related processes.</li>
+<li>process table: all the information about each process is stored in an OS table, which is an array of structures, one for each process currently in existence.</li>
+<li>A suspend process consists of its address space, (usually called core image), and its process table entry, which contains the contents of its registers and many other items needed to restart the process later</li>
+<li>process creation:
+<ul>
+<li>a process can create other processes (child processes).</li>
+<li>Interprocess communication: related processes that are cooperating to get some job done often need to communicate with one another and synchronize their activities. </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Files:
+<ul>
+<li>directory: a way of grouping files together</li>
+<li>path name: a way to specify a file within the directory hierarchy from the root directory</li>
+<li>file descriptor: used for opening a file before read or write, permissions are checked. If permitted, use this descriptor in subsequent operations.</li>
+<li>mounted file system: allows the file system on removable media (CD, USB) to be attached to the main tree.</li>
+<li>special file: provided in order to make I/O devices look like files, so that they can be read and written using the same system calls as are used for reading and writing files.
+<ul>
+<li>block special files: used to model devices that consist of a collection of randomly addressable blocks (such as disks). By opening a block special file and reading, say block 4, a program can directly access the forth block on the device, without regard to the structure of the file system contained on it.</li>
+<li>character special files: used to model printers, modems, and other devices that accept or output a character stream. </li>
+<li>By connection, special files are kept in the /dev directory.</li>
+</ul>
+</li>
+<li>pipe: a sort pseudofile that can be used to connect two processes.
+<ul>
+<li>If process A and B wish to talk using a pipe, first set it up in advance. When A wants to send data to B, its writes on the pipe as though it were an output file. B can read the data by reading from the pipe as though it were an input file.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Protection:
+<ul>
+<li>protection code: three 3-bit fields, one for the owner, one for other member of the owner’s group, one for everyone else. Each field has a bit for read access, write access, and execute access. Known as <u>rwx bits</u>.</li>
+</ul>
+</li>
+</ul>
+<div>
+<div><br/></div>
+<div><br/></div>
+<div><b>System Calls</b></div>
+<ul>
+<li>System calls for process management
+<ul>
+<li><i>fork()</i>: create an exact duplicate of the original process, including all the file descriptors, registers, everything.
+<ul>
+<li>After fork, the original process and the copy go their separate ways, subsequent changes in one of them do not affect the other one. </li>
+<li>fork returns a value, which is zero in the child and equal to the child’s PID (process identifier) in the parent.</li>
+</ul>
+</li>
+<li><i>waitpid()</i>: to wait for the child to finish, the parent executes a waitpid system call, which just waits until the child terminates. When waitpid completes, the address pointed to by the second parameter will be set to the child process’s exit status (normal or abnormal termination and exit value)</li>
+<li><i>execve()</i>: replace the entire core image with the file named in the first parameter, so that it can execute the user command.
+<ul>
+<li>three parameter:
+<ul>
+<li>name of the file to be executed</li>
+<li>a pointer to the argument array</li>
+<li>a pointer to the environment array</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><i>exit()</i>: processes should use when they are finished executing. Has one parameter, the exit status (0 to 255), which is returned to the parent via staloc in the waitpid system call.</li>
+<li>Processes in UNIX have their memory divided up into three segments:
+<ul>
+<li>text segment: the program code</li>
+<li>data segment: the variables
+<ul>
+<li>grows upward</li>
+</ul>
+</li>
+<li>stack segment
+<ul>
+<li>grows downward</li>
+</ul>
+</li>
+<li><img src="/images/CS6233/Screen%20Shot%202016-10-27%20at%2010.31.44%20AM.png" height="40%" width="40%"/></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>System calls for file management
+<ul>
+<li><i>mkdir()</i>: create empty directories</li>
+<li><i>rmdir()</i>: remove empty directories</li>
+<li><i>link()</i>: allow the same file to appear under two or more names, often in different directories
+<ul>
+<li>i-number: every file in UNIX has a unique number that identifies it.</li>
+<li>This i-number is an index into a table of i-nodes, one per file, telling who owns the file, where its disk blocks are. </li>
+<li>A directory is simply a file containing a set of (i-number, ASCII name) pairs.</li>
+</ul>
+</li>
+<li><i>mount()</i>: allow two file systems to be merged into one. The USB file system cal be attached to the root file system
+<ul>
+<li>mount(“/dev/sbd0”, “/mnt”, 0)
+<ul>
+<li>first parameter is the name os a block special file for USB drive 0</li>
+<li>second parameter is the place in the tree where it is to be mounted</li>
+<li>third parameter tells whether the file system is to be mounted read-write or read-only</li>
+</ul>
+</li>
+<li>When a file system is no longer needed, it can be unmounted with the umount system call.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>C</b></div>
+<ul>
+<li>Header files: .h header files that contain declarations, definitions, simple macros
+<ul>
+<li>e.g. #define BUFFER_SIZE 4096</li>
+<li>e.g. #define max(a,b) (a &gt; b ? a : b)</li>
+<li>conditional compilation:
+<ul>
+<li>#ifdef X86</li>
+<li>intel_int_ack();</li>
+<li>#endif</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Large programming projects
+<ul>
+<li>each .c is compiled into an object file (.o) by C compiler. </li>
+<li>Object files contain binary instructions for the target machine. They will later be directly executed by the CPU</li>
+<li>First pass of C compiler: C preprocessor
+<ul>
+<li>Reads each .c file, every time it hits a #include directive, it goes and gets the header file named in it and processes it,expanding macros, handling conditional compilation, and passing the results to the next pass of the compiler.</li>
+</ul>
+</li>
+<li>Second pass of C compiler: linker
+<ul>
+<li>combine all of .o files into a single executable binary file. Any library functions called are also included at this point, interfunction references are resolved, and machine addresses are relocated as need be. </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+</div>
+<div>
+<div><b>Chapter 2 Processes and Threads</b></div>
+<div><b>Process</b></div>
+<ul>
+<li>The most central concept in any operating system is the process: an abstraction of a running program</li>
+<li>pseudoparallelism: at any one instant the CPU is running only one process, but in the course of 1 second it may work on several of them (multiprogramming: switches from process to process quickly), giving the illusion of parallelism
+<ul>
+<li>in contrast, the true hardware parallelism of multiprocessor systems (two or more CPUs sharing the same physical memory).</li>
+</ul>
+</li>
+<li>The Process Model
+<ul>
+<li>sequential processes (or just processes for short):
+<ul>
+<li>a conceptual model that makes parallelism easier to deal with</li>
+<li>a process is just an instance of an executing program, including the current values of the program counter, registers, and variables. Conceptually, each process has its own virtual CPU, because it is easier to think about a collection of processes running in pseudo parallel.</li>
+<li>based on two independent concepts: resource grouping and execution</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Process creation
+<ul>
+<li>four principal events cause processes to be created
+<ul>
+<li>system initialization
+<ul>
+<li>many processes are created when OS is booted, some are foreground processes, some are background processes</li>
+<li>daemons: processes that stay in the background to handle some activity such as email, Web pages.</li>
+</ul>
+</li>
+<li>execution of a process - creation system call by a running process
+<ul>
+<li>a running process issues system calls to create one or more new processes to help it do its job</li>
+</ul>
+</li>
+<li>a user request to create a new process
+<ul>
+<li>users can start a program by typing command or clicking on an icon. Either or these actions starts a new process and runs the selected program in it.</li>
+</ul>
+</li>
+<li>initiation of a batch job
+<ul>
+<li>only apply to the batch systems found on large mainframes.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Use system call <i>fork()</i> to create a new process (only way in UNIX)
+<ul>
+<li>create an exact clone of the calling process, same memory image, same environment strings, same open files</li>
+<li>usually the child process then executes execve to change its memory image and run a new program</li>
+</ul>
+</li>
+<li>The change in one process is not visible to the other process</li>
+</ul>
+</li>
+<li>Process termination
+<ul>
+<li>four conditions that process terminates
+<ul>
+<li>normal exit (voluntary)
+<ul>
+<li>when the process have done its work, call <i>exit()</i>.</li>
+</ul>
+</li>
+<li>error exit (voluntary)
+<ul>
+<li>when a process discovers a fatal error, announces this fact and exits</li>
+</ul>
+</li>
+<li>fatal error (involuntary)
+<ul>
+<li>due to an error caused by the process, e.g. a program bug, illegal instruction, referencing nonexistent memory, dividing by zero.</li>
+<li>in some system (e.g. UNIX), a process can tell the OS that it wishes to handle certain errors itself, in which case the process is signaled (interrupted) instead of terminated.</li>
+</ul>
+</li>
+<li>killed by another process (involuntary) 
+<ul>
+<li>another process executes a system call <i>kill()</i> telling the OS to kill some other process. The killer must have necessary authorization. </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Process hierarchies
+<ul>
+<li>when a process creates another process, the parent process and child process continue to be associated in certain ways. The child process can itself create more processes, forming a process hierarchy.
+<ul>
+<li>a process has only one parent, but could have any number of children</li>
+</ul>
+</li>
+<li>In UNIX, a process and all of its children and further descendants together form a process group. 
+<ul>
+<li>when a user sends a signal from the keyboard, the signal is delivered to all members of the process group currently associated with the keyboard. Individually, each process can catch the signal, ignore the signal, or take the default action, which is to be killed by the signal.</li>
+</ul>
+</li>
+<li>when a computer is booted, a special process, called init, is present in the boot image. When it starts running, it reads a file telling how many terminals there are, and then it forks off a new process per terminal. These processes might start up more processes. All the processes in the whole system belong to a single tree, with init at the root.</li>
+<li>Windows has no concept of a process hierarchy. The only hint of a process hierarchy is that when a process is created. The parent is given a special token (called a handle) that it can use to control the child. It can pass this token to other process.</li>
+</ul>
+</li>
+<li><b>Process states</b>
+<ul>
+<li>running (actually using the CPU at that instant)</li>
+<li>Ready (runnable, temporarily stopped to let another process run)</li>
+<li>Blocked (unable to run until some external event happens)</li>
+<li><img src="/images/CS6233/Screen%20Shot%202016-10-27%20at%2011.02.02%20PM.png" height="60%" width="60%"/></li>
+<li><img src="/images/CS6233/Screen%20Shot%202016-10-28%20at%2010.14.46%20AM.png" height="60%" width="60%"/></li>
+</ul>
+</li>
+<li><b>Implementation of processes</b>
+<ul>
+<li><u>process table</u>: a table maintained by the OS to implement process model
+<ul>
+<li>one entry per process, sometimes these entries are called <u>process control blocks</u></li>
+<li>This entry contains important information about the process’s state, including its program counter, stack pointer, memory allocation, status of its open files, its accounting and scheduling information, and everything else that must be saved before switching states, so that it can be restarted later as if it had never been stopped.</li>
+</ul>
+</li>
+<li><u>Interrupt vector</u>: a location associated with each I/O class (typically at a fixed location near the bottom of memory)
+<ul>
+<li>it contains the address of the <u>interrupt service procedure</u>.</li>
+<li>example: suppose that user process 3 is running when a disk interrupt happens, user process 3’s program counter, program status word, and registers are pushed onto the current stack by the interrupt hardware. The computer then jumps to the address specified in the interrupt vector. This is all the hardware does, from here on, it is up to the interrupt service procedure.</li>
+</ul>
+</li>
+<li>All interrupts start by saving registers in the process table entry for the current process. Then the information pushed onto the stack by the interrupt is removed and the stack pointer is set to a temporary stack used by the process handler. Save process is done in assembly language.</li>
+<li>After save, calls a C procedure to do the rest of the work for this specific interrupt type. When it has done its job, the scheduler is called to see who to run next. After that, control is passed back to the assembly-language code to load up the registers and memory map for the now-current process and start it running.</li>
+<li><img src="/images/CS6233/Screen%20Shot%202016-10-29%20at%201.57.55%20PM.png" height="60%" width="60%"/></li>
+</ul>
+</li>
+<li>Modeling multiprogramming (probabilistic approximation)
+<ul>
+<li>multiprogramming helps improve CPU utilization</li>
+<li>suppose a process spends a fraction p of its time waiting for I/O to complete. With n processes in memory at once, the probability that all n processes are waiting for I/O is p^n</li>
+<li>So <img src="/images/CS6233/Screen%20Shot%202016-10-29%20at%202.00.44%20PM.png" height="30%" width="30%"/></li>
+<li>degree of multiprogramming: the CPU utilization as a function of n
+<ul>
+<li><img src="/images/CS6233/Screen%20Shot%202016-10-29%20at%202.02.23%20PM.png" height="60%" width="60%"/></li>
+<li>note that 80% or more I/O wait times are common, processes doing a lot of disk I/O will often have this percentage or more</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><b>Thread</b></div>
+<ul>
+<li>miniprocesses within a process, similar to process, but with the ability for parallel entities to share an address space and all of its data among them selves.</li>
+<li>usage: 
+<ul>
+<li>in many applications, multiple activities are going on at once. Some of them might block from time to time. By decomposing such an application into multiple sequential threads that run in quasi-parallel, the programming model becomes simpler.</li>
+<li>lighter weight than process, easier and faster to create and destroy than process. </li>
+<li>threads yield no performance gain when all of them are CPU bound, but when there is a substantial I/O, having threads allows these activities to overlap and thus speed up application</li>
+<li>e.g. a multithreaded Web server:
+<ul>
+<li>one thread, the <u>dispatcher</u>, reads incoming requests for work from the network. After examining the request, it chooses an idle (i.e. blocked) <u>worker thread</u> and hands it the request. The dispatcher then wakes up the sleeping worker, moving it from blocked state to ready state.</li>
+<li>when the worker wakes up, it checks to see if the request can be satisfied from the Web page cache, to which all threads have access. If not, it starts a read operation to get the page from the disk and blocks until the disk operation completes. When the thread blocks on disk operation, another thread is chosen to run.</li>
+<li><img src="/images/CS6233/Screen%20Shot%202016-10-29%20at%202.35.20%20PM.png" height="60%" width="60%"/></li>
+</ul>
+</li>
+<li>finite-state machine: a design in which each computation has a saved state, and there exists some set of events that can occur to change the state.</li>
+<li><img src="/images/CS6233/Screen%20Shot%202016-10-29%20at%202.44.46%20PM.png" height="60%" width="60%"/></li>
+</ul>
+</li>
+<li><b>Classical Thread model</b>
+<ul>
+<li>different threads in a process are not independent. All threads have exactly the same address space, and same global variables. One thread can read, write, or even wipe out another thread's stack. All threads can share the same set of open files, child processes, alarms, and signals.   
+<ul>
+<li>The is <u>no protection</u> between threads, because a process is always owned by a single user, who has presumably created multiple threads so that they can cooperate.</li>
+</ul>
+</li>
+<li>thread private items are program counter, registers, stack, and state.</li>
+<li>Create: Processes usually start with a single thread present. This thread has the ability to create new threads by calling a library procedure such as <i>thread_create.</i> A parameter to <i>thread_create</i> specifies the name of a procedure for the new thread to run, and it returns a thread identifier that names the new thread.</li>
+<li>Exit: A thread can exit by calling a library procedure <i>thread_exit</i>. It then vanishes and is no longer schedulable. </li>
+<li>Wait: A thread can wait for a specific thread to exit by calling a procedure thread_join. This procedure blocks the calling thread until a specific thread has exited. </li>
+<li>Yield: A thread can voluntarily give up the CPU to let another thread run by calling <i>thread_yield</i>. This call is important because there is no clock interrupt to actually enforce multiprogramming as there is with processes. Other calls allow one thread to wait for another thread to finish some work, for a thread to announce that it has finished some work and so on.</li>
+</ul>
+</li>
+<li><b>Implementing Threads in User Space</b>
+<ul>
+<li>put the threads package entirely in user space, and the kernel knows nothing about them. As far as kernel is concerned, it is managing ordinary, single threaded process. </li>
+<li>The threads run on top of a run-time system, which is a collection of procedures that manage threads. Each process needs its own private <u>thread table</u> to keep track of the threads in that process, which keeps track of per-thread properties including program counter, stack pointer, registers, state. The thread table is managed by the run-time system. When a thread is moved to ready state or blocked state, the information needed to restart it is stored in the thread table.</li>
+<li>Then a thread does something that cause it to become blocked locally, it calls a run-time system procedure, which checks to see if the thread must be put into blocked state. If so, it stores the thread's information in the thread table and switch to a new thread. </li>
+<li>Figure 2-16 P109</li>
+<li>Advantages:
+<ul>
+<li>Efficiency: Thread switching is very fast. The procedure that saves the thread's state and the thread scheduler are just local procedures, much more efficient than making a kernel call. No trap is needed, no context switch is needed, the memory cache need not be flushed.</li>
+<li>customizability: each process can have its own customized scheduling algorithm.</li>
+<li>scalibility: if implement in kernel, could take too much space to maintain table and stack space</li>
+</ul>
+</li>
+<li> Problems:
+<ul>
+<li>the problem of how blocking system calls are implemented. It is unacceptable for letting the thread actually make the system call, since this will stop all the threads in the process. 
+<ul>
+<li>solution: 
+<ul>
+<li>change system calls to nonblocking (unattractive)</li>
+<li>use a wrapper to check if the system call will block before calling. If so, the call is not made, another thread is run instead. The next time the run-time system gets control, it can check again to see if the read is now safe. (Inefficient and inelegant, but there is little choice)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>the problem of page faults. If a thread causes a page fault, the kernel will blocks the entire process, even though other threads might be runnable.</li>
+<li>the problem of scheduling. If a thread starts running, no other thread in that process will ever run unless the first thread voluntarily gives up the CPU. Within a single process, there are no clock interrupts.
+<ul>
+<li>solution: to have the run-time system request a clock signal (interrupt) once a second to give it control. (crude and messy, large overhead)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Implementing Threads in the Kernel</b> (Let the kernel know about and manage threads)
+<ul>
+<li>The kernel maintains a <u>thread table</u> that keeps track of all the threads in the system. Thread creation and termination are done by making a kernel call, which then does the creation or destruction by updating the kernel thread table
+<ul>
+<li>kernel thread table holds each thread's register, state, and other information, just like user-level thread table</li>
+<li>the kernel also maintains the traditional process table to keep track of processes, kernel thread table is just a subset of the information stored in process table for a particular process</li>
+<li>All calls that might block a thread are implemented as system calls (greater cost than a call to a run-time system procedure). When a thread blocks, the kernel can choose to run either another thread from the same process or a thread from a different process.
+<ul>
+<li>thread recycling is used to reduce overhead: when a thread is destroyed, it is marked as not runnable, later when a new thread must be created, an old thread is reactivated.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Problems:
+<ul>
+<li>higher cost of system calls, particularly when thread operations are frequent.</li>
+<li>What to do when a multithreaded process forks? Does the new process has as many threads as the old one did, or just one?</li>
+<li>signals: signals are sent to processes, not to threads. When a signal comes in, which thread should handle it?</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Hybrid implementation
+<ul>
+<li>Use kernel-level threads and then multiplex user-level threads onto some or all of them</li>
+<li>the kernel is aware of only the kernel-level threads and schedules those. Some of those threads may have multiple user-level threads multiplexed on top of them.</li>
+<li>figure 2-17 P113</li>
+</ul>
+</li>
+<li>Pop-up thread
+<ul>
+<li>When a message arrives, it causes the system to create a new thread to handle the message.</li>
+<li>Advantage:
+<ul>
+<li>each pop-up thread is brand new, they do not have any history (registers, stack, ...) to be restored. Therefore, it is very fast to make such a thread.</li>
+<li>The latency between message arrival and the start of processing can be made very short.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Making single-threaded code multithreaded
+<ul>
+<li>some variables are global to a thread but not global to the entire program. Threads should not touch other threads' global variables.
+<ul>
+<li>Solution:
+<ul>
+<li>Assign each thread its own private global variables. This creates a new scoping level, variables visible to all the procedures of a thread (but not to other threads), in addition to the existing scoping levels of variables visible only to one procedure and variables visible everywhere in the program
+<ul>
+<li>we can allocate a chunk of memory for the globals and pass it to each procedure in the thread as an extra parameter.</li>
+<li>Or we can introduce new library procedures to create, set and read these threadwide global variables.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Many library procedures are not reentrant, in other words, they were not designed to have a second call made to any given procedure while a previous call has not yet finished.
+<ul>
+<li>provide each procedure with a jacket that sets a bit to mark the library as in use. Any attempt for another thread to use a library procedure while a previous call has not yet completed is blocked. (but greatly eliminates potential parallelism)</li>
+</ul>
+</li>
+<li>Signals: are signals are thread specific, whereas others are not. How to handle signals</li>
+<li>Stack management: When a thread's stack overflows, the kernel does not know about it, so it cannot grow its stack automatically upon stack fault. </li>
+</ul>
+</li>
+</ul>
+</div>
+<div><br/></div>
+<div><b>Interprocess Communication (IPC) </b></div>
+<div>
+<ul>
+<li>three problems to consider
+<ul>
+<li>How to pass information</li>
+<li>making sure two or more processes do not get in each other's way</li>
+<li>proper sequencing when dependencies are present</li>
+</ul>
+</li>
+<li><b>Race Conditions</b>
+<ul>
+<li>When two or more processes are reading or writing some shared data and the final result depends on who runs precisely when, this kind of situations are called race conditions.</li>
+<li>debugging is hard, because errors occur with a small probability</li>
+</ul>
+</li>
+<li><b>Critical Regions</b>
+<ul>
+<li>The part of program where <u>shared memory is accessed</u> is called the critical region (or critical section)</li>
+<li>To avoid race condition, we need to arrange processes in a way that no two processes were ever in their critical regions at the same time</li>
+<li>Four conditions for having parallel processes cooperate correctly and efficiently using shared data:
+<ol>
+<li>No two processes may be simultaneously inside their critical regions</li>
+<li>No assumptions may be made about speeds or the number of CPUs</li>
+<li>No process running outside its critical region may block any process</li>
+<li>No process should have to wait forever to enter its critical region</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><b>Mutual Exclusion with Busy Waiting</b>
+<ul>
+<li><b>mutual exclusion</b> is used to prohibit more than one process from reading and writing the shared data at the same time</li>
+<li><b>busy waiting</b>: continuously testing a variable until some value appears</li>
+<li><b>spin lock</b>: a clock that uses busy waiting</li>
+<li><b>Disabling Interrupts</b>
+<ul>
+<li>One simple solution is to have each process disable all interrupts just after entering its critical region and re-enable them just before leaving it.</li>
+<li>With interrupts disabled, no clock interrupts can occur, and CPU will not be able to be switched to another process.</li>
+<li>Drawbacks:
+<ul>
+<li>unwise to give user process the power to turn off interrupts</li>
+<li>if the system is a multiprocessor, other CPU can still run and access the shared memory</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Lock Variables</b>
+<ul>
+<li>Use a single, shared <u>lock</u> variable,  initially set to 0</li>
+<li>When a process wants to enter its critical region, it first tests the lock. If the lock is 0, the process sets it to 1 and enters the critical region. If the lock is already 1, the process just waits until it becomes 0.</li>
+<li>0 means no process is in its critical region, and 1 means some process is in its critical region</li>
+<li>Problem: still have race conditions, interrupts can occur between the checking and setting the lock variable</li>
+</ul>
+</li>
+<li><b>Strict Alternation</b>
+<ul>
+<li>use a variable to keep track of whose turn it is to enter the critical region, two processes alternates strictly in turn</li>
+<li>when a process finishes its job in the critical region, it sets the turn variable to the other process’s value, meaning that it is the other process’s turn to enter the critical region.</li>
+<li>problems:
+<ul>
+<li>the speeds of two processes can affect efficiency, especially when one is faster than the other</li>
+<li>violates condition 3, because a faster process can be blocked by a process that is not in its critical region (because it is not yet the faster process’s turn)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Peterson’s Solution</b>
+<ul>
+<li><img src="/images/CS6233/Screen%20Shot%202016-11-29%20at%203.41.04%20PM.png" height="60%" width="60%"/></li>
+<li>use two variables <i>turn</i> and <i>interested</i> to add another layer of protection</li>
+</ul>
+</li>
+<li><b>TSL Instruction</b>
+<ul>
+<li>This solution requires some hardware support</li>
+<li>have a special atomic instruction:
+<ul>
+<li>TSL RX, LOCK   (Test and Set Lock)</li>
+<li>This instruction reads the contents of the memory word LOCK into register RX, and then stores a nonzero value at the memory address LOCK.</li>
+</ul>
+</li>
+<li>use this shared variable LOCK to coordinate access to shared memory. When LOCK is 0, any process may set it to 1 using the TSL instruction and then read or write the shared memory. When it is done, the process sets LOCK back to 0 using an ordinary MOVE instruction.</li>
+<li><img src="/images/CS6233/Screen%20Shot%202016-12-01%20at%202.10.28%20PM.png" height="60%" width="60%"/></li>
+<li>An alternate instruction to TSL is XCHG, which exchanges the contents of two locations atomically. 
+<ul>
+<li>All Intel x86 CPUs use XCHG instruction for low-level synchronization</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Sleep and Wakeup</b>
+<ul>
+<li>Peterson’s solution and the TSL instruction are correct, but requires busy waiting, which waste CPU time, and other problems
+<ul>
+<li>Priority inversion: if a low priority process L enters its critical region, a high priority process H becomes ready to run, but H cannot enter the critical region and thus busy waiting. However, L is never scheduled while H is running because of its low priority, L never gets the chance to leave its critical region, so H loops forever.
+<ul>
+<li>solution: give processes in critical regions higher priority</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>use <i><u>sleep</u></i> and <i><u>wakeup</u></i> system call
+<ul>
+<li>sleep: causes the called to block, aka be suspended until another process wakes it up</li>
+<li>wakeup: has one parameter, the process to be awakened</li>
+</ul>
+</li>
+<li><b>The Producer-Consumer problem (bounded-buffer problem)</b>
+<ul>
+<li>Two processes share a common, fixed-size buffer.</li>
+<li>Producer puts data into the buffer. If the buffer is full, it goes to sleep, to be awakened when the consumer has removed one or more items.</li>
+<li>Consumer takes data out of the buffer. If the buffer is empty, it goes to sleep, to be awakened when the buffer is no long empty.</li>
+<li>must produce before consumer, logical dependency</li>
+<li>Lost-wakeup problems: race condition, it the <i>wakeup</i> is called before sleep (the wakeup signal is missed), the sleeping process will not ever be waken up.
+<ul>
+<li>solution: use a wakeup waiting bit, to capture the missed wakeup signal.
+<ul>
+<li>The bit is set when a wakeup is sent to a process that is still awake</li>
+<li>Later when the process tries to go to sleep, if the wakeup waiting bit is on, it will be turned off, but the process will stay awake.</li>
+<li>The consumer clears the wakeup waiting bit in every iteration of the loop</li>
+</ul>
+</li>
+<li><img src="/images/CS6233/Screen%20Shot%202016-12-01%20at%202.32.20%20PM.png" height="60%" width="60%"/></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Semaphores</b>
+<ul>
+<li>Instead of using a wakeup waiting bit, use an integer variable semaphores to count the number of wakeups saved for the future. </li>
+<li>define two atomic operations
+<ul>
+<li><i>down</i>: checks if the value of semaphore is greater than 0, If so, it decrements the value and continue. If it is 0, the process is put to sleep without completing the down for the moment. </li>
+<li>up: increments the value of the semaphore addressed. If one or more processes were sleeping on that semaphore, unable to complete an earlier down operation, one of them is chosen and is allowed to complete its down. </li>
+</ul>
+</li>
+<li><img src="/images/CS6233/Screen%20Shot%202016-12-01%20at%202.42.27%20PM.png" height="60%" width="60%"/></li>
+</ul>
+</li>
+<li><b>Mutex</b>
+<ul>
+<li>When the semaphore’s ability to count is not needed, a simplified version of the semaphore, called mutex, is used. It is easy to implement using TLS or XCHG</li>
+<li>A mutex is a shared variable that can be in one of the two states: unlocked (0) or locked (1). </li>
+<li>When a thread (or process) needs to access to a critical region, it calls <i>mutex_lock</i>. If the mutex is currently unlocked,the call succeeds and the calling thread is free to enter the critical region. If the lock is already locked, the calling thread is blocked until the thread in the critical region is finished and calls mutex_unlock. If multiple threads are blocked on the mutex, one of them is chosen at random and allowed to acquire the lock.</li>
+<li><img src="/images/CS6233/Screen%20Shot%202016-12-01%20at%202.55.05%20PM.png" height="60%" width="60%"/></li>
+<li>When a thread fails to acquire a lock, it calls <i>thread_yield</i> to give up the CPU to another thread, thus no busy waiting. When the thread runs the next time, it tests the lock again.</li>
+<li><i>thread_yield</i> is a call to the thread scheduler in user space, it is very fast, do not require any kernel calls.</li>
+<li>There are other versions of mutex
+<ul>
+<li>mutex_trylock: when fail to acquire a lock, returns a code for failure, but do not block, gives the thread the flexibility to decide what to do next instead of waiting.</li>
+<li>futex: “fast user space mutex”, implements basic locking but avoids dropping into the kernel unless it really has to (because switching to the kernel and back is expensive), if there is no contention, the kernel is not involved. If there is, uses a “wait queue” in the kernel to allow multiple processes to wait on a lock. </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Monitors</b>
+<ul>
+<li>A monitor is a collection of procedures, variables, and data structures that are all grouped together in a special kind of module or package. It is a programming-language construct
+<ul>
+<li>Processes may call the procedures in a monitor whenever they want to, but they cannot directly access the monitor’s internal data structures from procedures declared outside the monitor.</li>
+<li>Only one process can be active in a monitor at any instant</li>
+</ul>
+</li>
+<li>Condition variables: have two operations on them:
+<ul>
+<li>wait: When a monitor procedure discovers that it cannot continue, it does a <i>wait</i> on some condition variable. This causes the calling process to block, and allows another process to enter the monitor.</li>
+<li>signal: The other process can wake up its sleeping partner by doing a signal on the condition variable that its partner is waiting on. The process doing a signal will exit immediately</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Message Passing
+<ul>
+<li>Uses two system calls:
+<ul>
+<li><i>send(destination, &amp;message)</i></li>
+<li><i>receive(source</i><i>, &amp;message)</i></li>
+</ul>
+</li>
+<li>Design issues:
+<ul>
+<li>Need acknowledgement message to guarantee delivery</li>
+<li>Need naming for processes</li>
+<li>Need authentication mechanism</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Barrier</b>
+<ul>
+<li>Some applications are divided into phases and have the rule that no process may proceed into the next phase until all processes are ready to proceed to the next phase. This can be achieved by placing a barrier at the end of each phase</li>
+<li>When a process reaches the barrier, it is blocked until all processes have reached the barrier, allows groups of processes to synchronize.</li>
+</ul>
+</li>
+<li><b>Read-Copy-Update</b>
+<ul>
+<li>avoid locking (because of overhead), but allow concurrent read and write accesses to shared data structures</li>
+<li>The trick is to ensure that each reader either reads the old version of the data, or the new one, but not some weird combination of old and new. 
+<ul>
+<li>For adding new data, the user will read the old version of the data, and the new data is initialized behind the scene. Once the new data is ready to be added, we do one atomic write, and no reader will ever read an inconsistent version.</li>
+<li>For deleting data, the users that are not reading it will see the new version (deleted version), while the users that are reading it will see the old version. Once there are no more readers of old data, we can free it.</li>
+</ul>
+</li>
+<li>Readers access the data structure in a read-side critical section, which may contain any code, as long as it does not block or sleep. In this case, we know the maximum time we need to wait.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div><br/></div>
+<div><br/></div>
+<div>
+<div><b>Scheduling</b></div>
+<ul>
+<li>Scheduler: the part of the OS that chooses which process to run next using scheduling algorithm</li>
+<li>Process behavior
+<ul>
+<li><b>CPU-bound</b>: a process that spends most of their time computing</li>
+<li><b>I/O-bound</b>: a process that spends most of their time waiting for I/O
+<ul>
+<li>as CPUs get faster, processes tend to get more I/O bound, because CPUs are improving much faster than disks</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>When to schedule
+<ol>
+<li>when a new process is created
+<ul>
+<li>run the parent or the child process? (scheduler can choose either)</li>
+</ul>
+</li>
+<li>a scheduling decision must be made when a process exits</li>
+<li>when a process blocks on I/O or other reason, another process has to be selected to run.</li>
+<li>when an I/O interrupt occurs, a scheduling decision may be made. (e.g. The interrupt came from an I/O device that has now completed its work, some process that was blocked waiting for the I/O may now be ready to run)</li>
+<li>a scheduling decision can be made at each clock interrupt or at every kth clock interrupt, if a hardware clock provides periodic interrupts.
+<ul>
+<li><b>nonpreemptive</b> scheduling algorithm: let a process run until it blocks or voluntarily releases the CPU. No scheduling decisions made during clock interrupts</li>
+<li><b>preemptive</b> scheduling algorithm: let a process run for a maximum of some fixed time. If it is still running at the end of the time interval, it is suspended and the scheduler picks another process to run. Require having a clock interrupt occur at the end of the time interval to give control of the CPU back to the scheduler.</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>Categories of scheduling algorithms:
+<ul>
+<li>batch:
+<ul>
+<li>Nonpreemptive algorithm (or preemptive algorithm with long time periods) are acceptable because there are no users impatiently waiting for a quick response.</li>
+<li>reduce process switches and improve performance</li>
+</ul>
+</li>
+<li>interactive:
+<ul>
+<li>preemptive algorithm needed, cannot have one process hogging the CPU because multiple users are waiting for quick response</li>
+</ul>
+</li>
+<li>real time:
+<ul>
+<li>nonpreemptive algorithm needed, because processes know that they may not run for long periods of time and usually do their work and block quickly</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Scheduling algorithm goals
+<ul>
+<li>All systems
+<ul>
+<li>fairness: giving each process a fair share of the CPU</li>
+<li>policy enforcement: seeing that stated policy is carried out (some processes have higher priority)</li>
+<li>balance: keeping all parts of the system busy (both CPU and all the I/O devices running)</li>
+</ul>
+</li>
+<li>Batch systems:
+<ul>
+<li><u>throughput</u>: maximize jobs per hour</li>
+<li><u>turnaround time</u>: minimize time between submission and termination (how long has to wait for output)</li>
+<li>CPU utilization: keep the CPU busy all the time</li>
+</ul>
+</li>
+<li>Interactive systems:
+<ul>
+<li><u>response time</u>: respond to requests quickly</li>
+<li><u>proportionality</u>: meet users' expections</li>
+</ul>
+</li>
+<li>Real-time systems:
+<ul>
+<li>meeting the deadlines: avoid losing data</li>
+<li>predictability: avoid quality degradation in multimedia systems</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Scheduling in Batch Systems:</b>
+<ul>
+<li><b>First-Come, First-Served</b>
+<ul>
+<li>processes are assigned the CPU in the order they request it, and they may run as long as they wants to. </li>
+<li>When the running process blocks, the first process on the queue is run next. When a blocked process becomes ready, it is put on the end of the queue like a newly arrived job.</li>
+<li>advantages: easy and fair</li>
+<li>problems:
+<ul>
+<li>when has few CPU-bound process and many I/O bound processes, it slows down CPU-bound process a lot</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Shortest Job First</b>
+<ul>
+<li>advantages: minimize turnaround time because the first job contributes more the turnaround time.</li>
+<li>problems: it is optimal only when all the jobs are available simultaneously</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Scheduling in Interactive Systems</b>:
+<ul>
+<li><b>Round-Robin Scheduling</b>
+<ul>
+<li>Each process is assigned a time interval, called it <u>quantum</u>, during which it is allowed to run.</li>
+<li>If the process is still running at the end of the quantum, the CPU is preempted and given to another process.</li>
+<li>problem:
+<ul>
+<li>need to decide the length of the quantum, process switch takes time and has overhead
+<ul>
+<li>too short: spend a lot of time on switching rather than doing work</li>
+<li>too long: other processes will need to wait a long time, users experience delay</li>
+<li>usually around 20-50 msec</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Priority Scheduling</b>
+<ul>
+<li>each process is assigned a priority, and the runnable process with the highest priority is allowed to run</li>
+<li>to prevent high-priority processes from running indefinitely, the scheduler can decrease the priority of the currently running process at each clock tick, or assigned a maximum time quantum that it is allowed to run</li>
+<li>priority can be assigned statically when processes started</li>
+<li>Or be assigned dynamically by the system, e.g. giving I/O bound process higher priority to keep the disk busy
+<ul>
+<li>e.g. set the priority of 1/f, where f is the fraction of the last quantum that a process used. I/O bound processes use only a small portion of the quantum, so they will have higher priority</li>
+</ul>
+</li>
+<li>Could also group processes into priority classes and use priority scheduling among the classes but round-robin scheduling within each class
+<ul>
+<li>figure2-43 P161</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Shortest Process Next</b>
+<ul>
+<li>Regard the execution of each command as a separate "job", then can minimize overall response time by running the shortest one first</li>
+<li>use estimates based on past behavior to order processes
+<ul>
+<li>suppose the estimate time per command is T0, now suppose its next run is measured to be T1. Then we can update our estimate by taking a weighted sum of these two numbers, aT0 + (1-a)T1, where a is a factor determined by the programmer.</li>
+<li>This techniques of estimating the next value is called <u>aging</u>.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Guaranteed Scheduling</b>
+<ul>
+<li>if n users are logged in while you are working, will receive about 1/n of the CPU power. Similarly, on a single-user system with n processes running, each process should get 1/n of the CPU cycles.</li>
+<li>The system must keep track of how much CPU each process has had since its creation, and compute the ratio of actual CPU time consumed to CPU time entitled. The process with lowest ratio runs until it has moved above its closest competitor.</li>
+<li>Hard to implement</li>
+</ul>
+</li>
+<li><b>Lottery Scheduling</b>
+<ul>
+<li>give processes lottery tickets for various system resources, such as CPU time. Whenever a scheduling decision has to be made, a lottery ticket is chosen at random, and the process holding that ticket gets the resource. </li>
+<li>more important processes can be given extra tickets, to increase their odds of winning. A process holding a fraction f of tickets will get about a fraction f of the resource.</li>
+</ul>
+</li>
+<li><b>Fair-Share Scheduling</b>
+<ul>
+<li>each users is allocated some fraction of the CPU. Each user's processes then share its user's resources.</li>
+<li>prevent one user with a lot of processes taking a large portion of the CPU</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Scheduling in Real-Time Systems</b>
+<ul>
+<li>time plays an essential role in a real-time system. Typically, one or more physical devices external to the computer generate stimuli, and the computer must react appropriately to them within a fixed amount of time.
+<ul>
+<li>the events can be periodic (occur at regular intervals) or aperiodic (occur unpredictably)</li>
+</ul>
+</li>
+<li>Two categories
+<ul>
+<li>hard real time: there are absolute deadlines that must be met</li>
+<li>soft real time: missing an occasional deadline is undesirable, but tolerable</li>
+</ul>
+</li>
+<li>The program is divided into a number of processes, each of whose behavior is predictable and known in advance. These processes are generally short lived and can run to completion in well under a second. When an external event is detected, it is the job of the scheduler to schedule the processes in such a way that all deadlines are met.</li>
+<li>A real-time system is <u>schedulable</u> if 
+<ul>
+<li>there are m events, each event i occurs with period Pi and requires Ci second to handle.</li>
+<li><img src="/images/CS6233/Screen%20Shot%202016-10-17%20at%2011.03.11%20PM.png" height="20%" width="20%"/></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Policy Versus Mechanism (policy-mechanism separation)
+<ul>
+<li>sometimes one process knows about all other processes and has a good idea of the importance of each processes, but it cannot pass that information to the scheduler.</li>
+<li>Solution: to separate the scheduling mechanism from the scheduling policy. Scheduling algorithm is parameterized in some way, but the parameters can be filled in by user processes.</li>
+</ul>
+</li>
+<li>Thread Scheduling
+<ul>
+<li>user-level thread:
+<ul>
+<li>the process scheduler decides which process to run, and the thread scheduler inside each process decide which thread to run within its quantum.</li>
+</ul>
+</li>
+<li>kernel-level thread:
+<ul>
+<li>kernel scheduler decides which thread to run, regardless with process to which it belongs to.
+<ul>
+<li>slower because of context switch</li>
+<li>but having a thread block on I/O does not suspend the entire process</li>
+</ul>
+</li>
+<li>can take into account the cost of switching when making scheduling decisions.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><br/></div>
+<div><b>Chapter 3 Memory Management</b></div>
+<div>Memory hierarchy</div>
+<ul>
+<li>Computers have
+<ul>
+<li>a few megabytes of very fast, expensive volatile cache memory</li>
+<li>a few gigabytes of medium speed, medium-priced, volatile main memory</li>
+<li>and a few terabytes of slow, cheap, nonvolatile magnetic or solid-state disk storage</li>
+<li>and other removable storage such as DVDs and USB sticks.</li>
+</ul>
+</li>
+<li>It is the job of OS to abstract this hierarchy into a useful model and then manage the abstraction</li>
+<li>Memory manager: the part of OS that manages all this
+<ul>
+<li>keep track of which parts of memory are in use</li>
+<li>allocate memory to processes when needed</li>
+<li>deallocate memory when they are done</li>
+</ul>
+</li>
+</ul>
+<div>No Memory Abstraction</div>
+<ul>
+<li>programs work directly on physical memory. Impossible to have two running programs at the same time.</li>
+<li>several options
+<ol>
+<li>put OS at the botton of memory in RAM
+<ul>
+<li>e.g. formerly used on mainframes and minicomputers, but rarely used any more</li>
+</ul>
+</li>
+<li>put OS in ROM at the top of the memory
+<ul>
+<li>e.g. used on some handheld computers and embedded systems</li>
+</ul>
+</li>
+<li>put device drivers at the top of memory in a ROM and the rest of system in RAM down below
+<ul>
+<li>e.g. used by early PCs, where the portion of the system in the ROM is called the BIOS</li>
+</ul>
+</li>
+</ol>
+</li>
+<li style="display:inline;list-style:none;">
+<ul>
+<li>model 1 and 3 have the disadvantage that a bug in the user program can wipe out the OS</li>
+<li><b>figure 3-1 P183</b></li>
+</ul>
+</li>
+<li>Running multiple programs without a memory abstraction
+<ol>
+<li>Swapping: OS saves the entire contents of memory to a disk file, then bring in and run the next program.</li>
+<li>With the help of some special hardware and protection bit.
+<ul>
+<li>assign 4-bit protection key to memory blocks and store keys in a special registers inside the CPU. PSW (program status word) also contains a 4-bit key. The hardware trapped any attempt by a running process to access memory with a protection code different from the PSW key.</li>
+<li>problems when try to accessing specific memory addresses. We want each program to reference a private set of addresses local to it.
+<ul>
+<li>solution: static relocation, add an offset to all addresses, but slow things down</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<div><br/></div>
+<div><b>Memory Abstraction: Address Spaces</b></div>
+<ul>
+<li>problem with exposing physical memory:
+<ul>
+<li>user programs can easily trash OS</li>
+<li>difficult to have multiple programs running at once</li>
+</ul>
+</li>
+<li><b>Address space</b>: the set of addresses that a process can use to address memory
+<ul>
+<li>each process has its own address space, independent of those belonging to other processes</li>
+</ul>
+</li>
+<li><b>Base and Limit Registers</b>
+<ul>
+<li>This simple solution uses a particularly simple version of <u>dynamic relocation</u>. map each process' address space onto a different part of physical memory</li>
+<li>It uses <u>base</u> and <u>limit</u> registers. Programs are loaded into consecutive memory locations wherever there is room and without relocation during loading.
+<ul>
+<li>the base register is loaded with the physical address where its program begins in memory</li>
+<li>the limit register is loaded with the length of the program</li>
+</ul>
+</li>
+<li>each time a process references memory, the CPU hardware automatically adds the base value to the address generated by the process before sending the address out on the memory bus. Simultaneously, it checks whether the address offered is equal to or greater than the value in the limit register, if so, a fault is generated and the access is aborted.</li>
+<li>disadvantage: need to perform addition and comparison on every memory reference, influence performance</li>
+</ul>
+</li>
+<li><b>Swapping</b>
+<ul>
+<li>bringing in each process in its entirety, running it for a while, then putting it back on disk</li>
+<li>used to dealing with memory overload (no enough physical memory to hold all processes), but slower since using disks</li>
+<li><u>memory compaction</u>: a technique used for reducing the holes in memory created by swapping, but slow</li>
+<li>allocate extra memory for each processes because they might grow</li>
+</ul>
+</li>
+<li>Managing Free Memory
+<ul>
+<li><b>bitmaps</b>
+<ul>
+<li>Memory is divided into allocation units (a few words to several kilobytes). Corresponding to each allocation unit is a bit in the bitmap, which is 0 if the unit is free, and 1 if it is occupied. </li>
+<li>Figure 3-6 P191</li>
+<li>The size of allocation unit is an important design issue. 
+<ul>
+<li>The smaller the allocation unit, the larger the bitmap, which takes more memory space</li>
+<li>The larger the allocation unit, the smaller the bitmap, but more memory may be wasted</li>
+</ul>
+</li>
+<li>advantage: simple way to keep track of memory words in a fixed amount of memory</li>
+<li>disadvantage: it is slow to find k consecutive 0 bits in the map for a k-unit process</li>
+</ul>
+</li>
+<li><b>free lists</b>
+<ul>
+<li>Maintain a linked list of allocated and free memory segments, where a segment either contains a process or is an empty hole between two processes.</li>
+<li>Each entry in the list specifies a hole (H) or a process (P), the address at which it starts, the length, and a pointer to the next item</li>
+<li>more convenient to have the list as a double-linked list, make it easier to find the previous entry and to see if a merge is possible</li>
+<li>several algorithms to allocate memory for a created process
+<ul>
+<li><u>first fit</u>: the memory manager scans along the list of segments until it finds a hole that is big enough (fast)</li>
+<li>next fit: works the same way as first fit, except it keeps track of where it is then it finds a suitable hole. The next time it is called to find a hole, it starts searching the list from the place it left off last time</li>
+<li><u>best fit</u>: searches the entire list, takes the smallest hole that is adequate, rather than breaking up a big hole that might be needed later (slower than first fit, but surprisingly waste more memory because it creates a lots of tiny useless holes.</li>
+<li>worst fit: take the largest available hole, so that the new hole will be big enough to be useful</li>
+<li>quick fit: maintains separate lists for some of the more common sizes requested</li>
+</ul>
+</li>
+<li>optimizations:
+<ul>
+<li>keep separate lists for processes and holes, speed up allocation, slow down deallocation</li>
+<li>sort hole lists in sorted order, faster to find best fit</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>Virtual Memory</b></div>
+</div>
+</div>
+<ul>
+<li>overlays: programs are split into little pieces, called overlays, and loaded into memory. Original method of virtual memory</li>
+<li>Basic idea of virtual memory:
+<ul>
+<li>each program has its own address space, which is broken up into chunks called pages. Each page is contiguous range of addresses. These pages are mapped onto physical memory, but not all pages have to be in physical memory at the same time to run the program. When the program references a part of its address space that is in physical memory, the hardware performs the necessary mapping on the fly. When the program references a part of its address space that is not in physical memory, the operating system is alerted to go get the missing piece and re-execute the instruction that failed.</li>
+<li>figure 3-8 P195</li>
+</ul>
+</li>
+<li><b>Paging</b> (technique used in virtual memory)
+<ul>
+<li>The program-generated addresses are called virtual addresses and form the virtual address space. Virtual address space consists of fixed-size units called pages. The corresponding units in the physical memory are called <u>page frames</u>
+<ul>
+<li>e.g. 4 KB page size, 64 KB of virtual address space is 16 virtual page, and 32 KB of physical memory is 8 page frames</li>
+</ul>
+</li>
+<li>When virtual memory is used, the virtual addresses go to <b>MMU (memory Management Unit)</b> that maps the virtual addresses onto the physical memory address.
+<ul>
+<li>The MMU first check the virtual address and see which page does it belong to. Then it finds the page frame that it is mapped to and translate the virtual address into physical address. The translated address is then passed to the bus, and the memory knows nothing about MMU.</li>
+<li>in actual hardware, a <u>present/absent bit</u> keeps track of which pages are physically present in memory.</li>
+<li>If the virtual address is unmapped, the MMU notices that the page is unmapped and causes the CPU to trap to the OS, which is called <b>page fault</b>. The OS picks a little-used page frame and writes its contents back to the disk, then fetches the page that was just referenced into the page frame just freed, changes the map, and restarts the trapped instruction.</li>
+<li>Figure 3-9, P197</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Page Tables</b> (map virtual pages onto page frames)
+<ul>
+<li>the first few bits of the virtual address is the page number, and the remaining bits are for the offset
+<ul>
+<li>The page number is used as an index into the page table, yielding the number of page frame corresponding to that virtual page. If the present/absent bit is 0, a trap to the OS is caused. If the bit is 1, the page frame number found in the page table is prepended to the offset bits, forming the physical address.</li>
+<li>figure 3-10 P199</li>
+</ul>
+</li>
+<li>Structure of a page table entry
+<ul>
+<li>fields
+<ul>
+<li>Page frame number: the goal of the page mapping is to output this value</li>
+<li>Present/absent bit: 1 if the entry is valid, 0 if that virtual page is not currently in memory</li>
+<li>Protection bit: tell what kinds of access are permitted. 0 for read/write and 1 for read only</li>
+<li>Modified bit (dirty bit): when a page is written to, set the this bit. If the page in it has been modified, it must be written back to the disk. If it has not been modified, it can just be abandoned, since the disk copy is still valid.</li>
+<li>Reference bit: it is set whenever a page is referenced. Its value is used to help the OS choose a page to evict when a page fault occurs.</li>
+<li>Caching Disabled bit: this bit allows caching to be disabled for the page. This feature is important for pages that map onto device registers rather than memory. If the OS is sitting in a tight loop waiting for some I/O device to respond to a command it was just given, it is essential that the hardware keep fetching the word from the device, and not use an old cached copy.</li>
+</ul>
+</li>
+<li>The disk address used to hold the page when it is not in memory is not part of the page table. The page table holds on that information the hardware needs to translate a virtual address to a physical address. Information the OS needs to handle page faults is kept in software tables inside the OS. The hardware does not need it.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Speeding Up Paging
+<ul>
+<li>two main issues in paging system
+<ul>
+<li>mapping for virtual address to physical address must be fast (need to translate for every memory reference)</li>
+<li>if virtual address space is large, the page table will be large (64 bits virtual address are becoming norm)</li>
+</ul>
+</li>
+<li><b>Translation Lookaside Buffers (TLB or associative memory) </b>
+<ul>
+<li>a small hardware device inside MMU for mapping virtual addresses to physical addresses without going through the page table, works like a cache because of locality. </li>
+<li>It consists of a small number of entries, each entry contains information about one page, including virtual page number, modified bit, protection code, valid bit, and the physical page frame in which the page is located. </li>
+<li>When a virtual address is presented to the MMU for translation, the hardware first checks to see if its virtual page number is present in the TLB.
+<ul>
+<li>If a valid match is found and the access does not violate the protection bits, the page frame is taken directly from the TLB, without going to the page table.</li>
+<li>If the virtual page number is present in the TLB but the instruction violates protection bits, a protection fault is generated. </li>
+<li>If the virtual page number is not in the TLB, the MMU detects the miss (TLB fault) and does an ordinary page table lookup. It then evicts one of the entries from the TLB and replaces it with the page table entry just looked up.</li>
+</ul>
+</li>
+<li>Figure 3-12 P203</li>
+</ul>
+</li>
+<li>Software TLB Management (fast translation)
+<ul>
+<li>Many OS now do page management in software</li>
+<li>TLB entries are explicitly loaded by the OS. When a TLB miss occurs, instead of the MMU going to page tables to find and fetch the needed page reference, it just generates a TLB fault and tosses the problem to OS. The OS must find the page, remove an entry from the TLB, enter the new one, and restart the instruction faulted.
+<ul>
+<li>simpler MMU and better performance</li>
+</ul>
+</li>
+<li>page table walk: looking up the mapping in the page table hierarchy</li>
+<li>different kinds of TLB misses
+<ul>
+<li>soft miss: occurs when the page referenced is not in the TLB, but in memory. only need to update TLB, no disk I/O needed. fast</li>
+<li>hard miss (major page fault): occurs when the page itself is not in memory. Require disk access, slow</li>
+<li>minor page fault: the page is actually in the memory, but in another process' page table. No need to access the disk again</li>
+<li>segmentation fault: the address referenced is invalid and no mapping needs to be added to added in the TLB. The OS typically kills the program.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Page table for large memories
+<ul>
+<li>multilevel page tables
+<ul>
+<li>avoid keeping all the page tables in memory all the time. Those that are not needed should not be kept around</li>
+<li>partitions the virtual address into multiple levels (e.g. 10-bit PT1 field, 10-bit PT2 field, and 12-bit offset)</li>
+<li>When a virtual address is presented to the MMU, it first extracts the PT1 field and this value as an index into the top-level page table. The entry located by indexing into the top-level page table yields the address or the page frame number of a second-level page table. The PT2 field is now used as an index into the selected second-level page table to find the page frame number for the page itself.</li>
+<li>figure 3-13 P206</li>
+<li>even though the address space could contains over a million pages, only a few number tables are needed. </li>
+</ul>
+</li>
+<li>Inverted Page Tables
+<ul>
+<li>There is one entry per page frame in real memory, rather than one entry per page of virtual address space. The entry keeps track of which (process, virtual page) is located in the page frame.</li>
+<li>Advantage: save lots of space (when virtual address space is larger than physical memory)</li>
+<li>Disadvantage: virtual-to-physical translation becomes much harder.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Page replacement algorithms</b>
+<ul>
+<li>The Not Recently Used (NRU) page replacement algorithm
+<ul>
+<li>use two status bits R and M
+<ul>
+<li>R is set whenever the page is referenced (read or written)</li>
+<li>M is set whenever the page is written to (modified)</li>
+</ul>
+</li>
+<li>When a process is started up, both page bits are set to 0. Periodically, the R bit is cleared to distinguish pages that have not been referenced recently from those that have been</li>
+<li>When a page fault occurs, there are four categories based on R and M
+<ol>
+<li>not referenced, not modified</li>
+<li>not referenced, modified</li>
+<li>referenced, not modified</li>
+<li>referenced, modified</li>
+</ol>
+</li>
+<li>The NRU removes a page at random from the lowest-numbered non-empty classes. </li>
+<li>easy to understand, moderately efficient to implement, adequate performance</li>
+</ul>
+</li>
+<li>The First-In, First-Out (FIFO) Page Replacement Algorithm
+<ul>
+<li>maintains a linked list of all pages currently in the memory. The old page at the front of the list is dropped, and the new one goes on the back of the list.</li>
+<li>problem: the oldest page may still be useful, rarely used</li>
+</ul>
+</li>
+<li>The Second-Chance page replacement algorithm
+<ul>
+<li>combine FIFO and NRU algorithm, look for an old page that has not been referenced in the most recent clock interval</li>
+<li>inspect the R bit of the oldest page. If it is 0, the page is both old and unused, so it is replaced immediately. If it is 1, the bit is cleared, the page is put onto the end of the list, and its load time is updated as though it had just arrived in memory. Then the search continues.</li>
+<li>inefficient, constantly moving pages around on its list.</li>
+</ul>
+</li>
+<li>The Clock page replacement algorithm
+<ul>
+<li>similar to second chance, but don’t need to move pages around</li>
+<li>keep all page frames on a circular list in the form of a clock. The hand points to the oldest page. </li>
+<li>If R bit is 0, the page is evicted. If R bit is 1, it is cleared and the hand is advanced to the next page.</li>
+</ul>
+</li>
+<li>The Least Recently Used (LRU) page replacement algorithm
+<ul>
+<li>When a page fault occurs, throw out the page that has been unused for the longest time.</li>
+<li>maintains a linked list of all pages in memory, with the most recently used page at the front and the least recently used page at the rear. The list must be updated on every memory reference. Time consuming to find a page, delete it, and move it to the front. (even in hardware)</li>
+</ul>
+</li>
+<li>The Not Frequently Used (NFU) page replacement algorithm
+<ul>
+<li>require a software counter associated with each page, initially zero. At each clock interrupt, the OS scans all the pages in memory. For each page, the R bit (0 or 1) is added to the counter. The counter roughly keep track of how often each page has been referenced. When a page fault occurs, the page with lowest counter is chosen for replacement.
+<ul>
+<li>but a page will a very high count might not be referenced in the future, stuck in the memory</li>
+</ul>
+</li>
+<li>Optimization
+<ul>
+<li>aging: the counters are each shifted right 1 bit before the R bit is added in, and the R bit is added to the leftmost rather rightmost bit.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>The Working Set page replacement algorithm
+<ul>
+<li>demand paging: pages are loaded on demand, not in advance</li>
+<li>working set: the set of pages that a process is currently using</li>
+<li>the idea is to keep track of each process’ working set and make sure that it is in memory before letting the process run. 
+<ul>
+<li>prepaging: loading the pages before letting processes run</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Design issues for paging systems
+<ul>
+<li>local vs global allocation: when replace page, do it locally or globally</li>
+<li>load control: swap some processes to the disk and free up the pages they are holding to avoid thrashing</li>
+<li>page size</li>
+<li>shared pages: multiple same program can be running at the same time, more efficient to shared the pages (avoid duplicate pages) as long as they are read-only.
+<ul>
+<li>copy on write: when a process try to write on the page, trap the OS, a copy is made, and both copies set to READ/WRITE</li>
+</ul>
+</li>
+<li>mapped files: a process can issue a system call to map a file onto a portion of its virtual address space. When exits or unmaps, all the modified pages are written back to the file on disk</li>
+</ul>
+</li>
+</ul>
+<div>
+<div><br/></div>
+<div><br/></div>
+<div><br/></div>
+<div><b>Chapter 4 File Systems</b></div>
+<div><b>Files</b></div>
+<div>
+<ul>
+<li>Files are logical units of information created by processes, stored in persistent storage such as a disk</li>
+<li>File system is the part of OS dealing with files
+<ul>
+<li>FAT-16, FAT-32: old MS-DOS file system</li>
+<li>NTFS: windows file system</li>
+</ul>
+</li>
+<li>File Naming
+<ul>
+<li>two-part file names
+<ul>
+<li>filename</li>
+<li>file extension: indicates the type of the file
+<ul>
+<li>some OS don’t enforce the file extension (e.g UNIX), some are aware of them and assign meaning to them(e.g. Windows)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>File Structure
+<ol>
+<li>unstructured sequence of bytes:
+<ul>
+<li>OS does not know or care what is in the file. Any meaning must be imposed by user-level programs. Maximum flexibility.</li>
+<li>UNIX and Windows use this approach</li>
+</ul>
+</li>
+<li>record sequence:
+<ul>
+<li>In this model, a file is a sequence of fixed-length records, each with some internal structure. </li>
+</ul>
+</li>
+<li>tree
+<ul>
+<li>In this model, a file consists of a tree of records, each containing a key filed in a fixed position in the record. </li>
+<li>The tree is sorted on the key field, to allow rapid searching for a particular key</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>File Types
+<ul>
+<li><u>Regular files</u>: files that contain user information
+<ul>
+<li>ASCII files:
+<ul>
+<li>consist of lines of text, each line terminated by a carriage return character or line feed character</li>
+<li>can be displayed and printed as it is, edited with any text editor</li>
+</ul>
+</li>
+<li>binary files:
+<ul>
+<li>incomprehensible data, have some internal structure known to programs that use them</li>
+<li>an executable file has a proper format, It has five sections
+<ul>
+<li>header: starts with a magic number, identifying the file as an executable file</li>
+<li>text</li>
+<li>data</li>
+<li>relocation bits</li>
+<li>symbol table</li>
+</ul>
+</li>
+<li>another example of binary file is an archive
+<ul>
+<li>It consists of a collection of library procedures compiled but not linked</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><u>Directories</u>: system files for maintaining the structure of the file system</li>
+<li>Character special files: used to model serial I/O devices</li>
+<li>Block special files: used to model disks</li>
+</ul>
+</li>
+<li>File Access
+<ul>
+<li>sequential access: a process could read all the bytes or records in a file in order, starting at the beginning, but could not skip around and read them out of order (convenient for magnetic tape)</li>
+<li>random-access: a process could read all the bytes or records in a file in any order (for disks)</li>
+<li>Two methods for specifying where to start reading
+<ol>
+<li><i>read</i> operation: every read operation gives the position in the file to start reading at</li>
+<li><i>seek</i> operation: used to set the current position. after a seek, the file can be read sequentially from the now-current position. (used in UNIX and Windows)</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>File Attributes
+<ul>
+<li>all OSs associate <u>attributes</u> (or metadata) with each file (in addition to its name and data)
+<ul>
+<li>protection: who can access the file and in what way</li>
+<li>password</li>
+<li>creator and owner</li>
+<li>flags: bits that control or enable some specific property
+<ul>
+<li>e.g. Hidden flag, Temporary flag, System flag, etc.</li>
+</ul>
+</li>
+<li>record-length, key-position, key-length: for files whose records can be looked up using a key, they provide info required to find the keys</li>
+<li>times:
+<ul>
+<li>e.g. creation time, last access time, last change time, etc.</li>
+</ul>
+</li>
+<li>current size: how big the file is at present</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>File Operations (system calls)
+<ol>
+<li>Create: create an empty file, announce that the file is coming and to set some attributes</li>
+<li>Delete: delete the file to free up disk space</li>
+<li>Open: allow the system to fetch the attributes and list of disk addresses into main memory for rapid access on later calls</li>
+<li>Close: the file is closed to free up internal table space (filled with attributes and disk addresses we fetched when open)</li>
+<li>Read: read data from file, the bytes come from the current position, the called must specify how many data are needed and provide a buffer to put them in</li>
+<li>Write: write data to the file at the current position</li>
+<li>Append: restricted form of write, can only add data to the end of the file</li>
+<li>Seek: for random-access files, used to specify from where to take the data. It repositions the file pointer to a specific place in the file, and then data can be read from or written to that position</li>
+<li>Get attributes: read attributes of files</li>
+<li>Set attributes: change attributes of files</li>
+<li>Rename: change the name of the existing files</li>
+</ol>
+</li>
+</ul>
+<div><b><br/></b></div>
+<div><b>Directories</b></div>
+<ul>
+<li>Single-level directory systems
+<ul>
+<li>having one directory containing all the files, sometimes called the <u>root directory</u></li>
+</ul>
+</li>
+<li>Hierarchical directory systems (used in nearly all modern file systems)
+<ul>
+<li>there can be as many directories as are needed to group the files in natural ways</li>
+<li>if multiple users share a common file server, each user can have a private root directory for his own hierarchy</li>
+</ul>
+</li>
+<li>Path Names
+<ul>
+<li>path names are used for specifying file names in a directory tree</li>
+<li><u>absolute path name</u>: each file is given an unique absolute path name consisting of the path from the root directory to the file</li>
+<li><u>relative path name</u>: used in conjunction with <u>working directory (current directory)</u>, all path names not beginning at the root directory are taken relative to the working directory</li>
+</ul>
+</li>
+<li>Directory Operations (system calls)
+<ol>
+<li>Create: a directory is created</li>
+<li>Delete: a directory is deleted (only empty directory can be deleted)</li>
+<li>Opendir: a directory is opened to read</li>
+<li>Closedir: a directory is closed to free up internal table space</li>
+<li>Readdir: returns the next entry in an open directory</li>
+<li>Rename: rename a directory</li>
+<li>Link: allows a file to appear in more than one directory. this call specifies an existing file and a path name, and creates a link from the existing file to the name specified by the path, increments the counter in the file’s i-node (<u>hard link</u>)
+<ul>
+<li>symbolic link: a nickname is created that contains a reference to another file or directory</li>
+</ul>
+</li>
+<li>Unlink: a directory entry is removed</li>
+</ol>
+</li>
+</ul>
+</div>
+<div><b><br/></b></div>
+<div><b>File-System Implementation</b></div>
+<ul>
+<li>File system layout
+<ul>
+<li>Most disks can be divided up into one or more partitions, with independent file systems on each partition</li>
+<li>Sector 0 of the disk is called the <u>MBR (Master Boot Record)</u> and it is used to boot the computer. The end of MBR contains the partition table , which specifies the starting and ending addresses of each partition</li>
+<li>Inside every partition, the first block is called <u>boot block</u>, which loads the OS contained in that partition</li>
+<li><u>superblock</u>: contains all the key parameters about the file system and is read into memory when the computer is booted or the file system is first touched</li>
+<li><u>free block management</u> block: in the form of a bit map or a list of pointers</li>
+<li><u>I-nodes</u>: an array of data structure telling all about each file</li>
+</ul>
+</li>
+<li>Implementing files
+<ul>
+<li><b>contiguous allocation</b>: store each file as a contiguous run of disk blocks
+<ul>
+<li>advantages:
+<ul>
+<li>simple to implement, need only starting address and the length</li>
+<li>read performance is excellent, entire file can be read in one operation (because blocks are contiguous)</li>
+</ul>
+</li>
+<li>drawback:
+<ul>
+<li>fragmentation: small holes in the disk, waste space</li>
+</ul>
+</li>
+<li>still used in CD-ROMs, because file sizes are known in advance and read-only (UDF, Universal Disk Format)</li>
+</ul>
+</li>
+<li>Linked-List Allocation: keep each file as a linked list of disk blocks
+<ul>
+<li>The first word of each block is used as a pointer to the next one, the rest is for data</li>
+<li>advantages:
+<ul>
+<li>no fragmentation, every block is used</li>
+<li>directory entry only need to store the disk address of the first block</li>
+</ul>
+</li>
+<li>drawback:
+<ul>
+<li>random access is extremely slow, because need to traverse through the linked list</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Linked-List Allocation Using a Table in Memory </b>
+<ul>
+<li><b>File Allocation Table (FAT)</b>: take the pointer word from each disk block and putting it in a table in memory, can know the disk addresses by looking up the table</li>
+<li>advantages:
+<ul>
+<li>the entire block is available for data</li>
+<li>random access is much easier, can follow the chain in memory</li>
+<li>directory entry only need to store the disk address of the first block</li>
+</ul>
+</li>
+<li>drawback:
+<ul>
+<li>the entire table must be in memory all the time, table can become very large when disk size is large and block size is small</li>
+</ul>
+</li>
+<li>Original file system for MS-DOS and still fully supported by Windows</li>
+</ul>
+</li>
+<li><b>I-nodes (index-node)</b>
+<ul>
+<li>a data structure associated with each file that keeps track of which blocks belong to which file</li>
+<li>The data structure lists the attributes and disk addresses of the file’s blocks</li>
+<li>advantages:
+<ul>
+<li>i-node need be in memory only when the corresponding file is open, and its size is proportional to the maximum number of files that may be open at once (much smaller)</li>
+</ul>
+</li>
+<li>Each i-node has room for a fixed number of disk addresses, if that is not enough, the last disk address can be used to point to a block containing more disk-block addresses</li>
+<li>used in UNIX, Windows uses a similar idea</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Implementing directories
+<ul>
+<li>directory entry provides the information needed to find the file's disk block. Depending on the system, this info might be the disk address of the entire file (contiguous allocation), the number of the first block (linked-list scheme), or the number of i-node. The main function of the directory system is to map the ASCII name of the file onto the information needed to locate the data</li>
+<li>Where the attributes should be store
+<ul>
+<li>store directly in the directory entry</li>
+<li>store attributes in the i-nodes, and directory entry can store just a file name and an i-node number</li>
+</ul>
+</li>
+<li>Fixed size vs variable size
+<ul>
+<li>fixed size: all directory entries have the same format, fixed size space is reserved for all the attributes
+<ul>
+<li>simple, but wasteful</li>
+</ul>
+</li>
+<li>variable size: entries can have variable sizes, allocated contiguously
+<ul>
+<li>problem: when a file is removed, variable-sized gap is introduced into the directory</li>
+</ul>
+</li>
+<li>hybrid: make directory entries fixed length, and keep file names together is a heap at the end of the directory. Each directory entry stores a pointer to its name in the heap
+<ul>
+<li>when an entry is removed, the next file entered will always fit there</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Log-Structured File Systems (LFS)
+<ul>
+<li>structure the entire disk as a great big log</li>
+<li>periodically write logs to the disk</li>
+<li>have a cleaner thread scanning the log circularly to compact it</li>
+</ul>
+</li>
+<li>Journaling File Systems
+<ul>
+<li>inspired by LFS, keep a log of what the file system is going to do before it does it, so that if the system crashes before it can do its planned work, upon rebooting the system can look in the log to see what was going on at the time of the crash and finish the job</li>
+<li>logged operation must be <u>idempotent</u>, meaning they can be repeated as often as necessary without harm.</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>File System Management and Optimization</b></div>
+<ul>
+<li>Free block management
+<ul>
+<li>use a <u>linked list</u> of disk blocks, with each block holding as many free disk block numbers as will fit (e.g. 32-bit block addresses in each block)</li>
+<li>use a <u>bitmap</u>, have one bit for each block, 1 represents free, 0 represents allocated
+<ul>
+<li>require much less space, because 1 bit for each block (as opposed to 32 bits per block)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><b><br/></b></div>
+<div><b><br/></b></div>
+<div><b>Chapter 5 Input/Output</b></div>
+<div>
+<div><b>I/O devices</b></div>
+<ul>
+<li>two categories
+<ul>
+<li>block devices: stores information in fixed-size blocks, each one with its own address, such as disk, USB</li>
+<li>character devices: delivers or accepts a stream of characters, without regard to any block structure, such as printer, network interface</li>
+<li>some devices do not fit in, for example clocks, screen</li>
+</ul>
+</li>
+</ul>
+<div><b>Device controllers</b></div>
+<ul>
+<li>device controller: electronic component of an I/O units, often a chip or a printed circuit card</li>
+<li>has a few control registers that are used for communicating with the CPU (by reading and writing to those registers)</li>
+</ul>
+<div><b>Port I/O</b></div>
+<ul>
+<li>each control register is assigned an I/O port number</li>
+<li>use special I/O instructions, such as IN, OUT
+<ul>
+<li>can only access them in assembly, cannot code in C</li>
+</ul>
+</li>
+</ul>
+<div><b>Memory-Mapped I/O</b></div>
+</div>
+<ul>
+<li>all the control registers is assigned a unique memory address to which no memory is assigned.</li>
+<li>assigned addresses at usually at the top of the address space</li>
+<li>can reference control registers as if referencing memory</li>
+<li>disadvantage:
+<ul>
+<li>hard to handle caching, need to selectively disable disable caching</li>
+<li>all memory modules and all I/O devices must need to examine all memory references to see which ones to response to</li>
+</ul>
+</li>
+</ul>
+<div>
+<div><b>Direct Memory Access (DMA)</b></div>
+<ul>
+<li>above two approach needs CPU to address the device controller and exchange data with them, waste CPU time</li>
+<li>the DMA controller has access to the system bus independent of the CPU</li>
+<li>it contains several registers that can be read and written by the CPU
+<ul>
+<li>memory address register, byte count register, several control registers</li>
+<li>control registers specifies the I/O port to use, the direction of transfer, transfer unit, number of bytes</li>
+</ul>
+</li>
+<li>how it works
+<ul>
+<li>First the CPU programs the DMA controller by setting its registers.</li>
+<li>It issues a command to the disk controller telling it to read data from disk into its internal buffer and verify the checksum. When valid data are in the disk controller’s buffer, DMA can begin</li>
+<li>DMA controller initiates the transfer by issuing a read request over the bus to the disk controller. The disk controller fetches the next word from its internal buffer and writes it to the memory address. When the write is complete, the disk controller sends an acknowledgement signal to the DMA controller. The DMA controller then increments the memory address to use and decrements the byte count. Repeat until byte count reaches 0. Interrupts the CPU to let it know the transfer is complete, and the data is already in the memory.</li>
+</ul>
+</li>
+</ul>
+<div><b>Interrupt</b></div>
+<ul>
+<li>When an I/O device has finished the work given to it, it causes an interrupt. It does this by asserting a signal on a bus line that it has been assigned. This signal is detected by the interrupt controller, which then decides what to do.</li>
+<li>precise interrupt: leaves machine in a well-defined state
+<ul>
+<li>the PC is saved in a known place</li>
+<li>all instruction before PC has completed</li>
+<li>no instruction after PC has finished</li>
+<li>the execution state of the instruction pointed to by the PC is known</li>
+</ul>
+</li>
+<li>imprecise interrupt: interrupts that do not meet above requirements
+<ul>
+<li>hard to program for OS writer</li>
+</ul>
+</li>
+</ul>
+<div><b>Principle of I/O software</b></div>
+<ul>
+<li>goals
+<ul>
+<li>device independence: programs should be able to access any I/O device</li>
+<li>uniform naming: name should not depend on the device</li>
+<li>error handling: errors should be handled as close to hardware as possible</li>
+<li>synchronous (blocking) vs. asynchronous (interrupt-driven) transfers</li>
+<li>buffering</li>
+</ul>
+</li>
+<li><b>programmed I/O</b>
+<ul>
+<li>have CPU do all the work, CPU continuously polls the device to see if it is ready to accept another one, called <u>polling</u> or <u>busy waiting</u></li>
+</ul>
+</li>
+<li><b>Interrupt-driven I/O</b>
+<ul>
+<li>allows CPU to do something else while waiting for the device to become ready (use interrupt)</li>
+</ul>
+</li>
+<li><b>DMA I/O</b>
+<ul>
+<li>DMA controller do all the work</li>
+<li>let the DMA controller feed the data to devices without CPU being bothered. </li>
+</ul>
+</li>
+</ul>
+<div><b>I/O software layers</b></div>
+<ul>
+<li><img src="/images/CS6233/Screen%20Shot%202016-11-15%20at%2012.59.33%20PM.png" height="60%" width="60%"/></li>
+<li><b>interrupt handlers</b>
+<ul>
+<li>a lot of work needed to be done</li>
+<li>e.g. save context, switch context, scheduling, load new process</li>
+</ul>
+</li>
+<li><b>Device driver</b>
+<ul>
+<li>each I/O device needs some device specific code for controlling it, called device driver. </li>
+<li>Generally written by the device’s manufacturer and delivered along with the device. </li>
+<li>have to be reentrant, a running driver has to expect that it will be called a second time before first call completed</li>
+</ul>
+</li>
+<li><b>Device-independent I/O software</b>
+<ul>
+<li>uniform interfacing for device drivers</li>
+<li><b>buffering</b>
+<ul>
+<li>double buffering:
+<ul>
+<li>uses two buffers in turns, one is being copied to user space, the other is accumulating new characters</li>
+<li>after first buffer fills up, use second buffer for new data and deliver data in the first buffer to the user</li>
+</ul>
+</li>
+<li>circular buffer:
+<ul>
+<li>consist of a region of memory and two pointers</li>
+<li>one pointer points to the next free word, where the new data can be placed</li>
+<li>the other pointer points to the first word of data in the buffer that has not been removed yet.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>error reporting</li>
+<li>allocating and releasing dedicated devices</li>
+<li>providing a device-independent block size</li>
+</ul>
+</li>
+</ul>
+</div>
+<div>
+<div>
+<div><br/></div>
+<div><b>Chapter 6 Deadlocks</b></div>
+<div><b>Resources</b></div>
+<ul>
+<li>A resource can be a hardware device or a piece of information</li>
+<li>Preemptable and Nonpreemptable resources
+<ul>
+<li>A preemptable resource can be taken away from the process owning it with no negative effect
+<ul>
+<li>e.g. memory</li>
+</ul>
+</li>
+<li>A nonpreemptable resource cannot be taken away from its current owner without potentially causing failure
+<ul>
+<li>e.g. Blu-ray recorder (cannot be taken away while burning a disk)</li>
+<li>In general, deadlocks involve nonpreemptable resources. </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Resource Acquisition
+<ul>
+<li>use mutex or semaphore to make sure only each resource is held by at most one process (or thread)</li>
+<li>The order of resource acquisition matters, it acquires resources in wrong order, can cause a deadlock.</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>Deadlocks</b></div>
+<ul>
+<li>A set of processes is deadlocked if each process in the set is waiting for an event that only another process in the set can cause.</li>
+<li>Resource deadlock: Each member of the set of deadlocked processes is waiting for a resource that is owned by a deadlocked process. None of the processes can run, none of them can release any resources, and none of them can be awakened.</li>
+<li>Conditions for resource deadlocks (must be present for a resource deadlock to occur
+<ol>
+<li>Mutual exclusion condition</li>
+<li>Hold-and-wait condition: processes currently holding resources that were granted earlier can request new resources</li>
+<li>No-preemption condition</li>
+<li>Circular wait condition: there must be a circular list of two or more processes, each of which is waiting for a resource held by the next member of the chain</li>
+</ol>
+</li>
+<li>Deadlock modeling
+<ul>
+<li>Above four conditions can be modeled using directed graphs.
+<ul>
+<li>Processes: circle nodes</li>
+<li>Resources: square nodes</li>
+<li>A process is holding a resource: an edge from resource to process</li>
+<li>A process is waiting for a resource: an edge from process to source</li>
+<li><img src="/images/CS6233/Screen%20Shot%202016-12-05%20at%209.59.36%20PM.png" height="60%" width="60%"/></li>
+</ul>
+</li>
+<li>A cycle in the graph means that there is a deadlock involving the processes and resources in the cycle.</li>
+</ul>
+</li>
+<li>Four solutions
+<ul>
+<li>Ignore the problem: The ostrich algorithm</li>
+<li>detection and recovery: let them occur, detect them, and take action</li>
+<li>dynamic avoidance by careful resource allocation</li>
+<li>prevention, by structurally negating one of the four conditions</li>
+</ul>
+</li>
+</ul>
+<div><b>The Ostrich Algorithm</b></div>
+<ul>
+<li>If deadlocks occurs not very often, it is not worth it to sacrifice performance and convenience to eliminate deadlocks.</li>
+<li>It is okay to ignore them and focus on other more frequently occurred problems. </li>
+</ul>
+<div><b>Deadlock detection and recovery</b></div>
+</div>
+<ul>
+<li>one resource of each type (simplest case)
+<ul>
+<li>construct the resource graph, check if the graph contains a cycle</li>
+<li>Do a DFS on all the nodes, and see if we revisit a node that we have visited previously</li>
+</ul>
+</li>
+<li>multiple resources of each type
+<ul>
+<li>use a matrix-based algorithm for detecting deadlock among n processes</li>
+<li>existing resource vector (E): Ei gives the total number of instances of each resource in existence</li>
+<li>available resource vector (A): Ai gives the number of instances of resource i that are current available</li>
+<li>current allocation matrix (C): 
+<ul>
+<li>row i tells how many instances of each resource class process i currently holds</li>
+<li>Cij is the number of instances of resource j that are held by process i</li>
+</ul>
+</li>
+<li>request matrix (R): 
+<ul>
+<li>Rij is the number of instances of resource j that process i wants</li>
+</ul>
+</li>
+<li>Algorithm
+<ol>
+<li>look for an unmarked process, Pi, for which the ith row of R is less than or equal to A (requested less than available)</li>
+<li>If such a process is found, add ith row of C to A, mark the process, and go back to step 1 </li>
+<li>If no such process exist, the algorithm terminates</li>
+<li>When the algorithm finishes, all unmarked processes are deadlocked</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>recovery from deadlock
+<ul>
+<li>Preemption: take a resource away from its current owner and give it to another process (difficult)</li>
+<li>Rollback: have processes <u>checkpoint</u> periodically, when a deadlock is detected, a process can rolled back to an earlier state</li>
+<li>Killing: kill processes to release the needed resources (the processes to be killed could be in the cycle, or not)</li>
+</ul>
+</li>
+</ul>
+<div><b>Deadlock avoidance</b></div>
+<ul>
+<li>Safe and unsafe states
+<ul>
+<li>safe state: there is some scheduling order in which every process can run to completion even if all of them suddenly request their maximum number of resources immediately</li>
+<li>unsafe state: no such guarantee, could possibly lead to deadlock</li>
+</ul>
+</li>
+<li>Banker’s algorithm
+<ul>
+<li>for a single resource
+<ul>
+<li>check to see if granting the request leads to an unsafe state</li>
+<li>If it does, it is postponed until later</li>
+<li>otherwise, the request is granted</li>
+</ul>
+</li>
+<li>for multiple resources
+<ul>
+<li>generalize the idea of single resources, use two matrices for resources currently assigned and resources still needs.</li>
+</ul>
+</li>
+<li>hard to implement (few existing system use the banker’s algorithm to prevent)
+<ul>
+<li>processes rarely know in advance what their maximum resources needs will be</li>
+<li>number of processes is not fixed</li>
+<li>resources might vanish</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><b>Deadlock prevention</b></div>
+</div>
+<div>
+<ul>
+<li>ensure that at least one of the four conditions is never satisfied</li>
+<li>attacking the mutual-exclusion condition:
+<ul>
+<li>no resource were assigned exclusively to a single process, thus no deadlocks</li>
+<li>Spool everything (using daemons)
+<ul>
+<li>e.g. printer spool, all printer output are handed to printer daemon, only printer daemon actually requests the printer. </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>attacking the Hold-and-Wait condition:
+<ul>
+<li>if we can prevent processes that hold resources from waiting for more resources, we can eliminate deadlocks</li>
+<li>require all processes to request all their resources before starting execution. If everything is available, the process can run. If not, nothing will be allocated and the process will just wait.
+<ul>
+<li>problem:
+<ul>
+<li>many processes do not know how many resources they will need until they have started running</li>
+<li>resources will not be used optimally, some resources will remain idle</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>attacking the No-Preemption condition:
+<ul>
+<li>virtualize resources, so that they can be taken away from its current owner
+<ul>
+<li>e.g. spooling printer output to the disk and allowing only the printer daemon access the real printer</li>
+<li>problem: not all resources can be virtualized</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>attacking the Circular Wait condition:
+<ul>
+<li>provide a global numbering of all the resources</li>
+<li>processes can request resources whenever they want to, but all requests must be made in numerical order. </li>
+<li>With this rule, the resource allocation graph can never have cycles
+<ul>
+<li>problems: it might be impossible to find an ordering that satisfies everyone</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><b>Other issues</b></div>
+<ul>
+<li>Two-phase locking:
+<ul>
+<li>phase one: requests locks on all the records it needs, if fail, release all its locks and start over</li>
+<li>phase two: performs its updates on all records, and releases the locks</li>
+<li>used in many database systems, but not in real-time systems and network</li>
+</ul>
+</li>
+<li>Livelock:
+<ul>
+<li>two processes simultaneously release the resources they are holding when they cannot obtain the next lock it needs, and yet no progress is possible</li>
+</ul>
+</li>
+<li>Starvation:
+<ul>
+<li>A process never gets the resources it needs even though it is not deadlocked</li>
+<li>can be avoided by using a FIFO resource allocation policy</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
