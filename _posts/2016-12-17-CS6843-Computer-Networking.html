@@ -1,0 +1,1647 @@
+---
+layout: post
+title: "CS6843: Computer Networking"
+date: 2016-12-17
+---
+<link rel="stylesheet" type="text/css" href="/css/post.css">
+<div>
+<p>This is my notes and a summary for CS6843: Computer Networking in Spring 2016.</p>
+<p>Special thanks to Professor Ross and his book <i>Computer Networking - A Top-Down Approach.</i></p>
+<hr>
+<!--more-->
+<br>
+<div><b>Chapter 2 Application Layer</b></div>
+<div><b>The Web and HTTP</b></div>
+<div>HyperText Transfer Protocol (HTTP)</div>
+
+<ul>
+<li>client-server model: client program and server program executing on different end systems, talk to each other by exchanging HTTP messages.</li>
+<li>HTTP define the communication protocol, it defines how Web clients requests Web pages from Web servers and how servers transfer Web pages to clients. It has nothing to do with how a Web page is interpreted. </li>
+<li>terminology:
+<ul>
+<li>web page: a document consists of objects.
+<ul>
+<li>Most web page consist of a <u>base HTML file</u> and several referenced objects. The base HTML file references other objects in the page with the objects’ URLs. The URL has a hostname and a path name. </li>
+</ul>
+</li>
+<li>object: a file, such as HTML file, JPEG image, Java applet, a video clip. </li>
+<li><b>round-trip time (RTT)</b>: the time it takes for a small packet to travel from client to server and then back to client.
+<ul>
+<li>includes packet propagation delays, packet queuing delays in intermediate routers and switches, and packet-processing delays.</li>
+<li>at least two RTTs during a HTTP connection (TCP three-way, request and response, file transmission time at server)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>HTTP uses TCP as its underlying transport protocol. After TCP connection is established, the browser and the server processes access TCP through their socket interfaces. It is a <u>stateless protocol</u> because HTTP server maintains no information about the clients.</li>
+<li>connection Persistency
+<ul>
+<li><b>non-persistent connections</b>: each request/response pair is sent over a <u>separate</u> TCP connection. Each connection is closed after the server sends the object. One request and one response message in each connection.
+<ul>
+<li>the HTTP client initiates a TCP connection to the server on port 80 (default port for HTTP). There will be a socket at the client and a socket at the server.</li>
+<li>The client sends an HTTP request message (includes the path name) )to the server via its socket.</li>
+<li>The server process receives the request message via its socket, retrieves the object from its storage, encapsulates the object in an HTTP response message, and sends the response message to the client. And the Server process tells TCP to close the TCP connection. </li>
+<li>The client receives the response message. The TCP connection terminates. The client extract the file from the response message.</li>
+</ul>
+</li>
+<li><b>persistent connections</b>: all of the requests and their corresponding responses are send over the <u>same</u> TCP connection. Default mode.
+<ul>
+<li>server leaves the TCP connection open after sending a response, which allows subsequent requests and responses between the same client and server to use it.</li>
+<li>The requests can be made back-to-back, without waiting for replies to pending requests (pipelining)</li>
+<li>server closes a connection when it timeouts (a configurable interval).</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Message Format
+<ul>
+<li>Request Message
+<ul>
+<li><b>Request line</b>: 
+<ul>
+<li>method file:
+<ul>
+<li>GET: request object</li>
+<li>POST: request object but with specification</li>
+<li>HEAD: request response message but not object, often used for debugging</li>
+<li>PUT: upload object</li>
+<li>DELETE: delete object</li>
+</ul>
+</li>
+<li>URL field: identify the requested object</li>
+<li>HTTP version field: HTTP/1.1</li>
+</ul>
+</li>
+<li><b>Header line</b>:
+<ul>
+<li><b>Host</b>
+<ul>
+<li>Host: <a href="http://www.google.com">www.google.com</a></li>
+<li>specifies the host on which the object resides. Required by Web proxy cache.</li>
+</ul>
+</li>
+<li><b>Connection:</b>
+<ul>
+<li>Connection: close
+<ul>
+<li>the browser is telling server that it doesn’t want to be bother with persistent connection</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>User-agent</b>:
+<ul>
+<li>specify the user agent, the browser type that is making the request</li>
+<li>This allows the server to send different versions of the same object to different types of user agents</li>
+</ul>
+</li>
+<li><b>Accept-language:</b>
+<ul>
+<li>indicates the user’s preference on the version of the object, if such version available, otherwise, send the default version.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Entity body:</b>
+<ul>
+<li>empty with the GET method</li>
+<li>contains what user enters when used with the POST method, e.g. when user fills out a form</li>
+</ul>
+</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-02%20at%209.33.03%20AM.png" height="60%" width="60%" /></li>
+</ul>
+</li>
+<li>Response Message
+<ul>
+<li><b>Status line</b>
+<ul>
+<li>Protocol version: HTTP/1.1 usually</li>
+<li>Status code and Status message
+<ul>
+<li>200 OK: request succeeded and information is returned in this response</li>
+<li>301 Moved Permanently: requested object has been permanently moved, the new URL is specified in Location: header of the response message. Client software will automatically retrieve the new URL.</li>
+<li>400 Bad Request: request could not be understood by the server</li>
+<li>404 Not Found: the requested document does not exist on this server</li>
+<li>505 HTTP Version Not Supported: The requested version is not supported</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Header lines</b>
+<ul>
+<li>Connection
+<ul>
+<li>connection: close, the server will close the TCP connection after sending </li>
+</ul>
+</li>
+<li>Date: indicates the time and date when the response was created and sent</li>
+<li>Server: indicates the Web server it uses</li>
+<li>Last-Modified: indicates the time and date when the object was created or last modified. critical for object caching in local client and in network cache servers (proxy servers)</li>
+<li>Content-Length: indicates the number of bytes in the object being send.</li>
+<li>Content-Type: indicates the type of the object in entity body</li>
+</ul>
+</li>
+<li><b>Entity body</b>
+<ul>
+<li>contains the requested object itself</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Cookies</b>
+<ul>
+<li>allows sites to identify and keep track of users, can be used to create a user session layer on top of stateless HTTP</li>
+<li>four components
+<ul>
+<li>a cookie header line in the HTTP response message</li>
+<li>a cookie header line in the HTTP request message</li>
+<li>a cookie file kept on the user’s end system and managed by the user’s browser</li>
+<li>a back-end database at the Web site</li>
+</ul>
+</li>
+<li>how it works
+<ul>
+<li>when a user visits a Web site, a request is sent to the site’s Web server. The server creates a unique identification number and create an entry in its back-end database that is indexed by the identification number. The server then responds to user’s browser, including in the HTTP response a Set-cookie: header, which contains the identification number.</li>
+<li>When the browser receives the HTTP response message, it sees the Set-cookie: header. The browser then appends a line to the special cookie file that it manages. This line includes the hostname of the server and the identification number. </li>
+<li>Each time the user requests a Web page, the browser consults the cookie file, extract identification number for this site, and puts a cookie header line that includes the identification number in the HTTP request. In this manner, the Web server is able to track this user’s activity, including what page she visited, when and in which order. </li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-02%20at%201.09.39%20PM.png" height="60%" width="80%"/></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Web Caching
+<ul>
+<li><b>Web cache</b> (or <b>proxy serve</b>r) is a network entity that satisfies HTTP requests on the behalf of an original Web server. It has its own disk storage and keeps copies of recently requested objects in this storage. </li>
+<li>How it work
+<ul>
+<li>the browser establishes a TCP connection to the Web cache and sends an HTTP request for the object to the Web cache.</li>
+<li>The Web cache checks to see if it has a copy of the object stored locally. If it does, the Web cache returns the object within an HTTP response message to the client browser. </li>
+<li>If not, the Web cache then sends an HTTP request for the object. After receiving this request, the origin server sends the object within an HTTP response to the Web cache.</li>
+<li>When the Web cache receives the object, it stores a copy in its local storage and sends a copy to the client browser.</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-02%20at%201.22.47%20PM.png" height="60%" width="60%" /></li>
+</ul>
+</li>
+<li>Benefits
+<ul>
+<li>substantially reduce the response time for a client request</li>
+<li>substantially reduce traffic on an institution’s access link to the Internet, which makes institution not have to upgrade bandwidth as quickly, thereby reducing costs.</li>
+<li>reduce Web traffic in the Internet as a whole, improve performance for all applications</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Conditional GET</b>
+<ul>
+<li>A mechanism that allows a cache to verify that its objects are up to date</li>
+<li>A condition GET message uses the GET method and includes an <u>If-Modified-Since:</u> header line</li>
+<li>When a request is sent to the Web cache for an object in the cache, the cache performs an up-to-date check by issuing a conditional GET. The value of the If-Modified-Since: header line is equal to the value of the Last-Modified: time, which tells the server to send the object only if the object has been modified since the specified date.</li>
+<li>If the object has not been modified, the Web server sends a response message <u>304 Not Modified</u>, with an empty entity body. Otherwise, the server will send the updated object.</li>
+</ul>
+</li>
+</ul>
+<div><b><br/></b></div>
+
+<div><b>Domain name system (DNS)</b></div>
+<ul>
+<li>It is a distributed database implemented in a hierarchy of DNS servers</li>
+<li>runs over UDP and uses port 53</li>
+<li><b>services that DNS provides</b>
+<ul>
+<li>a directory service that translates hostnames to IP address</li>
+<li>host aliasing: create alias names (more mnemonic) for canonical hostnames</li>
+<li>mail server aliasing: create alias names for mail servers (MX record)</li>
+<li>load distribution: perform load distribution among replicated servers (e.g. web servers)
+<ul>
+<li>a busy sites are replicated over multiple servers, and each having a different IP address. When DNS replies to client query, it responds with the entire set of IP addresses, but rotates the ordering of the addresses because the client typically visit the first address.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>How DNS works</b>
+<ul>
+<li>an application running is a user’s host needs to translate a hostname to an IP address. It will invoke client side of DNS, specify the hostname that needs to be translated.</li>
+<li>DNS in the user’s host then takes over, sending a query message into the network. After a delay, DNS in the user’s host receives a DNS reply message that provides the desired mapping. This mapping is then passed to the invoking application. </li>
+<li>A simple design for DNS would have one DNS server that contains all mappings, but this design has several problems:
+<ul>
+<li>a single point of failure</li>
+<li>traffic volume: a single server would have to handle all DNS queries</li>
+<li>distant centralized database: cannot be close to all clients</li>
+<li>maintenance: need to keep records for all Internet hosts</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>A distributed, hierarchical database:</b>
+<ul>
+<li>Three classes of DNS servers organized in a hierarchy:
+<ul>
+<li>root DNS servers
+<ul>
+<li>there are 13 root DNS servers in the Internet</li>
+</ul>
+</li>
+<li>top-level domain (TLD) DNS servers:
+<ul>
+<li>these servers are responsible for top-level domains (e.g. com, org, net, edu, gov), and country top-level domains (e.g. uk, jp). The company Verisign Global Registry Services mains TLD servers for com, and the company Educause mains the TLD servers for edu</li>
+</ul>
+</li>
+<li>authoritative DNS servers:
+<ul>
+<li>every organization with publicly accessible hosts (such as Web servers and mail servers) on the Internet must provide publicly accessible DNS records that maps the names of those hosts to IP addresses. An organization’s authoritative DNS server houses these DNS records. It can be implemented by the organization itself, or by other service providers with a charge</li>
+<li>However, TLD servers might not know the authoritative DNS servers for the hostname, it may know only of an intermediate DNS server, which in turn knows the authoritative DNS server for the hostname.</li>
+</ul>
+</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-22%20at%209.38.02%20PM.png" width="100%"/></li>
+<li>If a client wants to know the IP address for hostname www.amazon.com, it first contacts one of the root servers, which returns IP addresses for TLD servers for the top-level domain com. The client then contacts one of these TLD servers, which returns the IP address of an authoritative server for amazon.com. Finally, the client contacts one of the authoritative servers for amazon.com, which returns the IP address for the hostname www.amazon.com.</li>
+<li>local DNS server: does not belong to the hierarchy of servers, but is central to the DNS architecture.
+<ul>
+<li>each IPS (e.g. university, company) has a local DNS server (also called a default name server). </li>
+<li>when a host connects to an ISP, the ISP provides the host with the IP address of one or more of its local DNS servers (typically through DHCP), which is typically close to the host.</li>
+<li>When a host makes a DNS query, the query is sent to the local DNS server, which acts a proxy, forwarding the query into the DNS server hierarchy.</li>
+</ul>
+</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-23%20at%201.03.49%20PM.png" height="60%" width="50%"/>
+<ul>
+<li>a combination of Iterative and recursive queries, more common</li>
+</ul>
+</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-23%20at%201.09.40%20PM.png" height="60%" width="60%" />
+<ul>
+<li>recursive queries, put too much work on root servers</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>DNS Caching</b>
+<ul>
+<li>DNS extensively exploits DNS caching in order to improve the delay performance and to reduce the number of DNS messages sending around the Internet.</li>
+<li>When a DNS server receives a DNS reply, it can cache the mapping in its local memory. The cached information will be discarded after a period of time (often set to two days)</li>
+<li>A local DNS server can also cache the IP address of TLD servers, thereby allowing the local DNS server to bypass the root DNS servers in a query chain.</li>
+</ul>
+</li>
+<li><b>DNS Records and Messages</b>
+<ul>
+<li>DNS distributed database stores <u>resource records (RRs)</u>
+<ul>
+<li>A RR is a four-tuple that contains the following fields:
+<ul>
+<li>(Name, Value, Type, TTL)</li>
+<li><b>Type = A</b>, then Name is a hostname and Value is the IP address for the hostname. Type A records provides the standard hostname-to-IP address mapping.
+<ul>
+<li>e.g. (relay1.bar.foo.com, 145.37.93.126, A)</li>
+</ul>
+</li>
+<li><b>Type = NS</b>, the Name is a domain, and the Value is the hostname of an authoritative DNS server that knows how to obtain the IP addresses for hosts in the domain. This record is used to route DNS queries further along in the query chain.
+<ul>
+<li>e.g. (foo.com, dns.foo.com, NS)</li>
+</ul>
+</li>
+<li><b>Type = CNAME</b>, the Value is a canonical hostname for the alias hostname Name. This record can provide querying hosts the canonical name for a hostname.
+<ul>
+<li>e.g. (foo.com, relay1.bar.foo.com, CNAME)</li>
+</ul>
+</li>
+<li><b>Type = MX</b>, the Value is the canonical name of a mail server that has an alias hostname Name. MX records allow the hostnames of mail servers to have simple aliases. Note that by using the MX record, a company can have the same aliased name for its mail server and for one of its other servers (such as its Web server). To obtain the canonical name for the mail server, a DNS client would query for an MX record.
+<ul>
+<li>e.g. (foo.com, mail.bar.foo.com, MX)</li>
+</ul>
+</li>
+<li>e.g. An edu TLD server will contain a NS record (umass.edu, dns.umass.edu, NS) and a A record (dns.umass.edu, 128.119.40.111, A)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>DNS Messages
+<ul>
+<li>Two kinds of DNS messages with the same format
+<ul>
+<li>DNS query messages</li>
+<li>DNS reply messages</li>
+</ul>
+</li>
+<li>Format
+<ul>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-23%20at%201.49.31%20PM.png" height="60%" width="60%" /></li>
+<li>Identification (16-bit), this identifier is copied into the reply message to a query, allowing the client to match received replies with sent queries.</li>
+<li>Flags
+<ul>
+<li>query/reply flag: query (0), reply (1)</li>
+<li>authoritative flag: set to 1 in a reply when a DNS server is an authoritative server for a queried name</li>
+<li>recursion-desired flag: set to 1 when a client desires that the DNS server perform recursion when it doesn’t have the record</li>
+<li>recursion-available flag: set to 1 in a reply if the DNS server supports recursion</li>
+</ul>
+</li>
+<li>Number-of fields: These fields indicate the number of occurrences of the four types of data sections that follow the header</li>
+<li>Question section: contains information about the query that is being made. This section includes a <u>name</u> field that contains the name that is being queried, and a <u>type</u> field that indicates the type of question being asked about the name (e.g. a host address associated with a name (Type A), or the mail server for a name (Type MX))</li>
+<li>Answers section: contains the resource records for the name that was originally queried. A reply can return multiple RRs in the answer, since a hostname can have multiple IP addresses.</li>
+<li>Authority section: contains records of other authoritative servers.</li>
+<li>Additional section: contains other helpful records. For example, the answer field in a reply to an MS query contains a resource record providing the canonical hostname of a mail server. The additional section contains a Type A record providing the IP address for the canonical hostname of the mail server.</li>
+</ul>
+</li>
+<li>nslookup: a program that allows you to send a DNS query message directly from the host to some DNS server.</li>
+</ul>
+</li>
+<li>Inserting records into the DNS database
+<ul>
+<li>When open a new website, need to first register the domain name at a registrar. 
+<ul>
+<li>a registrar is a commercial entity that verifies the uniqueness of the domain name, enters the domain name into the DNS database. </li>
+</ul>
+</li>
+<li>When register, you need to provide the registrar with the names and IP addresses of your primary and secondary authoritative DNS servers. For each of the authoritative DNS server, the registrar would make sure that a Type NS and a Type A record are entered into the TLD com servers.</li>
+<li>You will also have to make sure that the Type A resource record for your Web server and the Type MS resource record for your mail server are entered into your authoritative DNS servers. 
+<ul>
+<li>the contents of each DNS server were traditionally configured statically. More recently, an UPDATE option has been added to the DNS protocol to allow data to be dynamically added or deleted from the database via DNS messages.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b><br/></b></div>
+<div><b>Chapter 3 Transport Layer</b></div>
+<ul>
+<li>provides for <u>logical communication</u> between application processes running on different hosts. From an application’s perspective, it is as if the hosts running the processes were directly connected.
+<ul>
+<li>transport layer connects <i>processes</i> on different hosts</li>
+<li>network layer connects <i>hosts</i></li>
+</ul>
+</li>
+<li>Terminology
+<ul>
+<li>segment: transport-layer unit</li>
+<li>multiplexing: the process of gathering data chunks at the source host from different sockets, encapsulating each data chunk with header information to create segments, and passing the segments to the network layer</li>
+<li>demultiplexing: the process of delivering the data in a transport-layer segment to the correct socket</li>
+<li>well-known port number: 0 - 1023 port number are reserved for use by well-known application protocol.</li>
+</ul>
+</li>
+<li><b>User Datagram Protocol (UDP)</b>
+<ul>
+<li>unreliable, connectionless, best-effort service</li>
+<li>benefits:
+<ul>
+<li>finer application-level control over what data is sent and when, data was sent as soon as application process passes it to UDP, no congestion-control, no retransmission</li>
+<li>no connection establishment, no handshake (thus no delay)</li>
+<li>no connection state, does not maintain connection state and track any of these parameters (e.g. receive and send buffer, congestion-control parameters, sequence and acknowledgement number)</li>
+<li>smaller packet header overhead, only 8 bytes of header (while TCP has 20 bytes)</li>
+</ul>
+</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-02%20at%206.14.10%20PM.png" height="60%" width="60%" /></li>
+<li>Segment structure:
+<ul>
+<li>source and destination port: allows destination host to pass the data to correct process</li>
+<li>length: total length of the segment (header + data)</li>
+<li>checksum: for error detection
+<ul>
+<li>even though IP also has checksum, but there is no guarantee that all the links between source and destination provide error checking</li>
+</ul>
+</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-17%20at%204.01.03%20PM.png" height="60%" width="60%" /></li>
+</ul>
+</li>
+<li>When a host receives a UDP packet whose destination port number doesn’t match with an ongoing UDP socket, the host sends a special ICMP datagram to the source.</li>
+</ul>
+</li>
+<li><b>Transmission Control Protocol (TCP)</b>
+<ul>
+<li>reliable, connection-oriented service</li>
+<li>provide full-deplex service: both ends can read and send</li>
+<li>it is a point-to-point connection, meaning between a single sender and a single receiver, do not support multicasting</li>
+<li><b>maximum segment size (MSS)</b>: maximum amount of application-layer data that can be placed in a segment
+<ul>
+<li>It is different from <u>maximum transmission unit (MTU)</u>, which is the length of the largest link-layer frame that can be sent </li>
+</ul>
+</li>
+<li><b>segment structure</b>
+<ul>
+<li>source and destination port: used for multiplexing/demultiplexing data from/to upper-layer applications</li>
+<li>checksum: for error checking</li>
+<li>sequence number
+<ul>
+<li>it is the byte-stream number of the first byte in the segment. Each byte during the connection has a sequence number.</li>
+</ul>
+</li>
+<li>acknowledge number
+<ul>
+<li>it is the sequence number of the next byte that the sender is expecting from the receiver. All other bytes prior to acknowledge number have been received.</li>
+<li>cumulative acknowledge: TCP only acknowledges bytes up to the first missing byte in the stream</li>
+</ul>
+</li>
+<li>receive window: used for flow control, indicate the number of bytes that a receiver is willing to accept</li>
+<li>header length field: specifies the length of the TCP header</li>
+<li>flag field:
+<ul>
+<li>ACK: indicates that the value carried in the acknowledgement field is valid, acknowledge a successfully received segment</li>
+<li>SYN: initiates a TCP connection</li>
+<li>RST: resets connection (usually error)</li>
+<li>FIN: terminates connection</li>
+<li>PSH: indicates that the receiver should pass the data to upper layer immediately</li>
+<li>URG: indicates some data in this segment has been marked as “urgent”. The location of the last byte of this urgent data is stored in urgent data pointer field.</li>
+</ul>
+</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-17%20at%204.23.10%20PM.png" height="60%" width="60%" /></li>
+</ul>
+</li>
+<li><b>Reliable Data Transfer</b>
+<ul>
+<li>TCP creates a reliable data transfer service on top of IP’s unreliable service</li>
+<li>Three major events in the TCP sender:
+<ul>
+<li>when TCP receives data from the application, encapsulates the data in a segment, and passes the segment to IP. The segment includes a sequence number that is the byte-stream number of the first data byte in the segment. If the timer is already not running, TCP starts the timer.</li>
+<li>timer timeout, TCP sender retransmits the not-yet-acknowledged segment with the smallest sequence number, doubles the timeout interval, and then restarts the timer.</li>
+<li>when an ACK from the receiver arrives, TCP compares the ACK value with its variable sendbase (the sequence number of the oldest unacked byte). if ACK value &gt; sendbase, because TCP uses cumulative acknowledge, sender knows that all bytes before this value has been received. Sender updates its sendbase variable and restarts the timer for currently not-yet-acked segments.</li>
+</ul>
+</li>
+<li>Four events in the TCP receiver:
+<ul>
+<li>Arrival of in-order segment with expected sequence number, all data up to expected sequence number already acknowledged: delayed ACK, wait for arrival of another in-order segment. If next segment doesn’t arrive in this interval, send an ACK</li>
+<li>Arrival of in-order segment with expected sequence number, one other in-order segment waiting for ACK transmission: immediately send single ACK, ACKing both in-order segments</li>
+<li>Arrival of out-of-order segment segment with higher-than-expected sequence number, gap detected: immediately send duplicate ACK, indicating sequence number of next expected byte</li>
+<li>Arrival of segment that fills in gap in received data: immediately send ACK, provided that segment starts at the lower end of gap</li>
+</ul>
+</li>
+<li><u>Doubling the timeout Interval</u>: timeout interval increases exponentially after each retransmission</li>
+<li><u>Fast retransmission</u>: The sender can detect packet loss before the timeout event occurs by noting duplicate ACKs, which is an ACK that reacknowledges a segment for which the sender has already received. When the sender receives three duplicate ACKs for the same data, it knows that segment is lost, and retransmits the missing segment before that segment’s timer expires.</li>
+</ul>
+</li>
+<li><b>Flow Control</b>: prevent receiver’s buffer overflow (speed-matching)
+<ul>
+<li>define some variables
+<ul>
+<li>Receive window, which is used to give the sender an idea of how much free buffer space is available at receiver</li>
+<li>LastByteRead: the number of last byte in the data stream read from the buffer</li>
+<li>LastByteRcvd: the number of the last byte in the data stream that has arrived from the network and has been placed in the receive buffer</li>
+<li>LastByteSent</li>
+<li>LastByteAcked</li>
+</ul>
+</li>
+<li>LastByteRcvd - LastByteRead &lt;= RcvBuffer : prevent overflow</li>
+<li>rwnd = RcvBuffer - [LastByteRcvd - LastByteRead]</li>
+<li>Receiver tells sender its receive window by placing its rwnd in the receive window field of every segment it sends. Initially rwnd = RcvBuffer. Receiver needs to keep track of several connection-specific variables</li>
+<li>Sender needs to keep track of LastByteSent and LastByteAcked. The difference between LastByteSent and the LastByteAcked is the amount of <u>unacknowledged</u> data. </li>
+<li>LastByteSent- LastByteAcked &lt;= rwnd: prevent overflow</li>
+</ul>
+</li>
+<li><b>Connection Management</b>
+<ul>
+<li>Three way handshake
+<ul>
+<li>The client sends an SYN segment with empty payload, and with a randomly chosen initial sequence number.</li>
+<li>The server receives the SYN packet, allocates TCP buffers and variables to the connection. Then it replies a SYN-ACK segment, with its acknowledgement field set to client_isn+1, and with a randomly chosen initial sequence number.</li>
+<li>When the client receives SYN-ACK segment, it also allocates buffers and variables to the connection. It replies another ACK segment, with an acknowledgement number of server_isn+1. This segment may carry data in the segment payload.</li>
+</ul>
+</li>
+<li>Four-way handshake 
+<ul>
+<li>The client sends an FIN segment to the server.</li>
+<li>When server receives this segment, it sends the client an acknowledgement segment in return</li>
+<li>The server then sends its own shutdown FIN segment</li>
+<li>Finally, the client acknowledges the server’s shutdown segment</li>
+</ul>
+</li>
+<li>When the host receives a TCP SYN packet to a port which is not accepting connections, the host will send a reset segment (RST) to the source.</li>
+<li>Port-scanning tool (nmap): sends a TCP SYN segment to a port
+<ul>
+<li>if receives a TCP SYN ACK segment, nmap knows an application is running with TCP on this port and this port is open</li>
+<li>if receives a TCP RST segment, it means the SYN segment reached the target host, but the host is not running an application on that port. Segments to this port are not blocked by any firewall.</li>
+<li>if receives nothing, it means the SYN segment was blocked and never reached the target host</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Congestion Control</b>
+<ul>
+<li>end-to-end congestion control</li>
+<li>additive-increase, multiplicative-decrease(AIMD) (congestion avoidance)</li>
+<li>senders keep track of a variable <u>congestion window</u> (cwnd), which imposes a constraint on the rate at which a TCP sender can send traffic into the network
+<ul>
+<li>LastByteSent - LastByteAcked &lt;= min {cwnd, rwnd}</li>
+<li>the amount of unacked data may not exceed the min of cwnd and rwnd</li>
+</ul>
+</li>
+<li>several guiding principles
+<ul>
+<li>a lost segment implies congestion, hence the sender should decrease rate</li>
+<li>an acknowledged segment indicates the network is working well, hence the sender’s rate can be increased when a ACK arrives</li>
+</ul>
+</li>
+<li><b>Slow start</b>
+<ul>
+<li>Initially, cwnd is typically set to a small value of 1 MSS. The value of cwnd is increased by 1MSS every time a transmitted segment is first acknowledged. Send rate grows exponentially during slow start phase.</li>
+<li>If a loss event (congestion) indicated by a timeout occurs, the sender sets the value of cwnd to 1 and begins the slow start process anew. It also sets the value of ssthresh (slow start threshold) to cwnd/2 (half of the value of congestion window when congestion was detected).</li>
+<li>When cwnd equals ssthresh, slow start ends and TCP transitions into congestion avoidance mode.</li>
+<li>When duplicate ACKs are detected, slow start ends and TCP performs a fast retransmit and enters the fast recovery state.</li>
+</ul>
+</li>
+<li><b>Congestion Avoidance</b>
+<ul>
+<li>when entering congestion avoidance state, cwnd is approximately half its value when congestion was last encountered. Thus, TCP increases cwnd more cautiously.</li>
+<li>Instead of doubling cwnd every RTT, cwnd is increased by just a single MSS every RTT. This can be done by increasing MSS/cwnd bytes whenever a new acknowledgement arrives.</li>
+<li>when the triple duplicate ACKs were received, TCP halves the value of cwnd, and records the value of ssthresh to be half the value of cwnd. Then it enters the fast recovery state</li>
+</ul>
+</li>
+<li><b>Fast Recovery</b>
+<ul>
+<li>the value of cwnd is increased by 1 MSS for every duplicate ACK received for the missing segment. </li>
+<li>Eventually, when an ACK arrives for the missing segment, TCP enters the congestion-avoidance state after deflating cwnd. </li>
+<li>If a timeout event occurs, fast recovery transitions to the slow-start state, cwnd is set to 1MSS and ssthresh is set to half the value of cwnd.</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-26%20at%207.46.47%20PM.png" height="100%" width="100%" /></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><b><br/></b></div>
+<div><b>Chapter 4 The Network Layer</b></div>
+<div><b>Network layer functions</b></div>
+<ul>
+<li>Forwarding: moves an arriving packet from the router’s input link to the appropriate out link, this happens within a router</li>
+<li>Routing: determines the route or path taken by packets as they flow from a sender to a receiver, needs to calculate paths using routing algorithms </li>
+<li>connection setup: handshakes, set up states before network-layer data packets within a given source-to-destination connection can begin to flow</li>
+</ul>
+<div><br/></div>
+<div><b>Forwarding table</b></div>
+<ul>
+<li>a router forwards a packet by looking at the value of a field in the arriving packet’s header, and then using this header value to index into the router’s forwarding table. The value stored in the forwarding table entry for that header indicates the router’s outgoing link interface to which that packet is to be forwarded. </li>
+<li>the routing algorithm determines the values that are inserted into the routers’ forwarding tables. 
+<ul>
+<li>centralized</li>
+<li>distributed </li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>Network service model</b>: defines the characteristics of end-to-end transport of packets between sending and receiving end systems</div>
+<ul>
+<li>examples:
+<ul>
+<li>guaranteed delivery</li>
+<li>guaranteed delivery with bounded delay</li>
+<li>in-order packet delivery</li>
+<li>guaranteed minimal bandwidth</li>
+<li>guaranteed maximum jitter</li>
+<li>security services</li>
+</ul>
+</li>
+<li>The Internet’s network layer provides a single service, known as <u>best effort service</u>
+<ul>
+<li>which is no service at all, do not guarantee delivery, timing, order</li>
+</ul>
+</li>
+<li><b>Virtual circuit</b>
+<ul>
+<li>computer networks that provides only a connection service at the network layer, e.g. (ATM, frame relay)</li>
+<li>a VC consists of :
+<ul>
+<li>a path (a series of links and routers) between the source and destination hosts</li>
+<li>VC number, one number for each link along the path</li>
+<li>entries in the forwarding table in each router along the path</li>
+</ul>
+</li>
+<li>Each router must maintain connection state information</li>
+<li>A packet belonging to a virtual circuit will carry a VC number in its header, this number will be replaced when going through a different link. The new VC number is obtained from the forwarding table</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-19%20at%209.08.40%20AM.png" height="60%" width="60%" /></li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-19%20at%209.08.46%20AM.png" height="60%" width="60%" /></li>
+</ul>
+</li>
+<li><b>Datagram network</b>
+<ul>
+<li>computer networks that provide only a connectionless service at network layer, e.g. the Internet</li>
+<li>an end system stamps the packet with the address of the destination end system and then send it into the network</li>
+<li>each router uses the packet’s destination address to forward the packet according to their forwarding table (which maps destination addresses to output link interfaces)
+<ul>
+<li>only need to matches a prefix of the packet’s destination address</li>
+<li>when multiple matches, uses the longest prefix matching rule</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Routers</b>
+<ul>
+<li>four components
+<ul>
+<li>Input ports:
+<ul>
+<li>performs the physical layer function of terminating an incoming physical link at a router</li>
+<li>performs link-layer functions needed to interoperate with the link layer at the other side of the incoming link</li>
+<li>performs lookup function, consult forwarding table to determine the router output port to which an arriving packet will be forwarded via the switching fabric</li>
+</ul>
+</li>
+<li>switching fabric: connects the router’s input ports to its output ports</li>
+<li>output ports:
+<ul>
+<li>stores packets received from the switching fabric and transmits these packets on the outgoing link by performing the necessary link-layer and physical-layer functions.</li>
+</ul>
+</li>
+<li>routing process: executes the routing protocols, maintain routing tables and attached link state information, and computers the forwarding table for the router. It also performs the network management functions.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><br/></div>
+<div><b>The Internet Protocol (IP)</b></div>
+<div>Three main components</div>
+<ul>
+<li>IP protocol:
+<ul>
+<li>addressing conventions</li>
+<li>datagram format</li>
+<li>packet handling conventions</li>
+</ul>
+</li>
+<li>Routing protocols:
+<ul>
+<li>path selection</li>
+<li>RIP, OSPF, BGP</li>
+</ul>
+</li>
+<li>ICMP protocol:
+<ul>
+<li>error reporting</li>
+<li>router signaling</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>Datagram Format:</b> a network-layer packet is referred as a datagram</div>
+<ul>
+<li>version number: IPv4, IPv6</li>
+<li>header length: typically 20 bytes</li>
+<li>type of service</li>
+<li>datagram length: total length, rarely larger than 1500 bytes</li>
+<li>identifier, flag, fragmentation offset: used for IP fragmentation</li>
+<li>time-to-live: decremented by one each time processed by a router, ensure it do not circulate forever. drop when reach 0.</li>
+<li>protocol</li>
+<li>header checksum: detect bit errors, treat each 2 bytes in the header as a number, and summing these numbers using 1s complement arithmetic. </li>
+<li>source and destination IP addresses</li>
+<li>options: rarely used, dropped in IPv6 header</li>
+<li>data (payload)</li>
+</ul>
+<div><br/></div>
+<div><b>IP datagram fragmentation</b></div>
+<ul>
+<li><u>maximum transmission unit</u> (MTU): maximum amount of data that a link-layer frame can carry, place a hard limit on the length of an IP datagram</li>
+<li><b>fragment:</b>
+<ul>
+<li>fragment the data in the IP datagram into two or more smaller IP datagrams, encapsulate each of these smaller IP datagrams in a separate link-layer frame and send these frames over the outgoing link.</li>
+<li>each fragment is stamped with the source address, destination address, and <u>identification number of the original datagram</u> (so that end system can know that they belong to same original packet)</li>
+<li>each fragment has the “more packet” flag set to 1, and the last fragment has this bit set to 0</li>
+<li>the offset field is used to specify where the fragment fits within the original IP datagram.</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-21%20at%205.05.53%20PM.png" height="60%" width="60%" /></li>
+<li>in the above example, MTU is 1500 bytes, the amount of payload data in all fragment (except the last) must be a multiple of 8 bytes</li>
+</ul>
+</li>
+<li><b>reassemble:</b>
+<ul>
+<li>fragments will be reassemble at the end system (not in routers) before they reach transport layer because both TCP and UDP expect to receive complete unfragmented segment</li>
+<li>If one or more of the fragments does not arrive at the destination, the incomplete datagram is discarded and not passed to the transport layer. (If TCP is transport layer, TCP will recover from retransmission)</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>IPv4 Addressing</b></div>
+<ul>
+<li>interface: the boundary between the host and the physical link, a host typically has only a single link into the network</li>
+<li>routers have multiple interfaces, one for each of its links, because its job is to receive a datagram on one link and forward the datagram on some other link.
+<ul>
+<li>IP requires each host and router interface to have its own IP address, thus an IP address is technically associated with an interface, rather than with the host or router containing that interface</li>
+</ul>
+</li>
+<li><b>IP address</b>
+<ul>
+<li>each IP address is 32 bits long (or 4 bytes)</li>
+<li>dotted-decimal notation: each byte of the address is written in its decimal form and is separated by a dot from other bytes in the address
+<ul>
+<li>e.g. 193.32.216.9</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Subnet</b>
+<ul>
+<li>a network where each interface is interconnected to each other without the need of routers</li>
+<li>network address: the first address in the subnet</li>
+<li>broadcast address: the last address in the subnet</li>
+<li>subnet mask
+<ul>
+<li>/24 (slash 24): leftmost 24 bits of the 32-bit quantity define the subnet address</li>
+</ul>
+</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-21%20at%205.23.20%20PM.png" height="60%" width="60%" /></li>
+<li>Three subnets in the above graph: 223.1.1.0/24, 223.1.2.0/24, 223.1.3.0/24</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-21%20at%205.35.10%20PM.png" height="60%" width="60%" /></li>
+<li>Six subnets in the above graph: 223.1.1.0/24, 223.1.2.0/24, and 223.1.3.0/24 like above; and three additional subnet 223.1.9.0/24, 223.1.8.0/24, 223.1.7.0/24 for the interfaces between routers</li>
+</ul>
+</li>
+<li><b>Classless Interdomain Routing (CIDR)</b>
+<ul>
+<li>generalizes the notion of subnet address</li>
+<li>as with subnet address, the 32-bit IP address is divided into two parts and has the dotted-decimal form a.b.c.d/x, where x indicates the number of bits in the first part of the address</li>
+<li>the x most significant bits of an address constitute the network portion of the IP address, and are often referred to as the prefix of the address. An organization is typically assigned a block of contiguous address, which all have a common prefix. Only these x leading prefix bits are considered by the routers outside the organization’s network.</li>
+<li>when a router outside the organization forwards a datagram whose destination address is inside the organization, only the leading x bits of the address need to be considered. This reduces the size of the forwarding table in the routers, since single entry of the form a.b.c.d/x will be sufficient to forward packets to any destination within organization.</li>
+<li>the remaining 32-x bits of an address can be thought of as distinguishing among the devices within the organization. Theses bits will be considered when forwarding packets at routers within the organization. These bits can also be further divided into smaller subnets.</li>
+</ul>
+</li>
+<li><b>Classful Addressing</b>
+<ul>
+<li>before CIDR was adopted, the network portions of an IP address were constrained to be 8, 16, or 24 bits in length.</li>
+<li>A - 8, B - 16, C - 24</li>
+<li>problematic for supporting small and medium sized subnets
+<ul>
+<li>class C (/24) subnet could accommodate up to 2^8 - 2 =254 hosts, too small</li>
+<li>class B (/16) subnet could accommodate up to 2^16 - 2 = 65634 hosts, too large, waste a lot of IP addresses</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>IP Broadcast address</b>
+<ul>
+<li>255.255.255.255</li>
+<li>When a host sends a datagram with broadcast address, the message is delivered to <u>all hosts on the same subnet</u></li>
+</ul>
+</li>
+<li>Obtaining an IP address
+<ul>
+<li>to obtain a block of IP addresses, need to contact ISP, ISP obtains its IP address blocks from Internet Corporation for Assigned Names and Numbers (ICANN)</li>
+<li><b>to obtain a host address: Dynamic Host Configuration Protocol (DHCP)</b>
+<ul>
+<li>allows a host to obtain an IP address automatically (plug-and-play protocol)
+<ul>
+<li>could give a host the same IP address every time it connects to the network, or a temporary IP address that will be different each time, depends on configuration</li>
+</ul>
+</li>
+<li>DHCP also allow a host learn additional information:
+<ul>
+<li>a host’s subnet mask</li>
+<li>the address of a host’s first-hop router (default gateway)</li>
+<li>the address of a host’s local DNS server</li>
+</ul>
+</li>
+<li>usually, each subnet will have a DHCP server. If no server is present on the subnet, a DHCP relay agent (typically a router) that knows the address of a DHCP server for that network is needed</li>
+<li>DHCP is a four-step process:
+<ul>
+<li><b>DHCP server discovery</b>: a client sends a discovery message within a <u>UDP packet to server port 67</u> from its port 68. The UDP packet is encapsulated in an IP datagram along with the broadcast destination IP address of 255.255.255.255 and a source IP address of 0.0.0.0. The client passes the IP datagram to the link layer, which then broadcasts this frame to all nodes attached to the subnet (destination MAC: FF.FF.FF.FF.FF.FF).</li>
+<li><b>DHCP server offer</b>: a DHCP receiving the DHCP discover message responds to the client with a DHCP offer message that is broadcast to all nodes on the subnet, again using the IP broadcast of 255.255.255.255. The client could receive multiple offers from different DHCP servers. Each offer message contains:
+<ul>
+<li>transaction IP of the received discover message</li>
+<li>proposed IP address for the client</li>
+<li>network mask</li>
+<li>IP address lease time: the amount of time for which the IP address will be valid, commonly several hours or days</li>
+</ul>
+</li>
+<li><b>DHCP request</b>: the client will choose from among one or more server offers and respond to its selected offer with a DHCP request message, echoing back the configuration parameters. Note the client don’t have an IP address yet, so it needs to use broadcast address again</li>
+<li><b>DHCP ACK</b>: the server responds to the DHCP request message with a DHCP ACK message, confirming the requested parameters. At this moment, the server can do unicast to client’s MAC address</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-21%20at%206.44.47%20PM.png" height="60%" width="60%" /></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Network Address Translation (NAT)</b>
+<ul>
+<li>The NAT-enabled router, residing in the home, has an interface that is part of the home network. The address space 10.0.0.0/8 is one of three portions of the IP address space that is reserved for a private network or a realm with private address. 
+<ul>
+<li>A realm with private addresses refers to a network whose addresses only have meaning to devices within that network</li>
+</ul>
+</li>
+<li>Devices within a given home network can send packets to each other using private addresses, but these addresses cannot to used beyond the home network into global Internet because there are many other networks using the same block of addresses</li>
+<li>a NAT-enabled router behaves to the outside world <u>as a single device with a single IP address.</u> It is hiding the details of the home network from the outside world. The router gets its address from the ISP’s DHCP server, and the router runs a DHCP server to provide addresses to computers within the NAT-DHCP-router-controlled home network’s address space)</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-21%20at%207.04.08%20PM.png" height="60%" width="60%" /></li>
+<li><b>NAT translation table</b>: includes port numbers and IP addresses in the table entries
+<ul>
+<li>when a host sends the datagram into the LAN, the NAT router receives the datagram, generates a new source port number (unique) for the datagram, replaces the source IP address with its WAN-side IP address and the port number. Then it adds a new entry to the translation table:
+<ul>
+<li>new port number, old port number, destination IP address, host IP address</li>
+</ul>
+</li>
+<li>When the reply arrives at the NAT router, the router indexes the NAT translation table using the destination IP address and destination port number to obtain the appropriate IP address and destination port number. The router then rewrites the datagram’s destination address and destination port number, and forwards the datagram into the home network.</li>
+</ul>
+</li>
+<li>objections:
+<ul>
+<li>port numbers are meant to be used for addressing process, not for addressing hosts</li>
+<li>routers are supposed to process packets only up to layer 3</li>
+<li>the NAT protocol violates the end-to-end argument; that is hosts should be talking directly with each other, without interfering nodes modifying IP addresses and port numbers</li>
+<li>we should use IPv6 to solve the shortage of IP addresses, rather than recklessly patching up the problem with NAT.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>Internet Control Message Protocol (ICMP)</b></div>
+<ul>
+<li>used by hosts and routers to communicate network-layer information to each other. most typically use for error reporting</li>
+<li>ICMP messages are carried as IP payload, just as TCP or UDP segments, so it lies just above IP</li>
+<li>ICMP messages have a type and a code field, and contain the header and the first 8 bytes of the IP datagram that caused the ICMP message to be generated in the first place, so that the sender can determine the datagram that caused the error.</li>
+<li><b>Ping</b>
+<ul>
+<li>ping program sends an ICMP <u>type 8 code 0</u> message to the specified host. The destination host, seeing the echo request, sends back a <u>type 0 code 0</u> ICMP echo reply. Most TCP/IP implementations support the ping server directly in the OS.</li>
+</ul>
+</li>
+<li>Source quench message:
+<ul>
+<li>perform congestion control to allow a congested router to send an ICMP source quench message to a host to force that host to reduce its transmission rate.</li>
+<li>But TCP has it own congestion-control mechanism, so this is rarely used</li>
+</ul>
+</li>
+<li><b>Traceroute</b>:
+<ul>
+<li>allows user to trace a route from a host to any other host in the world.</li>
+<li>To determine the names and addresses of the routers between source and destination, traceroute in the source sends a series of ordinary IP datagrams to the destination. Each of these datagrams carries a UDP segment with an unlikely UDP port number. The first datagrams has a TTL of 1, the second of 2, the third of 3, and so on. The source also starts timers for each of the datagrams. When the nth datagram arrives at the nth router, the nth router observes that the TTL of the datagram has just expired. The router then discards the datagram and sends an ICMP warning message to the source (<u>type 11 code 0</u>). This warning message includes the name of the router and its IP address. When this ICMP message arrives back at the source, the source obtains the round-trip time from the timer and the name and IP address of the nth router from the ICMP message.</li>
+<li>Eventually, one of the datagrams will make it all the way to the destination host. Since this datagram contains a UDP segment with an unlikely port number, the destination host sends a port unreachable ICMP message (<u>type 3 code 3</u>) back to the source. When the source host receives this particular ICMP message, it knows it does not need to send additional probe packets. (The standard Traceroute program actually sends sets of three packets with the same TTL)</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>Routing Algorithms</b></div>
+<ul>
+<li>Routing algorithms, operating in network routers, exchange and compute the information that is used to configure forwarding tables.</li>
+<li>Typically, a host is attached directly to one router, the <u>default router</u> (also called the <u>first-hop router</u>). We refer to the default router of the source host as the source router and the default router of the destination host as the destination router. The problem becomes to the problem of routing the packet from source router to destination router.</li>
+<li>There are two classes of routing algorithm
+<ul>
+<li><b>Link-state algorithm (</b><b>global routing algorithms)</b>: compute the least-cost path between a source and destination using <u>complete, global knowledge</u> about the network. This requires the algorithm obtain this information before calculation, which can be done using link-state broadcast algorithms.
+<ul>
+<li>e.g. OSPF</li>
+</ul>
+</li>
+<li><b>Distance-vector algorithm (decentralized routing algorithm)</b>: compute the least-cost path in an <u>iterative, distributed manner</u>. No node has complete information about the costs of all network links. Instead, each node begins with only the knowledge of the costs of its own directly attached links (neighbors). Then, through an iterative process of calculation and exchange of information, a node gradually calculates the least-cost path to a destination or set of destinations. Each node maintains a vector of estimates of the costs to all other nodes in the network.
+<ul>
+<li>e.g. RIP, BGP</li>
+</ul>
+</li>
+<li>other classifications
+<ul>
+<li>static vs dynamic routing algorithms</li>
+<li>load-sensitive vs load-insensitive algorithms</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Dijkstra’s algorithm (LS algorithm)</b>
+<ul>
+<li>D(v): cost of the least-cost path from the source node to destination v as of this iteration</li>
+<li>p(v): previous node along the current least-cost path from the source to v</li>
+<li>N’: subset of nodes; v is in N’ if the least-cost path from the source to v is definitively known.</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-24%20at%209.12.04%20PM.png" height="60%" width="60%" /></li>
+<li>computational complexity: O(n^2), because there are n iteration, and within each iteration, we are doing about n comparisons in the worst case. (Can be improved if uses heap in the implementation so that we can find minimum in log time)</li>
+</ul>
+</li>
+<li><b>Bellman-Ford algorithm (DV algorithm)</b>
+<ul>
+<li>celebrated Bellman-Ford equation
+<ul>
+<li>dx(y): the cost of the least-cost path from node x to node y</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-24%20at%209.34.22%20PM.png" height="30%" width="30%" /></li>
+</ul>
+</li>
+<li>Each node x begins with an estimate of the cost of the least-cost path from itself to node y, for all nodes in N. Each node x maintains the following routing information:
+<ul>
+<li>for each neighbor v, the cost from x to v</li>
+<li>node x’s distance vector, containing x’s estimate of its cost to all destinations</li>
+<li>the distance vectors of each of its neighbors</li>
+</ul>
+</li>
+<li>Each node sends a copy of its distance vector to each of its neighbors. When a node x receives a new distance vector to each of its neighbors v, it saves v’s distance vector, and then uses the Bellman-Ford equation to update its own distance vector.</li>
+<li>If node x’s distance vector has changed as a result of this update step, node x will then send its updated distance vector to each of its neighbors, which can in turn update their own distance vectors. Eventually, each host’s estimate converges to the actually cost of the least-cost path.</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-24%20at%209.41.57%20PM.png" height="60%" width="60%" /></li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-10-24%20at%209.44.28%20PM.png" height="60%" width="60%" /></li>
+<li>Link-cost change: 
+<ul>
+<li>when link cost decreases, DV algorithm can quickly update itself.</li>
+<li>However, when link cost increases, a routing loop can occur, and it will take a long time for DV algorithm to realize this problem. (count-to-infinity problem)
+<ul>
+<li>Poisoned reverse: a technique that used to avoided routing loop problem.
+<ul>
+<li>If z routes through y to get to destination x, then z will advertise to y that its distance to x is infinity, even though z knows its actual distance to x. </li>
+<li>This white lie make y never attempt to route to x via z, as long as z continues to route to x via y.</li>
+<li>However, this technique does not solve general count-to-infinity problem. Does not work when loop involving three or more nodes.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Comparison of LS and DV routing algorithms</b>
+<ul>
+<li>Message complexity: 
+<ul>
+<li>LS requires each node to know the cost of each link in the network. This requires O(NE) messages to be send. Also, whenever a link cost changes, the new link cost must be sent to all nodes.</li>
+<li>DV algorithm requires message exchanges between directly connected neighbors at each iteration. The time needed for the algorithm to converge can depend on many factors. When a link cost changes, DV algorithm will propagate the results of changed link cost only if the new link cost results in a changed least-cost path.</li>
+</ul>
+</li>
+<li>Speed of convergence
+<ul>
+<li>LS is O(N^2), requiring O(NE) messages.</li>
+<li>DV can converge slowly and can have routing loops while converging. DV also suffers from the count-to-infinity problem.</li>
+</ul>
+</li>
+<li>Robustness (what happen if a router fails)
+<ul>
+<li>Under LS, a router could broadcast an incorrect cost, corrupt or drop any packets. But an LS node is computing only its own forwarding table, other nodes are performing similar calculations for themselves. This means route calculation are somewhat separated under LS, providing a degree of robustness.</li>
+<li>Under DV, a node can advertise incorrect least-cost paths to any or all destinations. At each iteration, a node’s calculation is passed on to its neighbor and indirectly to its neighbor’s neighbor. Thus, an incorrect node calculation can be diffused through the entire network under DV.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Hierarchical Routing
+<ul>
+<li>Organize routers into <u>autonomous systems</u> (ASs), with each AS consisting of a group of routers that are under the same administrative control (e.g. by same ISP, or belong to same organization)</li>
+<li><u>intra-autonomous system routing protocol</u> (interior gateway protocol): routers within the same AS all run the same routing algorithm (LS or DV), have information about each other
+<ul>
+<li>gateway routers: routers in an AS that are responsible for forwarding packets to destinations outside the AS</li>
+</ul>
+</li>
+<li><u>inter-autonomous system routing protocol</u>: obtains reachability information from neighboring ASs and propagates the reachability information to all routers internal to the AS
+<ul>
+<li>all ASs in the Internet runs BGP4 as inter-AS routing protocol</li>
+</ul>
+</li>
+<li><b>Routing Information Protocol (RIP)</b> (intra-AS routing protocol)
+<ul>
+<li>It is a distance-vector protocol. Use hop count as a cost metric, which is the number of subnets traversed along the shortest path from source router to destination subnet, including the destination subnet. Maximum is limited to 15.</li>
+<li>RIP request message: to request information about a neighbor’s cost to a given destination.</li>
+<li>RIP response message (or RIP advertisements): routing updates are exchanged between neighbors (~ every 30s) using a RIP response message.
+<ul>
+<li>This message contains a list of destination subnets within the AS, and the sender’s distance to each of those subnets.</li>
+</ul>
+</li>
+<li>Each router maintains a RIP table knows <u>routing table</u>, which include the router’s distance vector and the router’s forwarding table. Routers update their routing table according to the RIP advertisements that they received.</li>
+<li>If a router does not hear from its neighbor at least once every 180s, that neighbor is considered to be no long reachable (server died or link down). RIP modifies the local routing table and then propagates this information by sending advertisements to its neighboring routers.  </li>
+<li>RIP runs over UDP on port 520 (application-layer process). A process called <i>routed</i> executes RIP, maintains routing info and exchanges messages with <i>routed</i> process running in neighboring routers. </li>
+</ul>
+</li>
+<li><b>Open Shortest Path First (OSPF) </b>(intra-AS routing protocol)
+<ul>
+<li>It is a link-state protocol that uses flooding of link-state information and a Dijkstra least-cost path algorithm</li>
+<li>A router constructs a complete topological map (a graph) of the entire autonomous system. Then it locally runs Dijkstra’s algorithm to determine a shortest-path tree to all <i>subnets</i>, with itself as the root node.</li>
+<li>Link costs are configured by the network administrator. Could set all link weights to 1 thus achieving <i>minimum-hop routing</i>, or set the link weights to be inversely proportional to link capacity in order to discourage traffic from using low-bandwidth links.</li>
+<li>A router broadcasts routing information to all other routers in the autonomous system (not just to its neighbors). A router broadcasts link-state info whenever there is a change in a link’s state (cost change, up/down status). It also broadcast a link’s state periodically (~ every 30 mins), even if no change. </li>
+<li>OSPF advertisements are contains in OSPF message that are carried by IP, with an upper-layer protocol of 89 for OSPF. Thus itself must implement functionality such as reliable message transfer and link-state broadcast. </li>
+<li><u>area</u>: An OSPF autonomous system can be configured hierarchically into areas. Each area runs its own OSPF link-state routing algorithm, with each router in an area broadcasting its link state to all other routers in that area. One or more <u>area border router</u> are responsible for routing packets outside the area. Exactly one OSPF area in the AS is configured to be the <u>backbone</u> area, whose primary role is to route traffic between the other areas in the AS.
+<ul>
+<li>a packet first routed to an area border router (intra-area routing), then routed through the backbone to the area border router that is in the destination area, and then routed to the final destination.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Border Gateway Protocol (BGP)</b> (inter-AS routing)
+<ul>
+<li>provides each AS a means to
+<ol>
+<li>obtain subnet reachability information from neighboring ASs (allows each subnet to advertise its existence)</li>
+<li>Propagate the reachability information to all routers internal to the AS</li>
+<li>Determine “good” routes to subnets based on the reachability information and on AS policy</li>
+</ol>
+</li>
+<li>How it works
+<ul>
+<li>In BGP, pairs of routers exchange routing information over semipermanent TCP connections using port 179.</li>
+<li>Terminology
+<ul>
+<li><u>external BGP</u>: BGP TCP connection for each link that directly connects two routers in two different ASs.</li>
+<li><u>internal BGP</u>: connections between routers within an AS.</li>
+<li>The two routers at the end of the connection are called <u>BGP peers</u>.</li>
+<li>The TCP connection along with all the BGP messages sent over the connection is called a <u>BGP session</u>. </li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-03%20at%204.15.23%20PM.png" height="60%" width="60%" /></li>
+</ul>
+</li>
+<li>BGP allows each AS to learn which destinations are reachable via its neighboring ASs. Destination are CIDRized prefixes (not hosts), with each prefix representing a subnet or a collection of subnets.</li>
+<li>When a gateway router receives eBGP-learned prefixes, the gateway router uses its IBGP sessions to distribute the prefixes to other routers in the AS. When a router learns about a new prefix, it creates an entry for the prefix in its forwarding table </li>
+<li>An autonomous system is identified by its globally unique <u>autonomous system number (ASN)</u>. (which is assigned by ICANN registries)</li>
+<li>when a router advertises a prefix across a BGP session, it includes with the prefix a number of <u>BGP attributes</u>:
+<ul>
+<li><b>AS-PATH</b>: this attribute contains the ASs through which the advertisement for the prefix has passed. When a prefix is passed into an AS, the AS adds its ASN to the AS-PATH attribute. 
+<ul>
+<li>use this attribute to detect and prevent looping advertisements</li>
+</ul>
+</li>
+<li><b>NEXT-HOP</b>: the router interface that begins the AS-PATH, provide critical link between the inter-AS and intra-AS routing protocol</li>
+</ul>
+</li>
+<li>Route selection: The input is the set of all routes that have been learned and accepted by the router. If there are two or more routers to the same prefix, invokes elimination rules until one router remains:
+<ul>
+<li>The routers with highest local preference values are selected (each route is assigned a local preference value as their attributes)</li>
+<li>From the remaining routes, selected the one with shortest AS-PATH.</li>
+<li>From the remaining routes, select the one with closest NEXT-HOP router.</li>
+<li>If multiple remains, use BGP identifiers to select the route.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Routing policy</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><br/></div>
+<div><b>Chapter 5 The Link Layer: Links, Access Networks, and LANs</b></div>
+<ul>
+<li>Link layer is implemented in a <u>network adapter</u> (also known as <u>network interface card (NIC)</u>). At the heart of the network adapter is the link-layer controller, usually a single, special-purpose chip that implements many of the link-layer services.</li>
+<li>Link layer is a combination of hardware and software.
+<ul>
+<li>Much of a link-layer controller’s functionality is implemented in hardware (framing, link access, error detection)</li>
+<li>part is implemented in software that runs on the host’s CPU (assembling link-layer address info, responds to controller interrupt, handling error condition, pass datagram up to network layer).</li>
+</ul>
+</li>
+</ul>
+<div>terminology</div>
+<ul>
+<li>node: any device that runs a link-layer protocol, including hosts, routers, switches, and WiFi access points</li>
+<li>link: communication channels that connects adjacent nodes along the communication path.</li>
+<li>A transmitting node encapsulates the datagram in a link-layer frame and transmits the frame into the link.</li>
+</ul>
+<div>Services provided by the link layer</div>
+<ul>
+<li>Framing: encapsulate each network-layer datagram within a link-layer frame before transmission over the link. </li>
+<li>Link access: A medium access control (MAC) protocol specifies the rules by which a frame is transmitted onto the link. 
+<ul>
+<li>point-to-point links: one sender at one end and one receiver at the other end. Sender can send whenever the link is idle.</li>
+<li>broadcast link: multiple nodes share a single broadcast link. Need MAC protocol to coordinate the frame transmissions</li>
+</ul>
+</li>
+<li>Reliable delivery: when a link-layer protocol provides reliable delivery service, it guarantees to move each network-layer datagram across the link without error.
+<ul>
+<li>Useful for links that are prone to high error rates (such as wireless link), correct error locally, rather than forcing an retransmission by higher-layer protocol</li>
+</ul>
+</li>
+<li>Error detection and correction: having the transmitting node include error-detection bits in the frame, and having the receiving node perform an error check.</li>
+</ul>
+<div>Error-Dection and -Correction Techniques</div>
+<ul>
+<li>These techniques allow the receiver to sometime (not always) detect that bit errors have occurred. There could be <u>undetected bit errors</u>. </li>
+<li><b>Parity checks</b>
+<ul>
+<li>use a single <u>parity bit</u>. </li>
+<li>even parity scheme: Suppose the data to be send has <i>d</i> bits. The sender simply includes one additional bit and chooses its value such that the total number of 1s in the <i>d+1</i> bit is <u>even</u>.</li>
+<li>the receiver need only count the number of 1s in the received <i>d+1</i> bits, and see if the number of 1-valued bits matches the scheme. If not, the receiver knows that at least one (odd number) bit error has occurred. </li>
+<li><b>two-dimensional parity scheme</b>
+<ul>
+<li>the <i>d</i> bits in D are divided into <i>i</i> rows and <i>j</i> columns. A parity value is computed for each row and for each column. The resulting <i>i+j+1</i> parity bits comprise the link-layer frame’s error-detection bits</li>
+<li>if a single bit error occurs, receiver can use the column and row indices to identify the bit that was corrupted and correct it.</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-03%20at%206.43.47%20PM.png" height="60%" width="60%" /></li>
+<li>Two-dimensional parity can also detect (but not correct) any combination of two errors in a packet. </li>
+<li>forward error correction (FEC): the ability of the receiver to both detect and correct errors.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Checksum</b>
+<ul>
+<li>the <i>d</i> bits of data are treated as a sequence of k-bit integers. </li>
+<li>Internet checksum:
+<ul>
+<li>bytes of data are treated as 16-bit integers and summed. The 1s complement of this sum is carried in the segment header. The receiver checks the checksum by taking the 1s complement of the sum of the received data (including the checksum) and see whether the result is all 1 bits. If not, an error is indicated.</li>
+<li>TCP and UDP computes checksum over all fields, IP computes checksum only over IP header. </li>
+</ul>
+</li>
+<li>Checksum is used at the transport layer because transport layer error detection is implemented in software, it is better to be simple and fast. While at the link layer, we can have dedicated hardware in adapters to perform more complex CRC operations.</li>
+</ul>
+</li>
+<li><b>Cyclic Redundancy Check (CRC)</b>
+<ul>
+<li>consider <i>d-</i>bit piece of data D. </li>
+<li>generator: it is an <i>r+1</i> bit pattern that the sender and receiver must first agree on. The most significant bit of generator must be 1. </li>
+<li>the sender will choose <i>r</i> additional bits, <i>R</i>, and append them to <i>D</i> such that the resulting <i>d+r</i> bit pattern (interpreted as a binary number) is exactly divisible by G. </li>
+<li>The receiver divides the <i>d+r</i> received bits by G. If the remainder is nonzero, the receiver knows that an error has occurred. </li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-03%20at%207.07.07%20PM.png" height="60%" width="60%" /></li>
+<li>All CRC calculation are done in modulo-2 arithmetic. Addition and subtraction are equivalent to XOR</li>
+</ul>
+</li>
+</ul>
+<div>Multiple Access Links and Protocols</div>
+<ul>
+<li>broadcast link: have multiple sending and receiving nodes all connected to the same shared broadcast channel. When any one node transmits a frame, the channel broadcasts the frames and each of the other nodes receives a copy. Ethernet and wireless LANs are examples of broadcast link-layer technologies.</li>
+<li>collision: when two nodes transmit frames at the same time, the frames collides, the frames transmitted cannot be interpreted, the broadcast channel is wasted during the collision interval.</li>
+<li><b>Channel Partitioning Protocol</b>
+<ul>
+<li><b>Time-division multiplexing</b>: divides time into time frames and divide each time frame into N time slots. Each time slot is assigned to one node, and the node can transmit packet during its time slot. </li>
+<li><b>Frequency-division multiplexing</b>: divides <i>R</i> bps channel into different frequencies (each with a bandwidth of R/N) and assigned each frequency to one of the N nodes. 
+<ul>
+<li>both TDM and FDM avoids collisions and divides bandwidth fairly. But a node is limited to a bandwidth of <i>R/N</i>, even when it is the only node with packets to send</li>
+</ul>
+</li>
+<li><b>Code Division Multiple Access (CDMA)</b>: assigns a different code to each node. Each node uses its unique code to encode the data bits it sends. If codes are chosen carefully, different nodes can transmit simultaneously and the receivers can correctly receive the encoded data bits. (commonly used in telephony)</li>
+</ul>
+</li>
+<li><b>Random Access Protocols</b>
+<ul>
+<li>a transmitting node always transmits at the full rate of the channel. When there is a collision, each node involved in the collision waits a random delay then repeatedly retransmits its frame until its frame gets through without a collision. Each node chooses independent random delays, there is a probability that one of the nodes will be able to sneak its frame into the channel before others</li>
+<li><b>Carrier Sense Multiple Access (CSMA)</b>
+<ul>
+<li>carrier sensing: a node listens to the channel before transmission. If a frame from another node is currently being transmitted into the channel, a node then waits until it detects no transmissions for a short time and then begins transmission.</li>
+<li>collision detection: a transmitting node listens to the channel while it is transmitting. If it detects that another node is transmitting an interfering, it stops transmitting and waits a random amount of time before repeating the sense-and-transmit-when-idle cycle.</li>
+<li>CSMA with collision detection (CSMA/CD): improves performance by not transmitting a useless, damaged frame</li>
+<li><u>binary exponential backoff algorithm</u>: when transmitting a frame that has already experienced <i>n</i> collisions, a node chooses the value of K at random from {0, 1, 2, … 2^n-1}. Thus, the more collisions experienced by a frame, the larger the interval from which K is chosen. </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>Taking-Turns Protocols</b>
+<ul>
+<li>polling protocol: requires one nodes to be designated as a master node. The master node polls each of the nodes in a round-robin fashion. Each nodes is allowed to transmit some maximum number of frames, then move on to the next node.
+<ul>
+<li>advantages: Higher efficiency.</li>
+<li>drawbacks: polling delay, single point of failure (master node)</li>
+</ul>
+</li>
+<li>token-passing protocol: a small, special purpose frame known as a <u>token</u> is exchanged among the nodes in some fixed order. When a node receives a token, it holds onto the token only if has some frames to transmit. It sends up to a maximum number of frames and then forwards the token to the next node. Otherwise, it immediately forwards the token to the next node. 
+<ul>
+<li>advantages: high efficiency, decentralized.</li>
+<li>drawbacks: the failure of one node can crash the entire channel. or if one node accidentally neglects to release the token</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><b>Switched Local Area Networks </b></div>
+<ul>
+<li>MAC address (LAN address, physical address):
+<ul>
+<li>6 bytes long, giving 2^48 possible MAC address, typically in hex notation, each manufacturer has first 24 bit assigned by IEEE</li>
+<li>Each network interface has a unique link-layer address. A host or router with multiple network interfaces will thus have multiple link-layer addresses associated with it. 
+<ul>
+<li>link-layer switches do not have link-layer address associated with their interfaces that connect to hosts and routers. This is because their job is to carry datagrams between hosts and routers transparently. </li>
+</ul>
+</li>
+<li><b>MAC broadcast address</b>: used for a sending adapter to broadcast a frame to all other adapters on the LAN. FF-FF-FF-FF-FF-FF</li>
+</ul>
+</li>
+<li><b>Address Resolution Protocol (ARP)</b>
+<ul>
+<li>translate between IP addresses and MAC addresses, only for hosts and router interfaces on the same subnet</li>
+<li>Each host and router has an <u>ARP table</u> in its memory, which contains mappings of IP addresses to MAC addresses. The ARP table also contains a TTL value, which indicates when each mapping will be deleted. </li>
+<li>A sender constructs an <u>ARP packet</u>, which has several fields, including the sending and receiving IP and MAC addresses. Both ARP query and response packets have the same format. </li>
+<li>The destination MAC address of an ARP query is the <u>MAC broadcast address</u>, which asks all the all the adapters on the subnet “who has this IP address.” The one with a match sends back to the querying host a response ARP packet with the desired mapping through a standard frame. The querying host can then update its ARP table and send its IP datagram.</li>
+</ul>
+</li>
+<li>Sending a Datagram off the subnet
+<ul>
+<li>the sending host passes the datagram to its adapter. The adapter then puts the MAC address of the first-hop router (obtained by ARP) in the frame. After the router receives this frame, it consults its forwarding table to know which interface the frame should be forwarded to. This frame is then passed to the adapter at the destination subnet. This adapter then encapsulates the datagram in a new frame whose MAC address is the MAC address of the ultimate destination (by ARP in the destination subnet) </li>
+</ul>
+</li>
+</ul>
+<div><b>Ethernet</b></div>
+<ul>
+<li>The most prevalent wire LAN technology</li>
+<li>hub: a physical-layer device that acts on individual bits. When a bit arrives from one interface, the hub simply re-creates the bit, boosts its energy strength and transmits the bit onto all the other interfaces.</li>
+<li>switch: layer 2 device, replaces hub, collision-less</li>
+<li>connectionless, unreliable service</li>
+<li>Ethernet Frame Structure
+<ul>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-03%20at%209.13.02%20PM.png" height="60%" width="60%" /></li>
+<li>Data field (46 to 1500 bytes): carries IP datagram. The maximum transmission unit (MTU) of Ethernet is 1500 bytes. If exceeds 1500 bytes, need fragmentation</li>
+<li>Destination address (6 bytes): MAC address of the destination adapter. If this address matches the receiver’s MAC address, its data field is passed to network-layer. If not, the frame is discarded.</li>
+<li>Source address (6 bytes): MAC address of the source adapter</li>
+<li>Type field (2 bytes): the type field permits Ethernet to multiplex network-layer protocol. The destination can know which network-layer protocol it should the data to. e.g. IPv4: 0x0800, ARP: 0x0806 </li>
+<li>Cyclic redundancy check (CRC) (4 bytes): CRC error checking</li>
+<li>Preamble (8 bytes): first 7 bytes has a value of 10101010, the last bytes is 10101011. Wake up the receiving adapters and to synchronize their clocks to the sender’s clock, because an adapter will not transmit the frame at exactly the target rate, always have some drift.</li>
+</ul>
+</li>
+</ul>
+<div><b>Switch</b></div>
+<ul>
+<li>receive incoming link-layer frames and forward them onto outgoing links transparently</li>
+<li>has buffers, store-and-forward</li>
+<li><b>filtering</b>: determines whether a frame should be forwarded to some interface or should just be dropped</li>
+<li><b>forwarding</b>: determine the interface to which a frame should be directed. </li>
+<li><b>switch table</b>: contains entries for hosts and routers on a LAN
+<ul>
+<li>each entry contains a MAC address, the switch interface, and time placed</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-03%20at%209.30.49%20PM.png" height="60%" width="60%" /></li>
+</ul>
+</li>
+<li>when a frame arrives at the switch’s interface x, there are three possible cases
+<ol>
+<li>there is no entry for the MAC address, the switch broadcasts the frame</li>
+<li>there is an entry for the MAC address, associating with interface x. In this case, the frame is coming from a LAN segment that contains the adapt with that MAC address, no need to forward to other interface, filtering function discards the frame</li>
+<li>there is an entry for the MAC address, associating with interface y != x. The switch performs its forwarding function by putting the frame in an output buffer that precedes interface y.</li>
+</ol>
+</li>
+<li><b>Self-Learning (plug-and-play device)</b>
+<ol>
+<li>the switch table is initially empty</li>
+<li>for each incoming frame received on an interface, the switch stores in its table the MAC address in the frame’s source address field, the interface from which the frame arrived, and the current time. Now it records in its table the LAN segment on which the sender resides.</li>
+<li>the switch deletes an address in the table if no frames are received with that address as the source address after some period of time (the aging time). In this manner, if a PC is replaced by another PC, the MAC address of the original PC will eventually be removed from the switch table. </li>
+</ol>
+</li>
+<li>advantages
+<ul>
+<li>elimination of collisions: no wasted bandwidth due to collisions. The switches buffer frames and never transmit more than one frame on a segment at any one time.</li>
+<li>heterogeneous links: because a switch isolates one link from another, the different links in the LAN can operate at different speeds and can run over different media</li>
+<li>management: eases network management. If an adapter malfunctions and continually sends Ethernet frames (jabbering adapter), a switch can detect the problem and internally disconnect the malfunctioning adapter</li>
+</ul>
+</li>
+</ul>
+<div><b>Virtual Local Area Networks (VLANs)</b></div>
+<ul>
+<li>drawbacks of switched LAN connected to other switched LAN:
+<ul>
+<li>lack of traffic isolation: broadcast traffic (ARP, DHCP) must still traverse the entire institutional network.</li>
+<li>inefficient use of switches: </li>
+<li>managing users: if an employee moves between groups, the physical cabling must be changed to connect to a different switch</li>
+</ul>
+</li>
+<li>VLANs allow multiple virtual local area networks to be defined over a single physical local area network infrastructure. Hosts within a VLAN communicate with each other as if they were connected to the switch. </li>
+<li>In a port-based VLAN, the switch’s ports (interfaces) are divided into groups by the network manager. Each group constitutes a VLAN, with the ports in each VLAN forming a broadcast domain (i.e. broadcast traffic from one port can only reach other ports in the group).  Switch hardware only delivers frames between ports belonging to the same VLAN.
+<ul>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-03%20at%209.56.51%20PM.png" height="60%" width="60%" /></li>
+</ul>
+</li>
+<li>To connect two different VLANs, need to use an external router. One of the VLAN’s switch port will be connected to the external router. So traffic between two VLANs will need to go through this router, even though they share the same physical switch. </li>
+<li>VLAN trunking: a scalable approach to interconnecting VLAN switches. A special port on each switch is configured as a trunk port to interconnect the two VLAN switches. This port belongs to all VLANs, and frame sent to any VLAN are forwarded over the trunk link to other switch. </li>
+</ul>
+<div><br/></div>
+<div><br/></div>
+<div><br/></div>
+<div><b>Chapter 6 Wireless and Mobile Networks</b></div>
+<div><b>Introduction</b></div>
+<ul>
+<li>elements in the wireless network
+<ul>
+<li>wireless hosts: end-system devices that run applications, may or may not be mobile</li>
+<li>wireless links: a host connects to a base station through a wireless communication link. Different wireless link technologies have different transmission rates and can transmit over different distance.</li>
+<li>base station: it is responsible for sending and receiving data to and from a wireless host that is associated with that base station. “associated” means the host is within the wireless communication distance of the base station, and the host uses that base station to relay data between it and the larger network.
+<ul>
+<li>e.g. cell towers in cellular networks and access points in 802.11 wireless LANs</li>
+<li><u>Infrastructure mode</u>: hosts are associated with a base station</li>
+<li><u>ad hoc networks</u>: no infrastructure, hosts themselves provide services such as routing, address assignment, DNS-like name translation, etc.</li>
+<li>handoff: the process of a mobile host moves beyond the range of one base station and into the range of another</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>network classification:
+<ul>
+<li>criteria:
+<ol>
+<li>whether a packet in the wireless network crosses exactly one wireless hop or multiple wireless hops</li>
+<li>whether there is infrastructure such as a base station in the network</li>
+</ol>
+</li>
+<li><b>single-hop, infrastructure-based</b>: has a base station, all communication is between this base station and a wireless host over a single wireless hop, e.g. 802.11, 3G cellular data network</li>
+<li><b>single-hop, infrastructure-less</b>: no base station, one of the nodes in this single-hop network coordinate the transmissions of the other nodes, e.g. Bluetooth networks</li>
+<li>multi-hop, infrastructure-based: has a base station, but some wireless nodes may have to relay their communication through other wireless nodes in order to communication via the base station, e.g. wireless mesh networks</li>
+<li>multi-hop, infrastructure-less: no base station, nodes may have to relay messages among other nodes in order to reach a destination, e.g. MANETs, VANET</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>Wireless Links and Network Characteristics</b></div>
+<ul>
+<li>difference between a wired link and a wireless link:
+<ul>
+<li>decreasing signal strength: signal attenuates as it passes through matter</li>
+<li>interference from other sources</li>
+<li>multipath propagation: this occurs when portions of the electromagnetic wave reflect off objects, taking paths of different lengths between a sender and receiver. This results in the blurring of the received signal at the receiver. </li>
+</ul>
+</li>
+<li>Because of these wireless link characteristics, wireless link protocols employ not only powerful CRC error detection codes, but also link-level reliable-data-transfer protocols</li>
+<li><b>Signal-to-noise ratio (SNR)</b> is a relative measure of the strength of the received signal and this noise. It is measured in units of decibels (dB). A larger SNR makes it easier for the receiver to extract the transmitted signal from the background noise. </li>
+<li><b>Bit error rate (BER)</b> is the probability that a transmitted bit is received in error at the receiver. 
+<ul>
+<li>For a given modulation scheme, the higher the SNR, the lower the BER</li>
+<li>For a given SNR, a modulation technique with a higher bit transmission rate will have a higher BER</li>
+</ul>
+</li>
+<li>Hidden terminal problem: A and C are both transmitting to B, but they are not aware of each other. Their transmissions are interfering at the destination B.</li>
+<li>Fading problem: A and C are placed such that their signals are not strong enough to detect each other’s transmissions, but their signals are strong enough to interfere with each other at station B.
+<ul>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-26%20at%209.27.21%20PM.png" height="60%" width="60%" /></li>
+</ul>
+</li>
+<li><b>Code division multiple access (CDMA)</b>
+<ul>
+<li>each bit being sent is <u>encoded by multiplying the bit by a signal (the code)</u> that changes at a much faster rate (chipping rate) than the original sequence of data bits.</li>
+<li>It is similar to having partygoers speaking in multiple languages; in such circumstances humans are actually quite good at locking into the conversation in the language they understand, while filtering out the remaining conversations. CDMA partitions the code space (as opposed to time or frequency) and assigns each node a dedicated piece of the code space.</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>WiFi: 802.11 Wireless LANs</b></div>
+<ul>
+<li>There are several 802.11 standards for wireless LAN technology
+<ul>
+<li>each with different frequency range and data rate</li>
+<li>all use the same medium access protocol, CSMA/CA</li>
+<li>all use same frame structure for their link-layer frames</li>
+</ul>
+</li>
+<li>Architecture: the fundamental building block is the <u>basic service set</u> (BSS)
+<ul>
+<li>A BSS contains one or more wireless stations and a central base station known as an <b>access point</b>. </li>
+<li>The access point of each BSS connects to a router (or a switch) to connect to the Internet
+<ul>
+<li>In a typical home network, there is one access point and one router integrated together as one unit that connects the BSS to the Internet</li>
+</ul>
+</li>
+<li>The network administrator assigns a <b>Service Set Identifier (SSID)</b> to the access point, which can be used to identify a particular access point in a WiFi jungle.</li>
+<li>To gain Internet access, a wireless station needs to join exactly one of the subnets and hence needs to <u>associate</u> with exactly one of the APs. 
+<ul>
+<li><u>passive scanning</u>: APs periodically send out beacon frames, which include their SSID and MAC address. A wireless station will listen to these beacon frames so it knows what APs are out there, and it can select one of the APs for association.</li>
+<li><u>active scanning</u>: a wireless host broadcasts a probe frame that will be received by all APs within the wireless host’s range. APs respond to the probe request frame with a probe response frame. The wireless host can then choose the AP with which to associate from among the responding APs.</li>
+</ul>
+</li>
+<li>After selecting the AP with which to associate, the wireless host sends an association request frame to the AP, and the AP responds with an association response frame.
+<ul>
+<li>wireless station may be required to authenticate itself to the AP. There are a number of approaches for authentication:
+<ol>
+<li>permit access to a wireless network based on a station’s MAC address</li>
+<li>employs usernames and passwords </li>
+</ol>
+</li>
+<li>In both cases, the AP typically communicates with an authentication server, relaying information between the wireless end-point station and the authentication server using a protocol such as RADIUS or DIAMETER.</li>
+<li>Separating the authentication server from the AP allows one authentication server to serve many APs, centralizing the decisions of authentication and access within a single server, and keeping AP costs and complexity low.</li>
+</ul>
+</li>
+<li>Once associated with an AP, the host will send a DHCP discovery message into the subnet via the AP in order to obtain an IP address on the subnet. Once the address is obtained, the wireless station can start sending and receiving data frames to and from the access point, and the rest of the world then views that host simply as another host with an IP address in that subnet.</li>
+</ul>
+</li>
+<li><b>802.11 MAC protocol</b>
+<ul>
+<li>because multiple stations may want to transmit data frames at the same time over the same channel, a multiple access protocol is needed to coordinate the transmissions. </li>
+<li><b>Carrier Sense Multiple Access with Collision Avoidance (CSMA/CA)</b>
+<ul>
+<li>uses collision-avoidance techniques (instead of detection)
+<ul>
+<li>Once transmission begins, it transmits the frame in its entirety</li>
+<li>Reasons:
+<ul>
+<li>collision-detection requires the ability to send and receive at the same time, which is very costly to build for a wireless hardware</li>
+<li>it is hard to detect all collisions, due to hidden terminal problem and fading</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>uses link-layer acknowledgement/retransmission (ARQ) scheme
+<ul>
+<li>when the destination station receives a frame that passes the CRC, it waits a short period of time known as <u>Short Inter-frame Spacing (SIFS)</u> and then send back an acknowledgement frame.</li>
+<li>If the transmitting station does not receive an acknowledgement within a given amount of time, it assumes that an error has occurred and retransmits the frame.</li>
+<li>If an acknowledgement is not received after some fixed number of retransmissions, the transmitting station gives up and discards the frame.</li>
+</ul>
+</li>
+<li>How it works
+<ol>
+<li>If initially the station senses the channel idle, it transmits its frame after a short period of time known as the <u>Distributed Inter-frame Space (DIFS)</u> </li>
+<li>Otherwise, the station chooses a random backoff value using binary exponential backoff and counts down this value when the channel is sensed idle. While the channel is sensed busy, the counter value remains frozen.</li>
+<li>When the counter reaches zero, the station transmits the entire frame and then waits for an acknowledgement.</li>
+<li>If an acknowledgement is received, the transmitting station knows that its frame has been correctly received at the destination station. If the station has another frame to send, it begins CSMA/CA protocol at step 2. If the acknowledgement isn’t received, the transmitting station reenters the backoff phase in step 2, with the random value chosen from a larger interval.</li>
+</ol>
+</li>
+<li>Reservation scheme
+<ul>
+<li><b>Request to Send (RTS)</b> control frame
+<ul>
+<li>When a sender wants to send a DATA frame, it can first send an RTS frame to the AP, indicating the total time required to transmit the DATA frame and the ACK frame.</li>
+</ul>
+</li>
+<li><b>Clear to Send (CTS)</b> control frame
+<ul>
+<li>When the AP receives the RTS frame, it responds by broadcasting a CTS frame.</li>
+<li>This CTS frame gives the sender permission to send and also instructs other stations not to send for the reserved duration.</li>
+</ul>
+</li>
+<li>This scheme improve performance in two ways
+<ul>
+<li>the hidden terminal problem is mitigated</li>
+<li>RTS and CTS frames are short, don’t hurt much if collision happens</li>
+</ul>
+</li>
+<li>However, it also introduces delay and consumes channel resources, so it is only used for the transmission of a long DATA frame. Each wireless station can set an RTS threshold.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>IEEE 802.11 Frame</b>
+<ul>
+<li>802.11 frames shares many similarities with an Ethernet frame, but it also contains a number of fields  that are specific to its use for wireless link.</li>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-28%20at%202.10.38%20PM.png" height="60%" width="60%" /></li>
+<li>Payload and CRC fields
+<ul>
+<li>typically contains an IP datagrams or an ARP packet</li>
+<li>includes cyclic redundancy check (CRC) so that receiver can detect bit errors in the received frame, since bit errors are much more common in wireless LANs</li>
+</ul>
+</li>
+<li>Address fields
+<ul>
+<li>There are four address fields, each of which can hold a 6-byte MAC address.
+<ul>
+<li>Address 2 is the MAC address of the station that transmits the frame.</li>
+<li>Address 1 is the MAC address of the wireless station that is to receive the frame.</li>
+<li>Address 3 is the MAC address of the router in this subnet</li>
+<li>Address 4 is used in ad hoc mode</li>
+</ul>
+</li>
+<li>AP translates 802.11 frames to 802.3 frames, and vice versa. Therefore, address 3 is important because it tells AP where it should send 802.3 frames to.</li>
+<li>Router is not aware of APs and the translation that APs have done. From router’s perspective, it is connected with all the hosts in the subnet.</li>
+</ul>
+</li>
+<li>Sequence Number, Duration, and Frame Control fields
+<ul>
+<li>Sequence number: because 802.11 uses acknowledgement scheme, the use of sequence number is required for the receiver to distinguish frames.</li>
+<li>Duration is the amount of time that a transmitting station reserves. Used in RTS, CTS, and DATA frames.</li>
+<li>Frame control field has many subfields
+<ul>
+<li>type and subtype are used to distinguish association, RTS, CTS, ACK, and data frames</li>
+<li>to and from fields are used to define the meanings of different address fields.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Mobility in the same IP subnet
+<ul>
+<li>How do wireless stations seamlessly move from one BSS to another while maintaining ongoing connections.</li>
+<li>Two BSSs can only be in the same subnet if they are interconnected with a switch. When a wireless station moves from a BSS to another, the switch can automatically update its switch table by “self-learning"</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>Bluetooth 802.15.1</b></div>
+<ul>
+<li>An IEEE 802.15.1 network operates over a short range, at low power, and at low cost. It is an ad hoc network, no network infrastructure. </li>
+<li>802.15.1 devices are first organized into a <u>piconet</u> of up to eight active devices. One of these devices is designated as the <u>master</u>, with the remaining devices acting as <u>slaves</u>. 
+<ul>
+<li>Master node rules the piconet, its clock determines time in the piconet.</li>
+<li>It can transmit in each odd-numbered slot, and a slave can only transmit only after the master has communicated with it in the previous slot.</li>
+</ul>
+</li>
+<li>There could also be <u>parked</u> devices in the network. These devices cannot communicate until their status has been changed from parked to active by the master node.</li>
+</ul>
+<div><br/></div>
+<div><b>Cellular Internet Access</b></div>
+<ul>
+<li>Global System for Mobile Communication (GSM) standard</li>
+<li>usually classify cellular technology in terms of “generations"
+<ul>
+<li>1G: voice-only communication</li>
+<li>2G: also for voice</li>
+<li>2.5G: extended to support data as well as voice service</li>
+<li>3G: support voice and data, but with much more emphasis on data capabilities and higher-speed radio access links</li>
+</ul>
+</li>
+<li>Cellular network architecture 2G
+<ul>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-28%20at%203.28.04%20PM.png" height="60%" width="60%" /></li>
+<li>“cellular” refers to the fact that the region covered by a cellular network is partitioned into a number of geographic coverage areas, known as cells. </li>
+<li>Each cell contains a <u>base transceiver station (BTS)</u> that transmits signals to and receives signals from the mobile stations in its cell. </li>
+<li>A <u>base station controller (BSC)</u> services a large number of BTSs. Its role is to allocate BTS radio channels to mobile subscribers, perform paging (find the cell in which a mobile user is resident), and perform handoff of mobile users.</li>
+<li>The BSC and its controlled BTSs collectively constitute a <u>base station system (BSS)</u></li>
+<li><u>Mobile switching center (MSC)</u> plays the role in user authorization and accounting, call establishment and teardown, and handoff. </li>
+</ul>
+</li>
+<li>3G Cellular Data Networks 
+<ul>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-28%20at%203.29.24%20PM.png" height="60%" width="60%" /></li>
+<li>The 3G core cellular data network connects radio access networks to the public Internet.</li>
+<li><u>Leave the existing core GSM cellular voice network untouched, adding additional cellular data functionality in parallel to the existing cellular voice network. </u></li>
+<li>Generalized Packet Radio Service (GPRS)
+<ul>
+<li>Serving GPRS Support Nodes (SGSN)
+<ul>
+<li>responsible for delivering datagrams to/from the mobile nodes in the radio access network to which the SGSN is attached. </li>
+</ul>
+</li>
+<li>Gateway GPRS Support Nodes (GGSNs)
+<ul>
+<li>acts as a gateway, connecting multiple SGSNs into the larger Internet.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>4G LTE (Long-Term Evolution)
+<ul>
+<li>has two important innovations over 3G
+<ul>
+<li>Evolved Packet Core (EPC): It is an all-IP core network. Both voice and data will be carried in IP datagrams.</li>
+<li>LTE Radio Access Network: uses a combination of frequency division multiplexing and time division multiplexing on the downstream channel.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>Mobility Mangament: Principles</b></div>
+<ul>
+<li>terminologies
+<ul>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-28%20at%203.54.26%20PM.png" height="60%" width="60%" /></li>
+<li>home network: the permanent home of a mobile node</li>
+<li>home agent: the entity within the home network that performs mobility management functions on behalf of the mobile node</li>
+<li>foreign network: the network in which the mobile node is currently residing</li>
+<li>foreign agent: the entity within the foreign network that helps the mobile node with the mobility management functions</li>
+<li>correspondent: the entity wishing to communicate with the mobile node</li>
+</ul>
+</li>
+<li>Addressing:
+<ul>
+<li>Two approaches
+<ol>
+<li>let the foreign network advertise to all other networks that the mobile node is resident in its network
+<ul>
+<li>benefits:
+<ul>
+<li>doesn’t make significant changes to the network-layer infrastructure</li>
+<li>other networks knows the location of the mobile node and it is easy to route to it</li>
+</ul>
+</li>
+<li>drawbacks:
+<ul>
+<li>scalability: impossible if network is huge</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>(adopted in practice) push mobility functionality from the network core to the network edge
+<ul>
+<li>foreign agent creates <u>care-of address (COA)</u> for the mobile node, with the network portion of the COA matching that of the foreign network</li>
+<li>Thus, mobile node has two addresses, one permanent address and a foreign address (COA)</li>
+<li>foreign agent is also responsible for informing the home agent that the mobile node is resident in its network and has the given COA.</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>Routing to a Mobile node
+<ul>
+<li>Indirect routing
+<ul>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-28%20at%204.20.21%20PM.png" height="60%" width="60%" /></li>
+<li>The correspondent simply addresses the datagram to the mobile node’s permanent address, and it is totally unaware of whether the mobile node is resident in its home network or is visiting a foreign network.</li>
+<li>Mobility is completely transparent to the correspondent. </li>
+<li>The home agent handles the arriving datagrams addressed to “away” nodes. It intercepts these datagrams, and then forwards them to the foreign agent using mobile node’s COA, and then the foreign agent will forward the datagram to the mobile node.
+<ul>
+<li>the forward process can be done by having the home agent encapsulate the correspondent’s original datagram within a new datagram.</li>
+</ul>
+</li>
+<li>drawback: triangle routing problem, inefficient</li>
+</ul>
+</li>
+<li>Direct routing
+<ul>
+<li><img src="/images/CS6843/Screen%20Shot%202016-11-28%20at%204.30.10%20PM.png" height="60%" width="60%" /></li>
+<li>uses a correspondent agent to learn the COA of the mobile node. This can be done by having the correspondent agent query the home agent. </li>
+<li>identify a <u>anchor foreign agent</u>, which is the foreign agent in the foreign network where the mobile node was first found. When mobile node moves to a new foreign network, the mobile node registers with the new foreign agent, and the new foreign agent provides the anchor foreign agent with the mobile node’s new COA. When the anchor foreign agent receives an encapsulated datagram for a departed mobile node, it can then re-encapsulate the datagram and forward it to the mobile node.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div><br/></div>
+<div><b>Mobile IP</b></div>
+<ul>
+<li>The mobile IP architecture contains many of the elements we have considered above. The current standard specifies the use of indirect routing to the mobile node.</li>
+<li>The mobile IP standard consists of three main pieces:
+<ul>
+<li>agent discovery:</li>
+<li>registration with home agent</li>
+<li>indirect routing of datagram</li>
+</ul>
+</li>
+<li>Agent discovery:
+<ul>
+<li>When a mobile IP node enters a new network, it must learn the identity of the corresponding foreign or home agent.
+<ul>
+<li>agent advertisement: an agent advertises its services by periodically broadcasts an ICMP message on all links to which it is connected.</li>
+<li>agent solicitation: a mobile node broadcast an agent solicitation message, which is also an ICMP message. An agent receiving the solicitation will unicast an agent advertisement directly to the mobile node.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Registration with home agent
+<ul>
+<li>once a mobile IP node has received a COA, that address must be registered with the home agent. This can be done via foreign agent or by mobile node itself.</li>
+<li>Steps for registration by foreign agent:
+<ol>
+<li>following the receipt of a foreign agent advertisement, a mobile node sends a mobile IP registration message to the foreign agent.</li>
+<li>The foreign agent receives this registration message and records the mobile node’s permanent IP address. It then sends a mobile IP registration message to the home agent.</li>
+<li>The home agent receives this request and checks for authenticity and correctness. Then it binds the mobile node’s permanent IP address with the COA. In the future, datagrams arriving at the home agent and addressed to the mobile node will be encapsulated and tunneled to the COA. The home agent sends a registration reply.</li>
+<li>The foreign agent receives the reply and forwards it to the mobile node.</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
