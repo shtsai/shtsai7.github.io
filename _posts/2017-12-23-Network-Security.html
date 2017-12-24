@@ -1,0 +1,2427 @@
+---
+layout: post
+title: "CS6823: Network Security"
+date: 2017-12-23
+---
+<link rel="stylesheet" type="text/css" href="/css/post.css">
+<p>This is my notes and a summary for CS6823: Network Security in Fall 2017.</p>
+<p>Special thanks to Professor O'Brien.</p>
+<hr>
+<!--more-->
+
+<p>Table of Content</p>
+<ol>
+ 	<li><a href="#introduction">Introduction</a></li>
+ 	<li><a href="#reconnaissance">Network Reconnaissance and Scanning</a></li>
+ 	<li><a href="#attack">Attacks, Vulnerabilities and Exploits</a></li>
+ 	<li><a href="#post-exploitation">Post Exploitation</a></li>
+ 	<li><a href="#cryptography">Cryptography</a></li>
+ 	<li><a href="#ipsec">IPSec/SSL VPNs</a></li>
+ 	<li><a href="#layer2">Layer 2 Switch Security</a></li>
+ 	<li><a href="#wireless">Wireless 802.11 Security</a></li>
+ 	<li><a href="#monitoring">Security Monitoring</a></li>
+ 	<li><a href="#firewall">Firewalls and Perimeter Security</a></li>
+ 	<li><a href="#ipv6-intro">IPv6 Introduction</a></li>
+ 	<li><a href="#ipv6-security">IPv6 Security</a></li>
+</ol>
+<hr>
+
+<div>
+	<br>
+    <div><a name="introduction"></a><span style="font-size: 16pt; font-weight: bold;">1 Introduction</span></div>
+    <div>Network security is focused on preventing undesired behavior</div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="font-weight: bold;">CIA</span>:</div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold;">Confidentiality</span>: keeping info secret, preventing unauthorized reading of info</li>
+            <li><span style="font-weight: bold;">Integrity</span>: insuring that the info is genuine and has not been tampered with&nbsp;&nbsp;</li>
+            <li><span style="font-weight: bold;">Availability</span>: insuring that the system is always available</li>
+            <li>Also add <span style="font-weight: bold;">Authenticity</span>: determining the origin of data</li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>Design concepts:</div>
+    <div>
+        <ul>
+            <li>maintain an acceptable level of risk (risk management)</li>
+            <li>optimize the security of the system given certain constraints [trade-offs] (cost, end user usability, information sensitivity)</li>
+            <li>an ongoing process, not a product</li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>Risk analysis is the process of:</div>
+    <div>
+        <ul>
+            <li>identifying the assets at risk</li>
+            <ul>
+                <li>owner of the asset may not be the owner of the related IT asset at risk, e.g. identity</li>
+            </ul>
+            <li>identifying what the threats are</li>
+            <li>putting quantitative or qualitative measures on the potential loss</li>
+            <li>putting quantitative or qualitative measures on the likelihood of the event happening</li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="line-height: 1.45;">Risk Assessment: measure the impact and probability of an event</span></div>
+    <div>
+        <ul>
+            <li>quantitative (objective): monetary value</li>
+            <ul>
+                <li><span style="font-weight: bold;">Exposure Factor</span> (EF): percentage of asset loss caused by identified threat</li>
+                <li><span style="font-weight: bold;">Single Loss Expectancy</span> (SLE): Asset value * Exposure Factor</li>
+                <li><span style="font-weight: bold;">Annualized Rate of Occurrence</span> (ARO): Estimated frequency a threat will occur within a year</li>
+                <li><span style="font-weight: bold;">Annualized Loss Expectancy</span> (ALE): Single Loss Expectancy * Annualized Rate of Occurence</li>
+                <li>pros: credibility, solid basis for evaluating cost/benefit of countermeasures</li>
+                <li>cons: difficult to enumerate all events, time consuming, costly, not reliable for rare or unthinkable impacts</li>
+            </ul>
+            <li>qualitative (subjective): categorical scales: low, medium, high, ratings</li>
+            <ul>
+                <li>classes of loss value, classes of likelihood, type of loss, rank ordering</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>Risk management is a process for planning on how to control those risks</div>
+    <div>
+        <ul>
+            <li>accept the risk: risk is low and worth accepting. Monitor</li>
+            <li>transfer the risk: transfer via insurance, warnings</li>
+            <li>remove the risk: remove the system component or feature associated with the risk if it is not worth the risk</li>
+            <li>mitigate the risk: reduce the risk with countermeasures</li>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>Taxonomy:</div>
+    <div>
+        <ul>
+            <li>Assets: things that have value (digital, physical, info, reputation)</li>
+            <li>Vulnerabilities: weaknesses that assets have that can be exploited</li>
+            <li>Threats: exploit these vulnerabilities either by malicious intent or others which can damage the asset</li>
+            <li>Attacks: action taken by someone or something which manifests the threat</li>
+            <li>Countermeasures: mitigate vulnerabilities</li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>Threat modeling:&nbsp;&nbsp;</div>
+    <div>
+        <ul>
+            <li><span style="line-height: 1.45;">Threats and assets are key - vulnerabilities and attacks are only concerns if there is a threat to an asset</span></li>
+            <li><span style="line-height: 1.45;">Identifying and evaluating threats</span></li>
+            <ul>
+                <li><span style="line-height: 1.45;">Arbitrary Threat Lists: enumerate threats by stepping through each asset and reviewing a list of attack goals</span></li>
+                <li><span style="line-height: 1.45;"><span style="line-height: 1.45; font-weight: bold;">Threat Trees</span> (forest)</span>
+                </li>
+                <ul>
+                    <li><span style="line-height: 1.45;">start with each abstract threat and then iteratively refine description gradually</span></li>
+                    <li><span style="line-height: 1.45;">relationship between threats can be conjunctive(AND) or Disjunctive(OR)</span></li>
+                    <li><span style="line-height: 1.45;">Nodes can be labeled with level of effort, risk, criticality</span></li>
+                </ul>
+                <li><span style="line-height: 1.45;"><span style="line-height: 1.45; font-weight: bold;">Attack trees</span> (think like an attacker)</span>
+                </li>
+                <ul>
+                    <li><span style="line-height: 1.45;">represents attacks and countermeasures as part of a tree structure</span></li>
+                    <li><span style="line-height: 1.45;">root node is the goal of the attack, leaf nodes are the attacks</span></li>
+                    <li><span style="line-height: 1.45;">AND nodes and OR nodes, boolean node values (easy vs not easy, expensive vs not expensive)</span></li>
+                    <li><span style="line-height: 1.45;">Continuous node values (cost in $ to attack, time to achieve)</span></li>
+                    <li><img src="/images/CS6823/641509F2-9D29-4CF7-8D42-909761BDF5D5.png" height="60%" width="60%" /></li>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><a name="reconnaissance"></a><span style="font-size: 16pt;"><span style="font-size: 16pt; font-weight: bold;">2 Network&nbsp;&nbsp;</span></span><span style="font-size: 21px;"><span style="font-size: 21px; font-weight: bold; line-height: 30px;">Reconnaissance</span></span><span style="font-size: 16pt;"><span style="font-size: 16pt; font-weight: bold;">&nbsp;&nbsp;and Scanning</span></span>
+    </div>
+    <div><span style="font-weight: bold;">Reconnaissance:&nbsp;&nbsp;</span></div>
+    <div>
+        <ul>
+            <li>Gather as much info as possible about the target from open sources</li>
+            <li>Things that we might want:</li>
+            <ul>
+                <li>IP addresses, Network topology, domain names, user account names, OS &amp; software, etc</li>
+            </ul>
+            <li>Dumpster diving, social engineering (fool people, fake phone number or email), physical break in</li>
+            <li>Google hacking, social network profile (location, frequency)</li>
+            <li><span style="line-height: 1.45;">Determine the network range:</span></li>
+            <ul>
+                <li><span style="line-height: 1.45;">DNS: need to provide personal info when register a domain, can also look at records in DNS server</span></li>
+                <li>Whois database: know who owns a domain, and registered IP blocks&nbsp;&nbsp;</li>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div><span style="font-weight: bold;">Scanning and enumeration:&nbsp;&nbsp;</span></div>
+    <div><span style="font-weight: bold;">Identify hosts</span></div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold;">Ping sweep</span>, IP scanner: ping all IP address in an IP space, see what answers back &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </li>
+            <ul>
+                <li>don't always work, can have firewall or security measures to prevent answering ICMP echoes</li>
+            </ul>
+            <li><span style="font-weight: bold;">DNS Zone Transfer</span>: use dig on Linux</li>
+            <ul>
+                <li>DNS server will periodically transfer its DNS database entries to the backup DNS server, attacker can pretend to be the backup server to obtain all info</li>
+            </ul>
+            <li><span style="font-weight: bold;">Brute Force Forward DNS</span>:</li>
+            <ul>
+                <li>take a list of common domain name and throw them to DNS server one by one, see if DNS replies a IP address.</li>
+            </ul>
+        </ul>
+    </div>
+    <div>Countermeasure:</div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold;">Split DNS</span>: split DNS server into internal and external DNS, which stores different information. Prevent leakage of internal DNS info.</li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="font-weight: bold;">Finding Open Ports</span></div>
+    <div>
+        <ul>
+            <li>War dialing: automatically scan a list of phone numbers to search for modems, computers or fax machines. Can guess user accounts (voicemail greetings), locate modems that might provide an entry-point.</li>
+            <li><span style="font-weight: bold;">Port scanning</span>: scanners send TCP and UDP packets to various ports to determine if a process is active</li>
+            <ul>
+                <li>tools: hping,&nbsp;&nbsp;<span style="line-height: 1.45;">nmap</span></li>
+                <li><span style="line-height: 1.45;">TCP connect scan: complete handshake, most reliable but also most detectable</span></li>
+                <li><span style="line-height: 1.45;"><span style="line-height: 1.45; font-weight: bold;">TCP SYN scan</span>: send SYN to the port, but not complete handshake (half open) to prevent logging.&nbsp;&nbsp;</span>
+                </li>
+                <ul>
+                    <li><span style="line-height: 1.45;">responses:</span></li>
+                    <ul>
+                        <li><span style="line-height: 1.45;">Closed: receive RST, port is closed, nothing listening</span></li>
+                        <li><span style="line-height: 1.45;">Open: receive SYN/ACK, port is open, a server is listening</span></li>
+                        <li><span style="line-height: 1.45;">Filtered: no response, there is something in between, maybe a firewall or router that silently discarding our packets</span></li>
+                    </ul>
+                </ul>
+                <li><span style="font-weight: bold;">FTP Bounce Scan</span>: connect to a FTP (acting like a proxy) and request the server to send a file to a client, which hides attacker's location</li>
+                <ul>
+                    <li>Uses a feature in FTP which allows for FTP proxy connections</li>
+                    <li><img src="/images/CS6823/C51FA03A-8C8E-47D9-A691-D7E67CA6F425.png" height="60%" width="60%" /></li>
+                    <li><span style="line-height: 1.45;">useful to get around firewalls if firewall allows connection to FTP server</span></li>
+                    <li><span style="line-height: 1.45;">If a port is open, will receive 150 or 226 response. Otherwise will receive "425 Can't build data connection: connection refused"</span></li>
+                </ul>
+                <li><span style="font-weight: bold;">IDLE scan</span>: attacker spoofs source ip address</li>
+                <ul>
+                    <li>Attacker sends a SYN packet to the "framed" machine, gets back a SYN-ACK which includes the IP header with IP ID value of X</li>
+                    <li>Attacker then sends a spoofed SYN packet to the target with "framed" machine's IP</li>
+                    <li>If listening the targe will send a SYN-ACK back to the framed machine. When "framed" machine receives a SYN-ACK from the target which was never requested, it will send a RST, which increments the IP ID to X+1</li>
+                    <li>Attacker now meassures the IP ID field on the "framed" machine. Send SYN, if get IP ID value of X+2 then port is open, otherwise it is closed.</li>
+                    <li><img src="/images/CS6823/7A91CEB0-523E-4517-9456-31F34D614AC4.png" height="60%" width="60%" /></li>
+                </ul>
+                <li><span style="font-weight: bold;">Firewalking</span>: a tools that attempts to determine which layer 3/4 access control lists are present on filtering routers and firewalls</li>
+                <ul>
+                    <li>send out TCP and UDP packets with a TTL one greater than the targeted firewall. If traffic is allowed by the firewall, it will forward to the internal host where it will expire and return an ICMP_TIME_EXCEEDED message. Otherwise, no response will be received</li>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>Staying Anonymous</div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold;">Proxy servers</span>: for web proxies, the proxy server terminates the http request and then re-originate it</li>
+            <ul>
+                <li>used in organizations for outbound web access in order to restrict and monitor web surfing</li>
+                <li>can also be used to anonymize connections</li>
+                <li>attacker might use other servers they have compromised as proxy</li>
+            </ul>
+            <li><span style="font-weight: bold;">TOR</span>: a network of virtual tunnels connected together and works like a big chained proxy</li>
+            <ul>
+                <li>uses random set of servers every time a user visits a site</li>
+                <li>exit node can see all the traffic</li>
+                <li>originally hide client identity, now can hide server identity</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><a name="attack"></a><font style="font-size: 16pt;"><span style="font-size: 16pt; font-weight: bold;">3 Attacks, Vulnerabilities and Exploits</span></font></div>
+    <div>General attack techniques</div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold;">IP address spoofing</span>: fake source IP address</li>
+            <ul>
+                <li>hides attacker, but cannot interact with victim (unless on path between victim and spoofed address)</li>
+                <li>Hard to do IP spoofing with TCP because need to know initial [random] sequence number (can guess)</li>
+                <li>Defense: <span style="font-weight: bold;">Ingress filtering</span></li>
+                <ul>
+                    <li>configure firewall so that it drops packets with source IP addresses that doesn't belong to their subnet</li>
+                    <li>can be done by network admin or ISP</li>
+                    <li>not perfect, can spoof neighbors, which won't be dropped by firewall</li>
+                </ul>
+            </ul>
+            <li><span style="font-weight: bold;">Session hijacking</span>: take control of one side of a TCP connection (sniffing + spoofing)</li>
+            <ul>
+                <li>attacker sniffs packets for sequence numbers, and pretend to be the client using IP spoofing to talk to server</li>
+                <li>attacker needs to be on segment where traffic passes through between the client and server</li>
+                <li>If server receives out-of-order packets from the same sourse IP, likely to drop connection. So attacker can send <span style="text-decoration: underline;">unsolicited ARP replies</span>&nbsp;&nbsp;(modify ARP table) to break the connection between server and client, and continue pretending the client.</li>
+                <li>Defense: <span style="font-weight: bold;">Encryption</span> with authentication protocol</li>
+                <ul>
+                    <li>Attacker needs keys to encrypt and insert meaningful traffic</li>
+                </ul>
+            </ul>
+            <li><span style="font-weight: bold;">Denial of Service (DoS)</span>: prevent access by legitimate users or stop critical system processes</li>
+            <ul>
+                <li><span style="font-weight: bold;">DoS vs DDos (Distributed DoS)</span>:</li>
+                <ul>
+                    <li>DoS: small number of nodes, source IP typically spoofed</li>
+                    <li>DDoS: from thousands of nodes (zombie nodes), IP addresses often not spoofed</li>
+                </ul>
+                <li><span style="font-weight: bold;">Vulnerability attack</span>: hack in system, remotely stopping or crashing services</li>
+                <li><span style="font-weight: bold;">Connection flooding</span>: Overwhelming connection queue with SYN flood</li>
+                <ul>
+                    <li>server allocates memory to track the status of new half-open connection. Attacker sends many SYN packets to fill connection queue with half-open connections. New connections cannot be initiated.</li>
+                    <li>Defense:&nbsp;&nbsp;<span style="line-height: 1.45;"><span style="line-height: 1.45; font-weight: bold;">SYN cookies</span>: When SYN segment arrives, server calculates hash function based on source and destination IP addresses and port numbers, and a secret number. It then uses resulting "cookie" for its initial sequence number (ISN) in SYNACK. No memory needed.</span>
+                    </li>
+                    <ul>
+                        <li>If SYN is legitimate, client returns ACK, server computes same hash function, verifies function = ACK #, then create socket for connection.</li>
+                        <li>If SYN-flood with spoofed IP address, no ACK comes back from client, no problem</li>
+                    </ul>
+                </ul>
+                <li><span style="font-weight: bold;">Bandwidth flooding attack</span>: Overwhelming communications link with packets (strength depends on volume)</li>
+                <ul>
+                    <li>attack traffic can be made similar to legitimate traffic, hindering detection</li>
+                    <li>needs a lot of machines to consume target's bandwidth resources (DDoS)</li>
+                    <li><span style="font-weight: bold;">Reflection attack</span>: send DNS requests (or UDP based service) with victim's IP address as source, query size is small, yet it causes large replies to be sent to victim (amplify traffics)</li>
+                    <li>Defense: don't let systems become bots, filter dangerous packets, over-provisioning of resources, limit number of packets sent from source to dest</li>
+                </ul>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div><span style="font-weight: bold;">DNS Attacks</span></div>
+    <div>
+        <ul>
+            <li>Reflector attack: discussed above</li>
+            <li>Denying DNS service (stop some level of DNS servers)</li>
+            <ul>
+                <li>DNS usually applies caching and have distributed nature, immediate effects are limited</li>
+            </ul>
+            <li><span style="font-weight: bold;">DNS redirecting</span>: Use fake DNS replies to redirect user</li>
+            <ul>
+                <li>Client sends DNS query to its local DNS server, sniffed by attacker, attacker responds with bogus DNS reply</li>
+                <li>need to spoof IP address to local DNS server, match reply ID with request ID, and stop reply from local DNS server (first response wins)</li>
+            </ul>
+            <li><span style="font-weight: bold;">Poisoning DNS</span>: insert false resource records into various DNS caches</li>
+            <ul>
+                <li>Attacker queries local DNS server, local DNS makes iterative queries, attacker then sends a bogus reply, tries to answer on behave of authoritative DNS server.</li>
+                <li>attacker needs to spoof source IP address and guess sequence number in request message sent to upstream server (not easy), may need to stop upstream name server from responding.</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="text-decoration: underline;">Network based attack</span>:&nbsp;&nbsp;</div>
+    <div>
+        <ul>
+            <li><span style="line-height: 1.45;">taking advantage of a vulnerability in a network resource in order to gain privileged access to resources. (e.g. server application vulnerability)</span></li>
+        </ul>
+    </div>
+    <div><span style="text-decoration: underline;">Client Side Attacks</span>:&nbsp;&nbsp;</div>
+    <div>
+        <ul>
+            <li><span style="line-height: 1.45;">Taking advantage of a vulnerability in software loaded and used by an "end user" in order to gain privileged access (trick user) (e.g. web browser vulnerabilities, fake urls, code running on HTML, malicious emails)</span></li>
+            <li>Once user clicks on an malicious url (or something similar), a payload is downloaded to victim system, which initiates a connection to the attacker's machine (reverse shell). B/c firewall usually doesn't allow connection going in, but allow connection going out</li>
+            <li><img src="/images/CS6823/BB78F08B-ECD6-428B-A67F-59DDC15483EC.png" height="60%" width="60%" /></li>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>Tools and Attack Implementation</div>
+    <div>
+        <ul>
+            <li>Vulnerability scanner: scans for software bug or mis-configuration which can make system vulnerable</li>
+            <ul>
+                <li>e.g. SATAN, Nessus, OPEN-VAS</li>
+            </ul>
+            <li>Exploitation tools: framework that allows code reuse, mix and match exploits and payloads, rapid development of new exploit code</li>
+            <ul>
+                <li>e.g. Metasploit</li>
+                <li>Terms:</li>
+                <ul>
+                    <li>Vulnerability: what allows code to be executed, weakness in a system&nbsp;&nbsp;</li>
+                    <li><span style="line-height: 1.45;">Exploit: code which allows an attacker to take advantage of the vulnerability in the system.</span></li>
+                    <li>Payload: the code which is delivered by the exploit. This is the code to be executed on the victim</li>
+                    <li>Encodes: ways to obfuscate the payload code so that anti-virus and IDS won't detect</li>
+                    <li>Auxiliary Module: other parts of Metasploit that aid in exploitation such as scanners</li>
+                </ul>
+                <li>Meterpreter: mother of all payloads</li>
+                <ul>
+                    <li>resides completely in memory, no hard disk writes</li>
+                    <li>encrypted communication between attacker and payload, remote command execution, etc</li>
+                </ul>
+                <li><span style="line-height: 1.45;"><span style="line-height: 1.45; font-weight: bold;">Pivoting</span>: use one compromised machine to further exploit other hosts or networks (e.g. compromise a machine inside a firewall, then launch further attacks from this compromised machine)</span>
+                </li>
+                <li><span style="line-height: 1.45;"><span style="line-height: 1.45; font-weight: bold;">Persistence</span>: create backdoor to maintain control of the system even after remote target reboots</span>
+                </li>
+                <ul>
+                    <li>backdoor runs as a service on the target, allow attacker to reconnect remotely</li>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><a name="post-exploitation"></a><font style="font-size: 16pt;"><span style="font-size: 16pt; font-weight: bold;">4 Post Exploitation</span></font></div>
+    <div><span style="font-weight: bold;">Persistence</span>:&nbsp;&nbsp;</div>
+    <div>
+        <ul>
+            <li>Uses startup service ([xinetd, initd] on Linux, [registry startup key, windows service] on Windows, [cron, plist] for OS X)</li>
+            <li><span style="font-weight: bold;">Trojans</span>: Non self replicating "back door" program which runs hidden on the victim</li>
+            <ul>
+                <li>can be used to maintain control, access password, keylog, use as a remote proxy to mask their tracks for additional attacks, plant the ability to launch DDoS attacks</li>
+                <li>Distinctions:</li>
+                <ul>
+                    <li>Virus: attaches itself to another program to enable replication (like a human virus)</li>
+                    <li>Worm: self replicating version of virus, can replicate through a network without human assistance</li>
+                    <li>Blended Threat: combines aspects of Trojans, viruses, and worms</li>
+                </ul>
+                <li>Determining which ports are listening:</li>
+                <ul>
+                    <li>netstat -an</li>
+                </ul>
+            </ul>
+            <li><span style="font-weight: bold;">Rootkits</span>: a set of programs which hides other malwares within the system</li>
+            <ul>
+                <li>evade forensics, alter code execution, hide malicious processes, files, registry entires</li>
+                <li>User mode vs Kernel mode</li>
+                <ul>
+                    <li>user mode runs in ring 3 along with other user applications</li>
+                    <li>kernel mode runs in ring 0 by modifying the OS kernel</li>
+                </ul>
+                <li>Netcat: "Swiss Army Knife" of network tools</li>
+                <ul>
+                    <li>blindly reads and writes data to and from network connections, can be used as a backdoor trojan</li>
+                    <li>client mode: initiates a network connection from the local system to a specified remote network port. std input is sent to the remote network port using pipes.</li>
+                    <ul>
+                        <li>nc [listener ip address] [port]</li>
+                    </ul>
+                    <li>listen mode: waits for a connection from the network, like a network server</li>
+                    <ul>
+                        <li>nc -l -p [port]</li>
+                    </ul>
+                    <li>uses: transfer data, back doors, replay attacks, vulnerability scanning, port scanning, relays</li>
+                </ul>
+            </ul>
+            <li><span style="font-weight: bold;">Wrappers</span>: executable programs that are used to wrapped trojan</li>
+            <ul>
+                <li>Two programs are wrapped into a single file, user only sees the exe of the wrapper, trojan runs in background</li>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div><span style="font-weight: bold;">Data Exfiltration</span>:</div>
+    <div>
+        <ul>
+            <li>Steganography: art and science of hiding a secret message such that no one other than the sender and receiver is aware of the existence of the message</li>
+            <li><span style="font-weight: bold;">Covert Channel</span>: hide message within the traffic of a legitimate communications channel</li>
+            <ul>
+                <li>sending a message in an area that is not usually meant for data transmission (e.g. IP, TCP, HTTP headers)</li>
+                <ul>
+                    <li>can uses sequence number, flags (encode message), reserved bits</li>
+                    <li>It is preferred to hide message in mandatory fields, as some network equipment might reset optional fields</li>
+                    <li><span style="font-weight: bold;">Covert-tcp</span>: can hide data in&nbsp;&nbsp;</li>
+                    <ul>
+                        <li>IP's ID field: insert ASCII character</li>
+                        <li>Sequence number of TCP: Send SYN with ASCII char as initial sequence, receive RST as&nbsp;&nbsp;acknowledgment</li>
+                        <li>ACK number of TCP:&nbsp;&nbsp;</li>
+                        <ul>
+                            <li>client sends SYN packet to bounce server, source address is spoofed to recipients address, ISN# is ASCII#-1.</li>
+                            <li>Bounce server responds to receiver, sends SYN ACK or RST, both increment ISN by 1 and ASCII char is received</li>
+                            <li><img src="/images/CS6823/59BAEE2D-E3E9-414D-A1F6-D64E632A1A2B.png" height="60%" width="60%" /></li>
+                        </ul>
+                    </ul>
+                    <li>Loki: Loki is installed on compromised server, data is sent to client using ICMP packets. Less detectable as ICMP is commonly allowed and doesn't have UDP/TCP ports</li>
+                    <ul>
+                        <li>Can hide data in the payload of ICMP,&nbsp;&nbsp;</li>
+                        <li>Can also use UDP 53 to disguise as a DNS request</li>
+                    </ul>
+                    <li>Reverse WWW Shell: covert channel using HTTP</li>
+                    <ul>
+                        <li>installed on compromised machine, every 60 seconds it contacts extenal server, pulls in commands and sends over normal HTTP.</li>
+                        <li>Looks like normal web traffic, usually implemented in PHP</li>
+                    </ul>
+                </ul>
+                <li>Tunneling: encapsulating one protocol into another protocol</li>
+                <ul>
+                    <li>common to tunnel communications over TCP 80, SSH, GRE</li>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="font-weight: bold;">Removal of Evidence</span></div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold;">Altering Event Logs</span>:&nbsp;&nbsp;</li>
+            <ul>
+                <li>too obvious to delete log files, instead selectively edit log files</li>
+                <li>Windows Logging (log in .log file, then move to main event logs .evt):</li>
+                <ul>
+                    <li>System event log (system alerts, failures)</li>
+                    <li>Security event log (login attempts, policy changes)</li>
+                    <li>Application event log (application related issues)</li>
+                    <ul>
+                        <li>.evt files are locked and in a binary format, cannot open/edit with usual tools</li>
+                        <li>Can edit using Event editing tools, or Winzapper (need reboot to take effects)</li>
+                    </ul>
+                </ul>
+                <li>Unix Logging:</li>
+                <ul>
+                    <li>Log files usually in ASCII text, easy to edit with privilege, config file tells where logs are located</li>
+                    <li>Also accounting files, binary files, harder to edit (so accounting file editing tool is standard part of most rootkits)</li>
+                    <li>Shell history files (list of command line commands issues</li>
+                </ul>
+                <li>Defense: Activate loggings, periodically audit logging, restrictive permissions, use separate server for logging, encrypt log files, make log "append-only"</li>
+            </ul>
+            <li><span style="font-weight: bold;">Hidden Files</span>:</li>
+            <ul>
+                <li>attacker might use hidden files to store attack tools, stolen info (hide on compromised machines to pass legal search)</li>
+                <li>Unix:</li>
+                <ul>
+                    <li>prepend "." to filename, use "," followed by spaces</li>
+                </ul>
+                <li>Windows:</li>
+                <ul>
+                    <li>"hidden" attribute</li>
+                    <li><span style="font-weight: bold;">Alternate Data Streams (ADS)</span>:&nbsp;&nbsp;</li>
+                    <ul>
+                        <li>multiple streams of data can be associated with a single file</li>
+                        <li>take a file, append a file to another host file as ADS. The host file will still work, and its size will not change after this append. Its copy will also contain ADS. (But hash will change)</li>
+                        <li>e.g. c:\winnt\system32\calc.exe:anyfile.exe</li>
+                        <ul>
+                            <li>hide anyfile.exe</li>
+                        </ul>
+                    </ul>
+                </ul>
+                <li>Defenses: file integrity checking, use ADS aware tools</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><a name="cryptography"></a><span style="font-size: 16pt; font-weight: bold;">5 Cryptography</span></div>
+    <div>It is used to hide information from unauthorized users.</div>
+    <div>
+        <ul>
+            <li><span style="line-height: 1.45;">It takes plain text/data, transforms it into ciphertext (encrypted text) by using a cipher(an encryption algorithm) and a key.</span></li>
+            <li><span style="line-height: 1.45;">Decryption is the process of converting ciphertext back to plaintext (the opposite of encryption)</span></li>
+            <li>Cryptography algorithm is known to everyone, usually uses keys (<span style="text-decoration: underline;">secret</span>)</li>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div><span style="font-weight: bold;">Classical Cryptography</span></div>
+    <div>
+        <ul>
+            <li>Substitution cipher: replaces one letter with another letter based on some key (e.g. alphabet shifts left)</li>
+            <li>Vigenere Polyalphabetic substitution: use a key to encrypt data</li>
+            <ul>
+                <li>e.g. (Key: cisco), (Plaintext, network), (Ciphertext: pmlycty)</li>
+                <li><img src="/images/CS6823/FB7E487B-945E-41FE-ADE8-DF610D3659CE.png" height="60%" width="60%" /></li>
+            </ul>
+            <li>Vernam "One Time Pad" (perfect substitution cipher): use a one-time key with key length as long as the plaintext</li>
+            <ul>
+                <li>very difficult to break but not practical</li>
+                <li>need to consider way of&nbsp;&nbsp;transferring&nbsp;&nbsp;key</li>
+            </ul>
+            <li>Code: a word or number that has some hidden meanings, only understandable by sender and receiver</li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="font-weight: bold;">Cryptanalysis</span>: it studies the process of breaking encryption algorithms</div>
+    <div>
+        <ul>
+            <li>Cryptography issues:</li>
+            <ul>
+                <li><span style="font-weight: bold;">confidentiality</span>: only sender and intended receiver should understand message contents</li>
+                <li><span style="font-weight: bold;">end-point authentication</span>: sender and receiver wants to confirm identity of each other</li>
+                <li><span style="font-weight: bold;">message integrity</span>: sender and receiver want to ensure message not altered without detection</li>
+            </ul>
+            <li>Notation:</li>
+            <ul>
+                <li>m is plaintext message, K_A is encryption key, K_B is decryption key, K_A(m) is ciphertext encrypted with key K_A</li>
+                <li>m = K_B(K_A(m))</li>
+            </ul>
+            <li>Computational effort required&nbsp;&nbsp;</li>
+            <ul>
+                <li>Time: number of primitive operations or computational time required for the attack (so attacks become more feasible as computing power becomes cheaper and faster)</li>
+                <li>Memory: amount of storage required to complete the attack (hard disk or memory)</li>
+                <li>Data:&nbsp;&nbsp;amount&nbsp;&nbsp;of captured data required to complete the attack</li>
+                <li>need to make encryption feasible and matches application</li>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>Types of attacks on encryption</div>
+    <div>
+        <ul>
+            <li>Cipher-text only attack: attacker only has the ciphertext that he can analyze</li>
+            <ul>
+                <li>Brute force: hard to analyze, number of possible keys is huge, hard to know when correctly decrypted</li>
+                <li>Statistical analysis: letters are more common probably represent common letters in English</li>
+            </ul>
+            <li>Known-plaintext attack: attacker has some plaintext corresponding to some ciphertext</li>
+            <li>Chosen-plaintext attack: attacker can get ciphertext from some chosen plaintext</li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>Requirements for a encryption algorithm:</div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold;">confusion</span>: make relationship between plaintext and the key very complicated. Changes in plaintext will result in unpredictable change in the ciphertext</li>
+            <li><span style="font-weight: bold;">diffusion</span>: any changes in the plaintext results in multiple changes spread throughout the ciphertext</li>
+            <li><span style="font-weight: bold;">Shannon Characteristics of a Good Cipher</span>:</li>
+            <ul>
+                <li>amount of secrecy needed determines the amount of work for encryption and decryption</li>
+                <li>the set of keys and enciphering algorithm should be free from complexity</li>
+                <li>the implementation of enciphering process should be simple</li>
+                <li>any errors in enciphering should not propagate and cause corruption of the further data</li>
+                <li>the size of ciphertext should be no larger than the text of the original message</li>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>Modern Cryptography</div>
+    <div>
+        <ul>
+            <li><span style="line-height: 1.45;"><span style="line-height: 1.45; font-weight: bold;">Symmetric Encryption</span>:</span>
+            </li>
+            <ul>
+                <li><span style="line-height: 1.45;">There is</span> <span style="line-height: 1.45; text-decoration: underline;">only one key</span> <span style="line-height: 1.45;">is for both the&nbsp;&nbsp;encryption&nbsp;&nbsp;and decryption. Very fast, but weak. If the key used is compromised, then the entire process is compromised.</span></li>
+                <li><img src="/images/CS6823/458BAE97-7FC9-492C-B97A-C4FFB281330E.png" height="60%" width="60%" /></li>
+                <li>Two types of symmetric ciphers</li>
+                <ul>
+                    <li><span style="font-weight: bold;">Stream ciphers</span>: <span style="text-decoration: underline;">encrypt one bit at a time</span> (less prefererd)</li>
+                    <ul>
+                        <li>Each bit of keystream is combined with bit of plaintext to get bit of ciphertext</li>
+                        <li><span style="text-decoration: underline;">use XOR to combine, XOR the same key twice will reveal the original message</span></li>
+                        <li>Problems:</li>
+                        <ul>
+                            <li>attacker can recover key stream if has know plain-text</li>
+                            <li>also can change hidden message</li>
+                            <li>key should not be reused, be as random as possible<span style="line-height: 1.45;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></li>
+                        </ul>
+                        <li>e.g. RC4,</li>
+                    </ul>
+                    <li><span style="font-weight: bold;">Block Ciphers</span>: <span style="text-decoration: underline;">encrypt each block as a unit</span></li>
+                    <ul>
+                        <li>one-to-one mapping is used to map k-bit block of plaintext to k-bit block of ciphertext</li>
+                        <li><span style="font-weight: bold;">Electronic Code Book (ECB)</span> mode: e.g. 000 -&gt; 110, 001 -&gt; 111</li>
+                        <ul>
+                            <li>as k increases, # permutation increases dramatically, hard to maintain a table of such huge size, can instead use functions to simulates a randomly permuted table</li>
+                            <li>If input block repeated, will produce same ciphertext (pattern, not good)</li>
+                        </ul>
+                        <li>Prototype function: a function that simulates code book table look up</li>
+                        <ul>
+                            <li>break large blocks into smaller blocks, then apply functions on smaller blocks and merge. Repeat this function a couple times to shuffle</li>
+                            <li>if only do a single round, then one bit of input affects at most 8 bits of output (need diffusion)</li>
+                        </ul>
+                        <li><span style="font-weight: bold;">Cipherblock Chaining</span> (CBC)</li>
+                        <ul>
+                            <li><span style="text-decoration: underline;">Have encryption of current block depend on result of previous block</span></li>
+                            <li>c(i) = Ks(m(i) ^ c(i-1)) &nbsp;&nbsp;[Encryption]</li>
+                            <li>m(i) = Ks(c(i)) ^ c(i-1) &nbsp;&nbsp;[Decryption]</li>
+                            <li><span style="font-weight: bold;">Initialization vector(IV)</span>: <span style="text-decoration: underline;">a random block c(0) used to encrypt first block</span>, does not have to be secret</li>
+                            <li>change IV for each message (or session), gurantees that even if the same message is sent repeatedly, the ciphertext will be completely different each time</li>
+                            <li><img src="/images/CS6823/158DF7CB-7920-4859-9EFB-DBA4CDA637F9.png" height="60%" width="60%" /></li>
+                            <li>e.g. DES (key length is too short), 3DES (encrypt/decrypt 3 times with 3 different keys)</li>
+                            <li>e.g. AES (longer keys, replacing DES)</li>
+                        </ul>
+                    </ul>
+                </ul>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+        <ul>
+            <li><span style="font-weight: bold; line-height: 1.45;">Asymmetric Encryption (public key cryptography)</span></li>
+            <ul>
+                <li>Each user has <span style="text-decoration: underline;">two keys</span>, one <span style="text-decoration: underline;">private key</span> that is kept secret, and a <span style="text-decoration: underline;">public key</span> which is shared. A user encrypt data using recipient's public, ensuring only that person with the matching private key can decrypt it. Drawback is that encryption and decryption is slower.</li>
+                <li><img src="/images/CS6823/D20CC175-3072-42B5-91C0-451DDF97D9FD.png" height="60%" width="60%" /></li>
+                <li>Given public key, should be impossible to compute private key</li>
+                <li>prereq: modular arithmetic</li>
+                <ul>
+                    <li>[(a mod n) + (b mod n)] mod n = (a + b) mod n</li>
+                    <li>[(a mod n) - (b mod n)] mod n = (a - b) mod n</li>
+                    <li>[(a mod n) * (b mod n)] mod n = (a * b) mod n</li>
+                </ul>
+                <li>a message is a bit pattern, can be uniquely represented by an integer number. Thus encrypting a message <span style="font-size: 12pt;">is equivalent to encrypting a number</span></li>
+                <li><span style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">RSA</span>:&nbsp;&nbsp;</span>
+                </li>
+                <ul>
+                    <li><span style="font-size: 12pt;">create public/private key pair</span></li>
+                </ul>
+                <ol>
+                    <li><span style="font-size: 12pt;">Choose two large prime numbers p, q (e.g. 1024 bits each)</span></li>
+                    <li><span style="font-size: 12pt;">Compute n = pq,&nbsp;&nbsp;</span><span style="letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; font-size: 12pt; color: rgb(34, 34, 34);">ϕ = (p-1)(q-1)</span></li>
+                    <li><span style="letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span style="font-size: 12pt; color: rgb(34, 34, 34);">Choose e (with e< n) that has no common factors with&nbsp;&nbsp;</span><span style="font-size: 12pt; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; color: rgb(34, 34, 34);">ϕ (e and&nbsp;&nbsp;<span style="font-size: 12pt; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; color: rgb(34, 34, 34);">ϕ are "relatively prime")</span></span>
+                        </span>
+                    </li>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34);">Choose d such that ed-1 is exactly divisible by&nbsp;&nbsp;</span><span style="font-size: 12pt; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; color: rgb(34, 34, 34);">ϕ. (In other words, ed mod&nbsp;&nbsp;<span style="font-size: 12pt; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; color: rgb(34, 34, 34);">ϕ = 1, or d = e^(-1) mod&nbsp;&nbsp;<span style="font-size: 12pt; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; color: rgb(34, 34, 34);">ϕ)</span></span>
+                        </span>
+                    </li>
+                    <li style="orphans: 2; widows: 2;"><span style="font-size: 12pt; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span style="font-size: 12pt; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span style="font-size: 12pt; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; color: rgb(34, 34, 34);">public key is (n, e), private key is (n, d)</span></span>
+                        </span>
+                    </li>
+                </ol>
+                <ul>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34); font-weight: bold;">Encryption: c = m ^ e mod n</span></li>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34); font-weight: bold;">Decryption: m = c ^ d mod n</span></li>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34);">Security of RSA:&nbsp;&nbsp;</span><span style="color: rgb(34, 34, 34); line-height: 1.45;">Hard to find factors of n without knowing the factors p and q</span></li>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34); line-height: 1.45;">Session keys:</span></li>
+                    <ul>
+                        <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34);">RSA is relatively slow and expensive comparing to symmetric encryption.</span></li>
+                        <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34); text-decoration: underline;">Can use RSA to exchagne a symmetric key Ks, then use symmetric key cryptography for communication</span></li>
+                    </ul>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34);">Practice RSA:&nbsp;&nbsp;<a href="https://www.cs.drexel.edu/~jpopyack/IntroCS/HW/RSAWorksheet.html" style="color: rgb(34, 34, 34);">https://www.cs.drexel.edu/~jpopyack/IntroCS/HW/RSAWorksheet.html</a></span></li>
+                </ul>
+                <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34); font-weight: bold;">Diffie-Hellman</span><span style="color: rgb(34, 34, 34);">:</span> <span style="color: rgb(34, 34, 34); text-decoration: underline;">allows two entities to agree on shared key</span><span style="color: rgb(34, 34, 34);">, but does not provide encryption</span></li>
+                <ul>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34);">n is a large prime, g (base) is a number less than n [public]</span></li>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34);">Alice chooses a secret integer a, then sends Bob A=g^a mod n</span></li>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34);">Bob chooses a secret integer b, then send Alice B = g^b mod n</span></li>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34);">Alice compute K = B^a mod n</span></li>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34);">Bob compute K = A^b mod n</span></li>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34);"><img src="/images/CS6823/Image%201.png" height="60%" width="60%"/></span></li>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34);">Cannot use this algorithm by itself, might suffer man in the middle attack, doesn't check authenticity</span></li>
+                    <li style="orphans: 2; widows: 2;"><span style="color: rgb(34, 34, 34);">Practice Diffie-Hellman:&nbsp;&nbsp;</span><a href="http://dkerr.home.mindspring.com/diffie_hellman_calc.html" style="color: rgb(34, 34, 34);">http://dkerr.home.mindspring.com/diffie_hellman_calc.html</a><span style="color: rgb(34, 34, 34);">&nbsp;&nbsp;</span></li>
+                </ul>
+            </ul>
+            <li><span style="font-weight: bold;">Hashing Encryption</span></li>
+            <ul>
+                <li><span style="line-height: 1.45;">Uses a mathematical process to perform a calculation against the data and return a fixed length hash value.</span></li>
+                <li><span style="line-height: 1.45;">It is a one-way function, meaning it is impossible to use the hash value to deduce the original data.&nbsp;&nbsp;</span></li>
+                <li><span style="line-height: 1.45;">It can be used as a highly effective checksum, seeing if the data has changed.</span></li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>Types of Ciphers</div>
+    <div>
+        <ul>
+            <li>Substitution cipher: changes one character into another</li>
+            <ul>
+                <li>monoalphabetic substitution cipher: a particular character is only changed to one other particular character</li>
+                <li>polyalphabetic substitution cipher: multiple alphabets are used to encrypt data</li>
+            </ul>
+            <li>Transposition Cipher: broke message into blocks, scramble each block and interchange letters in some way</li>
+            <ul>
+                <li>steganographic cipher: hide the secret data inside other data</li>
+                <li>block cipher: split plaintext into blocks and then mathematically encipher data in blocks</li>
+                <ul>
+                    <li>Electronic Code Book (ECB): each block is encrypted independently</li>
+                    <li>Cipherblock Chaining (CBC): use the results of previous block to encrypt current block</li>
+                </ul>
+                <li>stream cipher: each bit of data is sequentially encrypted using one bit of the key</li>
+                <ul>
+                    <li>one-time pads: use&nbsp;&nbsp;different&nbsp;&nbsp;random keys for the encryption</li>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="font-weight: bold;">Message Integrity and Digital Signatures</span></div>
+    <div>Message integrity allows communicating parties to verify that received messages are authentic</div>
+    <div>
+        <ul>
+            <li>content has not been altered, source is who you think it is, message has not been artificially delayed (replay attack), sequence of messages is maintained</li>
+        </ul>
+        <div><span style="font-weight: bold;">Message Digest: digital fingerprint</span></div>
+    </div>
+    <div>
+        <ul>
+            <li>Use one-way, collision-free hash function to transforms message into <span style="text-decoration: underline;">fixed-size string</span></li>
+            <li>used for message integrity check and digital certificates, very fast comparing to encryption</li>
+            <li>longer the length, lower chance of collision and more secure</li>
+            <li>e.g. MD5 (128-bit message), SHA-1 (160-bit), SHA-2 (256-bit)</li>
+            <li><span style="font-weight: bold;">Birthday attack:</span></li>
+            <ul>
+                <li>given N possible hash values, you'll find collisions when you have calculated 1.2 * sqrt(N) values</li>
+            </ul>
+            <li><span style="font-weight: bold;">Rainbow Tables:</span> use precomputation</li>
+            <ul>
+                <li>compute all possible hash mappings and store in a database, when see a hashed value, look up in DB to find what maps to it.</li>
+                <li>Defense: use SALT -&nbsp;&nbsp;</li>
+                <ul>
+                    <li>concatenate a random number to the message, then do hash</li>
+                    <li>SALT is not hidden, it is public, but doesn't help attacker, attacker would have to compute a Rainbow table for each SALT</li>
+                </ul>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div><span style="font-weight: bold;">End Point Authentication</span>: <span style="text-decoration: underline;">want to be sure of the originator of the message</span></div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold;">Message Authentication Codes (MAC)</span>: provide for authentication</li>
+            <ul>
+                <li><u>Sender appends <b>shared secret</b> to the message, then do hash</u>. Send this hash value along with message to the receiver.</li>
+                <li>When receiver gets this message, it appends shared secret to the message it received, and perform hash.</li>
+                <li>Finally, compare two hash values to see if they are the same</li>
+                <li><img src="/images/CS6823/3CCA9F25-DD9F-46A8-B443-241796D70444.png" height="60%" width="60%" /></li>
+            </ul>
+            <li><span style="font-weight: bold;">Playback Attack:</span></li>
+            <ul>
+                <li>attacker can copy a valid message, and play it back again and again to the receiver</li>
+                <li>receiver needs measures to distinguish between the original message and later playback</li>
+                <li>problem is that the shared secret is used over and over again</li>
+                <li>Defense: <span style="font-weight: bold;">Nonce</span> - a number that a protocol will only ever used once in a lifetime</li>
+                <ol>
+                    <li>Alice sends initial message</li>
+                    <li>Bob chooses a random number R as nonce, and send it to Alice</li>
+                    <li>Alice encrypts the nonce using Alice and Bob's symmetric secret key K, and sends the encrypted nonce K(R) in her following message back to bob</li>
+                    <li>Bob will verify if the nonce is the one he generated</li>
+                </ol>
+                <li><span style="line-height: 1.45; text-decoration: underline;">The fact that Alice knows symmetric key and uses it to encrypt a value that lets Bob know that message he receives was generated by Alice.</span></li>
+                <li><span style="line-height: 1.45;">The nonce is used to insure that Alice is "live". <span style="line-height: 1.45; text-decoration: underline;">If the decrypted nonce equals the nonce he sent Alice, then Alice is authenticated.</span></span>
+                </li>
+            </ul>
+            <li><span style="font-weight: bold;">Digital Signatures:</span></li>
+            <ul>
+                <li>Used for entity authentication, data origin authentication, integrity, non-repudiation (someone can't deny they did something in a later time)</li>
+                <li>Sign: encrypt the hash value of a message with Alice's private key, then append the signature to the message</li>
+                <li>Upon receipt of a signed message, decrypt the signature using Alice's public key &nbsp;&nbsp;to get the hash of message. Rehash the received message, and compare two hash values. If they are equal, signature is authentic.</li>
+                <li>Bob thus verifies that Alice signed message (because only she has that private key)</li>
+            </ul>
+            <li><span style="font-weight: bold;">Public Key Certification</span>: need a third party authority to verify the real public key of each entity</li>
+            <ul>
+                <li>Certificate Authorities: binds public key to particular entity E by creating a certificate</li>
+                <li>E (person, router) registers its public key with CA by providing proof of identity to CA</li>
+                <li>certificate containing E's public key is digitally signed by CA</li>
+                <li><img src="/images/CS6823/44739F1C-2BDC-4DC0-A2D2-C32FE9EE7FE4.png" height="60%" width="60%" /></li>
+                <li>When Alice wants Bob's public key:</li>
+                <ul>
+                    <li>gets Bob's certificate</li>
+                    <li>and apply CA's public key to Bob's certificate to get Bob's public key</li>
+                    <li>Trusted CA's public key can be found on browser or OS</li>
+                </ul>
+                <li>Certificate authorities can also have problems:</li>
+                <ul>
+                    <li>some are more trustworthy than others</li>
+                    <li>some have been controlled by government</li>
+                </ul>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><a name="ipsec"></a><span style="font-size: 16pt; font-weight: bold;">6 IPSec/SSL VPNs</span></div>
+    <div><span style="line-height: 1.45;"><span style="line-height: 1.45; font-weight: bold;">IPSec</span>: it is a method for protecting IP datagrams</span>
+    </div>
+    <div>
+        <ul>
+            <li>b/c IP datagrams have no inherent security</li>
+            <li>only sender and receiver have to be IPSec compliant, intermediate routers don't have to know IPsec</li>
+            <li>IPSec Services</li>
+            <ul>
+                <li><b>Confidentiality</b>: hidden data from sniffering</li>
+                <ul>
+                    <li>sending entity encrypts the payload of datagrams</li>
+                </ul>
+                <li><b>Data integrity</b>: protect data from being modified</li>
+                <li><b>Origin authentication</b></li>
+                <li><b>Anti-replay protection</b></li>
+            </ul>
+            <li><span style="font-weight: bold;">Virtual Private Networks (VPNs)</span></li>
+            <ul>
+                <li>A virtual private network where inter-office traffic is sent over public Internet</li>
+                <li>Inter-office traffic is encrypted before entering public internet by using tunneling and encryption</li>
+                <li><img src="/images/CS6823/B78D2FC3-1033-4947-9D72-9770CF4F3456.png" height="60%" width="60%" /></li>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+        <div><span style="line-height: 1.45;">IPSec security protocols</span></div>
+    </div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold;">Authentication Header</span> (AH):</li>
+            <ul>
+                <li>provides <span style="font-weight: bold; text-decoration: underline;">authentication</span> and <span style="font-weight: bold; text-decoration: underline;">integrity</span> of the payload, but the payload itself is not encrypted</li>
+                <li>Use keyed-hash mechanism: insert AH between IP header and the data, the recipient will hash the received packet and compare it with AH</li>
+                <li><img src="/images/CS6823/45C263BA-2EC3-4582-A852-0025994F40A5.png" height="60%" width="60%" /></li>
+            </ul>
+            <li><span style="font-weight: bold;">Encapsulating Security Payload (ESP):</span> most commonly implemented form of IPSec</li>
+            <ul>
+                <li>provides <span style="font-weight: bold; text-decoration: underline;">encryption</span>, <span style="font-weight: bold; text-decoration: underline;">authentication</span> and <span style="font-weight: bold; text-decoration: underline;">integrity</span>.</li>
+                <li>original IP packet is encapsulated with a ESP header and ESP trailer, which is then encapsulated in another IP packet (tunneling). We also append a ESP authentication trailer.</li>
+                <li><img src="/images/CS6823/26A9FF35-CB17-472F-BA93-5B24BEC8A128.png" height="60%" width="60%" /></li>
+                <li>Transport Mode: we don't create addition IP address</li>
+                <ul>
+                    <li>Use this when you have direct connection between two end points</li>
+                </ul>
+                <li>Tunnel mode: encapsulate everything in a new IP header</li>
+                <ul>
+                    <li>Use this when building an IP tunnel between two end points (e.g. conneting two remote offices which are far away from each other). Use tunnel to connect two routers</li>
+                </ul>
+                <li><img src="/images/CS6823/775A4922-23B4-440A-8E9E-A750EE11F4C4.png" height="60%" width="60%" /></li>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div><span style="font-weight: bold;">Internet Key Exchange (IKE)</span></div>
+    <div>
+        <ul>
+            <li>This is a sub protocol within IPSec, used for negotiating key material</li>
+            <li>Can prevent denial of service, replay, man in middle</li>
+            <li><span style="line-height: 1.45;">provides&nbsp;&nbsp;</span><span style="font-weight: bold; line-height: 1.45;">perfect forward secrecy (PFS):</span></li>
+            <ul>
+                <li>If a key is compromised, only the specific session it protected will be revealed to an attacker, previous or future sessions are not affected</li>
+                <li>each key is only for its individual session, and keys are securely deleted after use.&nbsp;&nbsp;</li>
+            </ul>
+            <li>Components:</li>
+            <ul>
+                <li><span style="font-weight: bold;">Internet Security Association and Key Management Protocol (ISAKMP)</span>:</li>
+                <ul>
+                    <li><u>Defines procedures and packets formats to establish, negotiate, modify or delete security associations</u></li>
+                    <li><u>Defines payloads for exchanging key generation and authentication data</u></li>
+                    <li>ISAKMP message consist of header followed by one or more payloads</li>
+                    <ul>
+                        <li><img src="/images/CS6823/1C6CF0C8-2EFC-4278-B374-335AB382E1D7.png" height="60%" width="60%" /></li>
+                    </ul>
+                    <li>Security Association:</li>
+                    <ul>
+                        <li><u>Phase 1: ISKAMP, which is heavier and more secure</u></li>
+                        <li><u>Phase 2: IPSec security association (AH or ESP) lighter and faster</u></li>
+                    </ul>
+                </ul>
+                <li><span style="font-weight: bold;">Oakley</span> Key Determination Protocol:&nbsp;&nbsp;<span style="line-height: 1.45;">a refinement of <span style="line-height: 1.45; text-decoration: underline;">Diffie-Hellman</span></span>
+                </li>
+                <ul>
+                    <li>use <span style="text-decoration: underline;">cookie exchange</span> to thwart DoS attacks</li>
+                    <ul>
+                        <li>attacker can forge source address and force victim to do numberous DH exponentiations to overwhelm it</li>
+                        <li><u>cookie exchange requires that each side send a pseudo-random number (cookie) in the initial message</u>. Usually use hash value of source and destination address, ports and local generated secret value</li>
+                        <li>DH is done only after successful cookie exchange (handshake)</li>
+                    </ul>
+                    <li><u>enable two parties to negotiate group - global parameters of Diffie-Hellman</u></li>
+                    <li>use <u>nonce</u> to protect against replay attacks</li>
+                    <li>enables exchange of Diffie-Hellman public key values</li>
+                    <li><span style="text-decoration: underline;">Authenticates</span> Diffie-Hellman exchange to thwart man-in-the-middle attack</li>
+                    <ul>
+                        <li>Authentication by digital signatures, public-key encryption, or symmetric-key encryption</li>
+                    </ul>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><b>Five Steps of IPSec Operation</b></div>
+    <div>
+        <ol>
+            <li><b>Detect interesting traffic</b>: the VPN devices recognize traffic to protect</li>
+            <ul>
+                <li>split tunnel: define what traffic will go through tunnel, what other will go outside clear text</li>
+            </ul>
+            <li><b>IKE phase 1</b>: <u>the VPN devices negotiate an IKE security policy and establish a secure channel</u></li>
+            <ul>
+                <li><img src="/images/CS6823/28A934DD-1935-4F84-AE91-941CA298D533.png" height="60%" width="60%" /></li>
+                <li>A router can have multiple options for policy sets. Two routers need to agree on a <span style="text-decoration: underline;">matching policy set</span></li>
+                <ul>
+                    <li>e.g. DES, MD5, pre-share, DH1, lifetime (a possible combination)</li>
+                </ul>
+                <li><span style="text-decoration: underline;">authenticate peer</span> by using Pre shared keys, RSA signatures, or RSA Encrypted Nonces</li>
+            </ul>
+            <li><b>IKE phase 2</b>: <u>the VPN devices negotiate IPSec security policy</u> used to protect the IPSec data</li>
+            <ul>
+                <li>negotiates <span style="text-decoration: underline;">IPSec security parameters</span>, <span style="text-decoration: underline;">IPSec transform sets</span>, <span style="text-decoration: underline;">establish IPSec SAs</span></li>
+                <ul>
+                    <li>e.g. transform set: ESP, 3DES, SHA, Tunnel, lifetime (a combination of algorithms and protocols that enact a security policy for traffic)</li>
+                </ul>
+                <li>SA lifetime: need to periodically renegotiate IPSec SAs to ensure security, not keeping a tunnel for too long that a key could be compromised</li>
+                <li>use separate and different security association for different IPsec connections</li>
+                <li>Security Parameter Index (SPI): a number that receiving router can use two determine what policy it should apply to a particular IPSec connection. It is included in the ESP header.</li>
+                <li>Security Association Database (SAD)</li>
+                <ul>
+                    <li>endpoint holds state of its SAs in a SAD where it can locate them during process</li>
+                    <li>when sending IPsec datagram, R1 accesses SAD to determine how to process datagram</li>
+                    <li>when IPsec datagram arrives to R2, R2 examines SPI in IPSec datagram, indexes SAD with SPI and processes accordingly</li>
+                </ul>
+                <li>IPSec sequence number: prevent attacker from sniffing and replaying a packet</li>
+                <ul>
+                    <li>for new SA, sender initialized seq# to 0</li>
+                    <li>each time datagram is sent to SA, sender increments seq# counter, places value in seq# field</li>
+                    <li>receiver will discard packets that are out of order</li>
+                </ul>
+            </ul>
+            <li><b>Data Transfer</b>: the VPN devices apply security services to traffic and then transmit the data</li>
+            <li><b>Tunnel terminated</b>: the tunnel is torn down</li>
+            <ul>
+                <li>by an SA lifetime timeout, or if the packet counter is exceeded, or inactivity for a period of time</li>
+            </ul>
+        </ol>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="font-weight: bold;">SSL/TLS</span></div>
+    <div><b>Secure Sockets Layer</b>: widely deployed security protocol (almost all browsers and web servers), sits between Transport layer and Application layer</div>
+    <div>
+        <ul>
+            <li>Variations: Transport Layer Security (TLS), newer version of SSL</li>
+            <li>provides <u>confidentiality, integrity, authentication</u></li>
+            <li>can operate in a number of modes: w/w.o authentication, encryption, etc.</li>
+            <li>Session: a group of connection</li>
+            <ul>
+                <li>SSL authenticates a session, then all connections within that session are authenticated (speed things up)</li>
+                <li>Each session has a session identifier, peer certificate, master secret, is resumeable</li>
+            </ul>
+            <li>Record Layer protocol operations:</li>
+            <li><b>SSL messages:</b></li>
+            <ul>
+                <li><img src="/images/CS6823/CCAB7AD2-5318-4634-9C3A-18841AD016FA.png" height="60%" width="60%" /></li>
+                <li>ClientHello: session ID, version, compression method, cipher spec, random number (proposals)</li>
+                <li>ServerHello: session ID, version, compression method, cipher spec, random number (selections)</li>
+                <li>ServerKeyExchange: contains key information, depends on algorithm being used&nbsp;&nbsp;</li>
+                <li>ServerHelloDone: indicates to client that server has finished initial negotiation message</li>
+                <li>ClientKeyExchange: established symmetric encryption key information</li>
+                <ul>
+                    <li>e.g. if RSA being used, client generated session key and uses servers public key to encrypt the session key</li>
+                </ul>
+                <li>Finished Message: allow both side to verify that negotiation has been successful and security has not been compromised</li>
+            </ul>
+            <li>Session Resumption:</li>
+            <ul>
+                <li>client/server sends a new Hello message</li>
+                <li>using the Master key already established, new per connections key can be created using the new ClientRandom and ServerRandom</li>
+                <li>Server and client send finished messages to complete the resumption</li>
+                <li>Session resumption is used to avoid expensive initial handshake process</li>
+            </ul>
+            <li><b>SSL Handshake protocol</b>: allows server and client to <span style="text-decoration: underline;">authenticate one another</span> and <span style="text-decoration: underline;">establish security parameters</span></li>
+            <ul>
+                <li><img src="/images/CS6823/C94929F7-45C6-4590-B6D2-EB4D1CE6BB92.png" height="60%" width="60%" /></li>
+            </ul>
+            <li>SSL Alert Protocol: used for SSL related alert and error messages</li>
+            <ul>
+                <li>Two levels of alerts</li>
+                <ul>
+                    <li>Warnings: actions not specified in the spec</li>
+                    <li>Fatal: terminate the connection, invalidate the session</li>
+                </ul>
+                <li><span style="font-weight: bold;">Closure Alerts</span>: client and server should notify each other of connection terminations</li>
+                <ul>
+                    <li>use close_notify alert</li>
+                    <li>Otherwise, <span style="font-weight: bold;">truncation attacks</span> are possible</li>
+                    <ul>
+                        <li>e.g. "Defuse the bomb by removing the red wire, after removing the green wire", what if "after removing the green wire" is never received</li>
+                    </ul>
+                </ul>
+            </ul>
+            <li>SSL Change Cipher Spec Protocol</li>
+            <ul>
+                <li>notify the Record Layer protocol to change cipher specifications (keys, etc.)</li>
+                <li>propose a new cipher that we want to switch to, renew keys</li>
+                <li>Causes pending state to be copied into current state</li>
+                <li><span style="font-weight: bold;">SSL Cipher Suite</span>: &nbsp;&nbsp;a collection of public-key, symmetric encryption, message digest, and key exchange algorithms</li>
+                <ul>
+                    <li>client offers a choice, the server picks one</li>
+                    <li>client and server must agree upon a common suite</li>
+                </ul>
+            </ul>
+            <li>SSL Encryption</li>
+            <ul>
+                <li><b>Pre-master secret</b>: created by client, <u>used to "seed" calculation of encryption parameters</u></li>
+                <ul>
+                    <li>2 bytes of SSL version + 46 random bytes</li>
+                    <li>send encrypted to server using server's public key</li>
+                </ul>
+                <li><b>Master Secret</b>: generated by both parties from premaster secret and random values generated by both client and server</li>
+                <li><b>Key material</b>: A bit stream generated from the master secret and shared random values</li>
+                <li><b>Encryption keys</b>: extracted from the key material</li>
+            </ul>
+            <li>SSL integrity</li>
+            <ul>
+                <li>Compute fixed length <b>Message Authentication Code (MAC)</b> thats includes hash of message, shared secret, sequence number. Then transmit this MAC with the message</li>
+            </ul>
+            <li>SSL Key Exchange Methods</li>
+            <ul>
+                <li>RSA: secret key is encrypted with receiver's public key</li>
+                <li>Fixed Diffie-Hellman: public parameters are embedded in a certificate for the sides requiring authentication</li>
+                <li>Ephemeral Diffie-Hellman: public parameters are signed by the sender</li>
+                <li>Anonymous Diffie-Hellman: Standard Diffie-Hellman</li>
+                <li>Fortezza: KEA is used for key exchange</li>
+            </ul>
+            <li>Security Analysis of SSL</li>
+            <ul>
+                <li>Authentication issues: depends on the validity of certificates and certificate revocation</li>
+                <li>Key exchange issues: avoid the use of anonymous DH&nbsp;&nbsp;</li>
+                <ul>
+                    <li><span style="font-weight: bold;">Man in the middle attack</span></li>
+                    <ul>
+                        <li><b>Simple DoS:</b></li>
+                        <ul>
+                            <li>send an invalid SSL packet with correct TCP values (sequence number...), SSL will ignore it but TCP will accept it. Then when real SSL packet comes in, TCP will ignore it thinking it is a duplicate and SSL layer will never receive the packet</li>
+                        </ul>
+                        <li><b>Cipher Spec Rollback</b></li>
+                        <ul>
+                            <li>SSL V2 doesn't do integrity check on ClientHello, attacker can change security parameters</li>
+                        </ul>
+                        <li><b>Truncation Attack</b></li>
+                        <ul>
+                            <li>SSL V2 depends on TCP FIN/RST for connection termination. But TCP FIN/RST is not authenticated hence attacker can terminate a SSL connection at wish</li>
+                        </ul>
+                    </ul>
+                </ul>
+                <li>Cipher spec negotiation issues: version rollback, algorithm rollback</li>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>VPNs: IPSec and SSL are usually used for VPN type connections</div>
+    <div>
+        <ul>
+            <li>Types of VPN</li>
+            <ul>
+                <li>Site to site VPN: connect two remote network, usually use IPSec</li>
+                <li>Client side VPN: connect &nbsp;&nbsp;a client into a network, usually use SSL</li>
+                <ul>
+                    <li>very common, build into many clients (e.g. browsers), can be web-based</li>
+                    <li>better when don't have the ability to install software on machine or have full control of the clients</li>
+                </ul>
+            </ul>
+            <li>IP Sec VPN:</li>
+            <ul>
+                <li>need to install and configure VPN client software for complete access</li>
+                <li>Encapsulates all IP protocols</li>
+            </ul>
+            <li>SSL VPN:</li>
+            <ul>
+                <li>uses a standard web browser to access limited corporate network resource</li>
+                <li>no separate client software needed</li>
+                <li>uses SSL encryption native to web browsers</li>
+                <li>supports limited TCP-based client/server applications in clientless mode</li>
+                <li>encapsulates all IP protocols with AnyConnect client</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><a name="layer2"></a><span style="font-size: 16pt; font-weight: bold;">7 Layer 2 Switch Security</span></div>
+    <div><span style="font-weight: bold; line-height: 1.45;">Why</span><span style="line-height: 1.45;">: security is only as strong as the weakest link, if layer 2 is compromised, all layers above are compromised</span></div>
+    <div>
+        <br/>
+    </div>
+    <div><b>MAC Attacks</b></div>
+    <div>
+        <ul>
+            <li>MAC address: 48-bit hexadecimal number that represents unique layer two address</li>
+            <ul>
+                <li>first 24-bits: manufacture code, assigned by IEEE</li>
+                <li>second 24-bits: specific interface, assigned by manufacture</li>
+            </ul>
+            <li><span style="font-weight: bold;">CAM table / Content Addressable Memory</span>:&nbsp;&nbsp;</li>
+            <ul>
+                <li><span style="text-decoration: underline;">stores information such as MAC addresses available on physical ports</span> with their associated VLAN parameters.&nbsp;&nbsp;</li>
+                <li>Used for directing traffics from incoming ports to outgoing ports</li>
+                <ul>
+                    <li>When switch has no knowledge about a MAC address, it floods ARPs to all its ports (except incoming port). After receiving a reply, stores information about which MAC address resides on which port.</li>
+                </ul>
+                <li>It has a fixed size, which is a&nbsp;&nbsp;vulnerability.</li>
+                <ul>
+                    <li>Attacker can spoof thousands of MAC addresses and fill up the switch's CAM table.&nbsp;&nbsp;</li>
+                    <li>As a result, the switch has two options:</li>
+                    <ul>
+                        <li>1. Stop forwarding traffics</li>
+                        <li>2. Traffic without a CAM entry is flooded out every port on that VLAN, so attacker can see all traffic</li>
+                    </ul>
+                    <li>This attack will also fill the CAM tables of adjacent switches</li>
+                </ul>
+                <li>Defense: <span style="font-weight: bold;">Port Security</span></li>
+                <ul>
+                    <li>limits the number of MACs can learn on each port, anything after that will be ignored</li>
+                    <li>puts timers in to state how long the MAC address will be kept</li>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><b>VLAN Hopping Attacks</b></div>
+    <div>
+        <ul>
+            <li>Switch trunk port: when you connect two switches together, interconnect two switches with a trunk, so that a single cable will carry traffic to two VLANs</li>
+            <ul>
+                <li><img src="/images/CS6823/Image%201_1.png" height="60%" width="60%" /></li>
+                <li>&nbsp;&nbsp;Trunk ports have access to all VLANs by default</li>
+            </ul>
+            <li>Basic VLAN Hopping Attack</li>
+            <ul>
+                <li><u>Attacker disguises itself to be a switch and send trucking negotiate message to local switch</u>, so that it can have access to VLAN that they are not supposed to have access to.</li>
+                <li>Defense: Disable trunk negotiation with end-points, turn off native VLAN</li>
+            </ul>
+            <li>Double 802.1q Encapsulation VLAN Hopping Attack</li>
+            <ul>
+                <li>attacker can encapsulate packets with two 802.1q headers</li>
+                <li>a switch might strip off the first header, and read the content. It then sends the packet to another switch, and now this packet reaches a VLAN that it is not supposed to have access to.</li>
+                <li><img src="/images/CS6823/Image%202.png" height="60%" width="60%" /></li>
+            </ul>
+            <li>Defense: better to statically configure trunk, less preferred to dynamically configure trunk</li>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div><b>DHCP Attacks</b></div>
+    <div>
+        <ul>
+            <li>DHCP&nbsp;&nbsp;</li>
+            <ul>
+                <li>function: server dynamically assigns IP address on demand, delivers configuration info (default router, DNS server, lease time)</li>
+                <li>usually in the same subnet, but can also be several layer 3 hops away, need proxy</li>
+                <ul>
+                    <li>DHCP packet contains client's MAC address</li>
+                </ul>
+            </ul>
+            <li><span style="font-weight: bold;">DHCP Starvation Attack (DoS)</span></li>
+            <ul>
+                <li>attacker spoofs MAC addresses and tries to lease all the addresses available in the DHCP scope, consumes all ip addresses in the subnet</li>
+                <li>Defense: <span style="font-weight: bold;">Port Security</span></li>
+                <ul>
+                    <li><span style="text-decoration: underline;">restrict the number of MAC addresses on a port</span>, thus will not be able to lease more IP address than MAC addresses allowed on the port</li>
+                </ul>
+            </ul>
+            <li><span style="font-weight: bold;">Rogue DHCP Server Attack:</span></li>
+            <ul>
+                <li>Attacker pretends to be DHCP server, handout fake (DoS) or malicious information (MITM)</li>
+                <li>For example, it sets default gateway address to its machine, so that it can see all traffics</li>
+                <li>client will most likely to accept the fastest offer (fastest wins)</li>
+                <li>Defense: <span style="font-weight: bold;">DHCP Snooping</span></li>
+                <ul>
+                    <li>Switches know which port the real DHCP server resides, specify a trusted port.&nbsp;&nbsp;<span style="line-height: 1.45;">DHCP offers and acks from an untrusted port will be dropped</span></li>
+                    <li>Switches build <span style="font-weight: bold;">binding tables</span> containing <span style="text-decoration: underline;">information about what parameters DHCP server assigned to a particular MAC address</span>. If something strange changes, the switch has a trusted state it can reply on</li>
+                    <li>what if the attacker uses the same interface MAC address, but changes the client hardware address in the DHCP request packet?</li>
+                    <ul>
+                        <li>The switches will check the client hardware address field to make sure it match the hardware MAC in the DHCP snooping binding table</li>
+                    </ul>
+                    <li>If DHCP snooping is not supported, can create firewall rules to only accept DHCP message from port 68 of a known DHCP server. Denying all other DHCP messages.</li>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><b>ARP attacks</b></div>
+    <div>
+        <ul>
+            <li>ARP</li>
+            <ul>
+                <li>function:&nbsp;&nbsp;</li>
+                <ul>
+                    <li>send ARP request to map IP address to the MAC address</li>
+                    <li>the station that matches the IP address will send an ARP reply</li>
+                </ul>
+                <li><span style="line-height: 1.45;"><span style="line-height: 1.45; font-weight: bold;">Gratuitous ARP</span>: <u>client can send an unsolicited ARP reply to insert their info in other hosts' ARP table</u></span>
+                </li>
+                <ul>
+                    <li>No&nbsp;&nbsp;authentication, huge&nbsp;&nbsp;vulnerability, anyone can claim be the owner of any IP/MAC address&nbsp;&nbsp;</li>
+                </ul>
+                <li><b>ARP attack</b>: Poisoning ARP table&nbsp;&nbsp;</li>
+                <ul>
+                    <li>1. to perform man in the middle attacks, can see all the traffics without noticing by the two ends</li>
+                    <li>2. drop all traffics (DoS)</li>
+                </ul>
+                <li>Defense: <span style="font-weight: bold;">Dynamic ARP Inspection</span></li>
+                <ul>
+                    <li>Use the DHCP snooping binding table information</li>
+                    <li>all ARP packets much match the IP/MAC binding table entries</li>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><b>Spoofing Attacks</b></div>
+    <div>
+        <ul>
+            <li>MAC spoofing:&nbsp;&nbsp;<span style="line-height: 1.45;">attacker sends packets with incorrect source MAC address</span></li>
+            <ul>
+                <li>to get network access or to take over someone's identity</li>
+            </ul>
+            <li>IP spoofing:&nbsp;&nbsp;<span style="line-height: 1.45;">attacker sends packets with incorrect source IP address</span></li>
+            <li><span style="line-height: 1.45;">Combine IP and MAC spoofing: traffic now looks like an existing client who is already in that network</span></li>
+            <li><span style="line-height: 1.45;">Defense: <span style="line-height: 1.45; font-weight: bold;">IP Source Guard</span></span>
+            </li>
+            <ul>
+                <li><span style="line-height: 1.45;">uses DHCP snooping binding table information</span></li>
+                <li><span style="line-height: 1.45;">looks at all packets going through the switch, just like Dynamic ARP Inspection, verify that MAC and IP address of the traffic from the interface is in the binding table.</span></li>
+            </ul>
+        </ul>
+        <div><img src="/images/CS6823/Image%203.png" height="60%" width="60%" /></div>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>Attacks on other protocols</div>
+    <div>
+        <ul>
+            <li>Spanning Tree Protocol:&nbsp;&nbsp;</li>
+            <ul>
+                <li>a layer 2 protocol with bridging designed to maintain loop-free topologies in a redundant layer 2 network</li>
+                <ul>
+                    <li>avoiding loops ensures broadcast traffic does not become storms</li>
+                    <li>elect a switch as the root, and establish the topology</li>
+                    <li>sends simple messages using Bridge Protocol Data Units (BPDUs)</li>
+                </ul>
+                <li>Attacks:</li>
+                <ul>
+                    <li>attacker sends BPDU messages to become root bridge and gains highest priority, now see all traffic going through it</li>
+                </ul>
+                <li>Defense:&nbsp;&nbsp;</li>
+                <ul>
+                    <li>Design loop-free topologies where ever possible, to avoid the need for STP</li>
+                    <li>BPDU Guard: configure user-facing ports to not accepct BPDU message</li>
+                    <li>Root Guard: nail down where root switch can be, user-facing port will never be elected as root switch</li>
+                </ul>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><a name="wireless"></a><span style="font-size: 16pt; font-weight: bold;">8 Wireless 802.11 Security</span></div>
+    <div>2.4 GHz&nbsp;&nbsp;</div>
+    <div>
+        <ul>
+            <li><span style="line-height: 1.45;">There are other protocols running in 2.4 GHz spectrum</span></li>
+            <li><span style="line-height: 1.45;">3 non-overlapping channels 1, 6, 11</span></li>
+            <ul>
+                <li><img src="/images/CS6823/A3C1382C-C3DD-41CF-8664-699ABAD07693.png" height="60%" width="60%" /></li>
+            </ul>
+        </ul>
+    </div>
+    <div>5 GHz:&nbsp;&nbsp;</div>
+    <div>
+        <ul>
+            <li><span style="line-height: 1.45;">Higher the frequency, less propagation, smaller range</span></li>
+            <li><span style="line-height: 1.45;">Plenty of channels, do not overlap</span></li>
+            <ul>
+                <li><span style="line-height: 1.45;"><span style="line-height: 1.45; text-decoration: underline;">Dynamic Frequency Selection</span> (DFS): access point will listen on the channel, if see any interference, it will switch channel</span>
+                </li>
+            </ul>
+        </ul>
+    </div>
+    <div><img src="/images/CS6823/Image%204.png" height="60%" width="60%" /></div>
+    <div>
+        <ul>
+            <li>Terminology</li>
+            <ul>
+                <li><span style="font-weight: bold;">Stations</span>: clients (mobile devices, laptops, etc)</li>
+                <li><span style="font-weight: bold;">Access Points (router)</span>: 802.11 frames must be converted in order to communicate with the wired network (bridging function)</li>
+                <li><span style="font-weight: bold;">Basis Service Set (BSS)</span>: Basic building block of all wireless network. one or more stations that communicate with each other</li>
+                <li><span style="font-weight: bold;">Independent BSS (IBSS)</span>: Ad-Hoc network, a network comprised of one or more stations without the use of an access point, point-to-point connection between two stations, no dependency on intermediate access point</li>
+                <li><span style="font-weight: bold;">Infrastructure BSS</span>: network that consists of at least one station and one access point, station to station communication is relayed by the access point, most common</li>
+                <li><span style="font-weight: bold;">Extended Service Set (ESS)</span>: formed by linking BSS's together, multiple access points serving up the same SSID</li>
+                <ul>
+                    <li>e.g. WIFI at school</li>
+                </ul>
+                <li><span style="font-weight: bold;">Multi-BSS</span>: have multiple BSS using the same hardware</li>
+                <ul>
+                    <li>e.g. NYU, NYU-guest</li>
+                </ul>
+                <li><span style="font-weight: bold;">BSS Identifier (BSSID)</span>: usually the MAC address of the access point service the BSS</li>
+                <li><span style="font-weight: bold;">Service Set Identifier (SSID)</span>: a friendly name given to the network</li>
+            </ul>
+        </ul>
+        <div><img src="/images/CS6823/Image%205.png" height="60%" width="60%" /></div>
+    </div>
+    <div><img src="/images/CS6823/Image%206.png" height="60%" width="60%" /></div>
+    <div>From a router R1 in wired network, sending a packet to H1 (802.3 frame). Access point will insert its MAC address in the header, and send it to H1 (802.11 frame).</div>
+    <div><img src="/images/CS6823/Image%207.png" height="60%" width="60%" /></div>
+    <div>When H1 replies back, it will put its MAC address H1 in address 2, put access point's address AP in address 1, and send it to access point. Once access point receives it, it will peel off its MAC address, and convert the packet back into 802.3 frame.</div>
+    <div>
+        <br/>
+    </div>
+    <div>Two types of frames</div>
+    <div>
+        <ul>
+            <li>Data frames: carry data, frame control type "10"</li>
+            <li>Management frames: frame payload contains management info, frame control type "00"</li>
+            <ul>
+                <li><span style="font-weight: bold;">Beacons</span>: messages that <u>announce the existence of a network</u>, contains info such as SSID</li>
+                <li><span style="font-weight: bold;">Probe Requests</span>: send by stations to <u>scan for in-range networks</u></li>
+                <ul>
+                    <li>station will channel hop through all available channels when searching for its networks</li>
+                    <li>can also send broadcast probe requests to solicit a response to any AP in its vicinity</li>
+                </ul>
+                <li><span style="font-weight: bold;">Probe Responses</span>: access points acknowledge a probe request with a probe response <u>to indicate that a compatible network exists</u></li>
+                <li>Authentication: establish the wireless station's identity to the access point</li>
+                <li>Deauthentication: terminates a previously established session</li>
+                <li>Association: recording keeping process where the AP identifies itself as the gateway for a particular wireless stations</li>
+                <li>Disassociation: the process of removing the wireless station from the network</li>
+                <li>Roaming/Reassociation: allow clients to move freely between ESS, or choose another AP with better signal strength</li>
+            </ul>
+            <li><img src="/images/CS6823/4560B74E-4911-4291-AEDF-4368CAAA9915.png" height="60%" width="60%" /></li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>WIFI Security</div>
+    <div>
+        <ul>
+            <li>WEP: already broken, do not use</li>
+            <li>WPA: based on TKIP &amp; 802.1X, breaking, avoid use</li>
+            <li>WPA2: based on AES &amp; 802.1X, support TKIP for backward compatibility</li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="font-weight: bold;">WEP:</span></div>
+    <div>
+        <ul>
+            <li>protect information transmitted by encrypting the data within the 802.11 frame, client uses the initialization vector (IV) stored within the frame head and the WEP key to decrypt the data.</li>
+            <li>Encryption process</li>
+            <ul>
+                <li><span style="font-weight: bold;">CRC-32 ICV (Integrity Check Value):&nbsp;&nbsp;</span></li>
+                <ul>
+                    <li><span style="text-decoration: underline;">compute ICV for the data payload and append to it</span></li>
+                    <li><img src="/images/CS6823/Image%208.png" height="60%" width="60%" /></li>
+                    <li>ICV is not hash value.</li>
+                    <li>It is not secure because it is linear. Attacker can decrypt or tamper with data while leaving ICV correct.</li>
+                </ul>
+                <li><span style="font-weight: bold;">UNIQUE Seed:&nbsp;&nbsp;</span></li>
+                <ul>
+                    <li>the shared secret key is static</li>
+                    <li><span style="text-decoration: underline;">A 24 bit Initialization vector (IV) is concatenated with the key to form a unique seed</span></li>
+                    <li><img src="/images/CS6823/Image%209.png" height="60%" width="60%" /></li>
+                    <li>However, the 24 bit IV will eventually roll over</li>
+                </ul>
+                <li><span style="font-weight: bold;">Keystream</span>:</li>
+                <ul>
+                    <li>The seed is input into RC4 stream cipher which outputs a "keystream" of arbitrary length</li>
+                    <li><img src="/images/CS6823/Image%2010.png" height="60%" width="60%" /></li>
+                </ul>
+                <li><span style="font-weight: bold;">Ciphertext</span></li>
+                <ul>
+                    <li>The plaintext data with CRC-32 ICV value are XORed against the keystream to create ciphertext</li>
+                    <li><img src="/images/CS6823/Image%2011.png" height="60%" width="60%" /></li>
+                </ul>
+            </ul>
+            <li>Decryption process</li>
+            <ul>
+                <li>Receiver uses IV and pre-shared key to reproduce RC4 keystream</li>
+                <ul>
+                    <li><img src="/images/CS6823/Image%2012.png" height="60%" width="60%" /></li>
+                </ul>
+                <li>Then ciphertext is XORed against the RC4 keystream to recover plaintext</li>
+                <ul>
+                    <li><img src="/images/CS6823/Image%2013.png" height="60%" width="60%" /></li>
+                </ul>
+                <li>CRC-32 ICV computed to verify the integrity of the data.</li>
+                <ul>
+                    <li><img src="/images/CS6823/Image%2014.png" height="60%" width="60%" /></li>
+                </ul>
+            </ul>
+            <li><b>Attacks on WEP</b></li>
+            <ul>
+                <li><b>Passive attack</b>: sniff all packets, store offline, attack IV, recover original encryption key</li>
+                <ul>
+                    <li>This works because IV is only 24 bits. If we have enough packets, we will eventually see IV recycle (roll over). If we see two messages encrypted with the exact same key, we can then recover the original message</li>
+                </ul>
+                <li><b>Active attack</b>: generate traffic to get unique IVs, make IV recycle faster</li>
+                <ul>
+                    <li>1. Client sends legitimate encrypted data</li>
+                    <li>2. Attacker observes the traffic and replays it many times</li>
+                    <li>3. AP receives all data, decrypts it and processes it</li>
+                    <li>4. Traffic destined for the wireless network is encrypted with a new IV</li>
+                </ul>
+                <li>AP-Less Attacks (Cafe-latte attack)</li>
+                <ul>
+                    <li>Allows attacker to obtain a WEP key from a client system.</li>
+                    <li>Find a client not associated with a network. Use client's initial DHCP and ARP request to forge our own ARP requests.&nbsp;&nbsp;<span style="line-height: 1.45;">Attacker then impersonates the access point, and gets the client to send ARP reply over and over. Once gather enough traffics, we obtain the WEP key.</span></li>
+                </ul>
+                <li>Evil Twin</li>
+                <ul>
+                    <li>Attacker impersonate an access point, fool clients to join.</li>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="font-weight: bold;">WPA</span>:</div>
+    <div>
+        <ul>
+            <li>A transitional protocol to address the issues in WEP</li>
+            <li>Introduce TKIP and AES:</li>
+            <ul>
+                <li><span style="font-weight: bold;">RC4 - TKIP(Temporal Key Integrity Protocol)</span></li>
+                <ul>
+                    <li>major improvement over WEP but still based on RC4</li>
+                    <li><span style="text-decoration: underline;">increases the size of initialization vector</span> to 48 bits and key size to 128 bits</li>
+                    <li><span style="text-decoration: underline;">Message Integrity Check (MIC)</span> within the frame</li>
+                    <li><span style="text-decoration: underline;">Dynamic Key rotation</span>, periodical rotate key</li>
+                </ul>
+                <li><span style="font-weight: bold;">AES (Advanced Encryption Stanstard)</span></li>
+                <ul>
+                    <li>Counter mode with Cipher Block Chaining - Message Auth Code</li>
+                    <li>Complete redesign and replace WEP and TKIP</li>
+                    <li>Re-keys automatically to derive new sets of temporal keys</li>
+                    <li>Uses packet number field as a counter to provide replay protection</li>
+                </ul>
+            </ul>
+            <li><b>WPA Authentication</b></li>
+            <ul>
+                <li><b>WPA Personal</b> (<b>WPA-PSK</b> [preshared-key])&nbsp;&nbsp;</li>
+                <ul>
+                    <li>a single pre-shared key is distributed to users (most suited for home use)</li>
+                </ul>
+                <li><b>WPA Enterprise</b></li>
+                <ul>
+                    <li>flexible authentication</li>
+                    <ul>
+                        <li>can be user based, computer based, etc</li>
+                        <li>per user Authentication, Authorization, and Accounting (AAA)</li>
+                        <ul>
+                            <li>relying on a user database for authentication, along with a password</li>
+                        </ul>
+                    </ul>
+                    <li><span style="font-weight: bold;">802.1X</span></li>
+                    <ul>
+                        <li>Need authentication with radius server in order to get WIFI access</li>
+                        <li>Supplicant: client attempting to connect to the network</li>
+                        <li>Authenticator: controls access to the network, usually the AP</li>
+                        <li>Authentication server: authorizes user to connect (Radius server)</li>
+                        <li><img src="/images/CS6823/30B123A0-BBD8-49F3-A306-B1654FE83F94.png" height="60%" width="60%" /></li>
+                        <li>Use EAP for message</li>
+                    </ul>
+                    <li><span style="font-weight: bold;">Extensible Authentication Protocol (EAP)</span></li>
+                    <ul>
+                        <li>Four message types:</li>
+                        <ul>
+                            <li>EAP-Request</li>
+                            <li>EAP-Response</li>
+                            <li>EAP-Success</li>
+                            <li>EAP-Failure</li>
+                        </ul>
+                        <li>Support a variety of authentication methods, defined by the "type" field on EAP request/response frames</li>
+                        <ul>
+                            <li>EAP-TLS: Certicate based authentication</li>
+                            <li>LEAP (lightweight): username/password</li>
+                            <li>PEAP/EAP-TTLS/EAP-FAST: certificate + username/password</li>
+                        </ul>
+                        <li><img src="/images/CS6823/AB421A3D-D3AD-4213-9595-0D8A9AC55B9A.png" height="60%" width="60%" /></li>
+                    </ul>
+                </ul>
+                <li>Joining the network</li>
+                <ul>
+                    <li>1. 802.11 Session establishment: standard probe, authentication, association</li>
+                    <li>2. EAP Handshake: generate PMK in WPA enterprise</li>
+                    <li>3. 4-way handshake (between AP and client):&nbsp;&nbsp;<span style="line-height: 1.45;">use PMK to generate/establish encryption keys</span></li>
+                    <li>4. Data communication: successful authentication, now a connected party</li>
+                </ul>
+            </ul>
+            <li>WPA Encryption:</li>
+            <ul>
+                <li>Keying</li>
+                <ul>
+                    <li><span style="font-weight: bold;">Pairwise Master Key (PMK)</span>: used to derive all other keys</li>
+                    <ul>
+                        <li>WPA-Pre-Shared Key: derived by the PSK</li>
+                        <li>WPA-Enterprise: created at the Radius server and distributed</li>
+                    </ul>
+                    <li>The four way handshake: establishes two encryption keys between AP and client</li>
+                    <ul>
+                        <li><span style="font-weight: bold;">Pairwise Transit Key (PTK)</span>: for encrypting unicast 802.11 traffic</li>
+                        <li><span style="font-weight: bold;">Group Temporal Key (GTK)</span>: for encrypting broadcast and multicast 802.11 traffic</li>
+                    </ul>
+                </ul>
+            </ul>
+            <li>Attacks on WPA</li>
+            <ul>
+                <li>Authentication (most common)</li>
+                <ul>
+                    <li>WPA-PSK</li>
+                    <ul>
+                        <li>capture 4-way handshake to deduce PSK using the data in the handshake</li>
+                        <ul>
+                            <li>passively: sniff new client's connection</li>
+                            <li>actively: DoS the client and watch him reconnect</li>
+                        </ul>
+                        <li>launch an offline brute force using a dictionary</li>
+                    </ul>
+                    <li>WPA Enterprise</li>
+                    <ul>
+                        <li>LEAP:&nbsp;&nbsp;<span style="line-height: 1.45;">use MSCHAP, which doesn't use SALT in hashes, so it is very easy to off-line brute force</span></li>
+                        <li><span style="line-height: 1.45;">EAP/TTLs and PEAP: uses SSL tunnel between the client and authentication server</span></li>
+                        <ul>
+                            <li><img src="/images/CS6823/E35FC68B-553A-420B-A3CD-260E7A393AD6.png" height="60%" width="60%" /></li>
+                            <li>Improper certificate validation: since clients commonly configured to ignore this certificate, attacker impersonate an AP and gain access to inner authentication credentials</li>
+                        </ul>
+                    </ul>
+                </ul>
+                <li>Encryption</li>
+                <ul>
+                    <li>can encrypt/decrypt some traffic, thus inject a small number of packets</li>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><a name="monitoring"></a><span style="font-size: 16pt; font-weight: bold;">9 Security Monitoring</span></div>
+    <div>Network Security Monitoring: <span style="text-decoration: underline;">the collection, analysis, and escalation of indications and warnings to detect and respond to network intrusions</span></div>
+    <div>Reasons to monitor:</div>
+    <div>
+        <ul>
+            <li>Actively base lining your network for normal actively and alerting on anomalies can detect a large number of intrusions</li>
+            <li>Layered security is critical. Detection is last line of defense.</li>
+            <li>Can "watch" the intrusion so as to build a case.</li>
+        </ul>
+        <div>Indicators and warnings are a way we can watch a network for evidence that an attacker is starting his attacks or organizing an attack</div>
+    </div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold; line-height: 1.45;">Intrusion Detection System (IDS)</span><span style="line-height: 1.45;">: performs collection and alerts</span></li>
+            <li><span style="line-height: 1.45;">People provide the analysis.</span></li>
+            <li><span style="line-height: 1.45;">Processes guide the&nbsp;&nbsp;escalation&nbsp;&nbsp;of events, bringing the detected event to the attention of individuals who have the authority to response.</span></li>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>Policies for security monitoring:</div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold;">Blacklist monitoring</span>: enumerate threats based on a list of what is not allowed</li>
+            <ul>
+                <li>Not a good idea, have endless bad behaviors, hard to include everything</li>
+            </ul>
+            <li><span style="font-weight: bold;">Anomaly monitoring</span>: establish a baseline for normal activity and generate an alert when the activity deviates from this baseline.</li>
+            <li><span style="font-weight: bold;">Policy monitoring</span>: compare discovered events to what is approved and acceptable as defined by the policy.</li>
+            <ul>
+                <li>white list monitoring, easier to define what is allowed, disallow everything else</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>IDS/IPS Systems</div>
+    <div>IDS:&nbsp;&nbsp;<span style="line-height: 1.45;">Intrusion Detection System</span></div>
+    <div><span style="line-height: 1.45;">IPS: Intrusion Prevention System, the device is inline with traffic and can act on the detected events</span></div>
+    <div><span style="line-height: 1.45;">Efficiency of IDS:</span></div>
+    <div>
+        <ul>
+            <li>Accuracy: low false positive and false negative rates</li>
+            <li>Performance: the rate at which traffic and audit events are processed</li>
+            <li>Fault tolerance: resistance to attacks</li>
+            <li>Timeliness: time elapsed between intrusion and detection</li>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div><span style="line-height: 1.45;">Analysis methods:</span></div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold;">Anomaly Detection</span>: sensor placed on "learning" mode and a network baseline is established over a period of time</li>
+            <ul>
+                <li>attacker can circumvent if they change their behavior slowly</li>
+                <li>lack of training data with real attacks</li>
+                <li>many attacks may be within bounds of normal range of activities</li>
+            </ul>
+            <li><span style="font-weight: bold;">Pattern matching</span>: database of known attacks is loaded as signatures</li>
+            <ul>
+                <li>disadvantage: can only detect known attacks</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>However, IDS can have many false positives.</div>
+    <div><b>Base Rate Fallacy:</b> It is a tendency for people to place too little weight on the base rate of possibility, by not taking into account all&nbsp;&nbsp;relevant&nbsp;&nbsp;information.</div>
+    <div>
+        <br/>
+    </div>
+    <div>.</div>
+    <div>.</div>
+    <div>&nbsp;&nbsp;</div>
+    <div><img src="/images/CS6823/E701426F-66EC-48C0-A279-F5802C5C9A61.png" height="60%" width="60%" /></div>
+    <div>
+        <br/>
+    </div>
+    <div>Where should a IDS be deployed?</div>
+    <div>
+        <ul>
+            <li>Ideally, put IDS everywhere</li>
+            <li>Reality, put it in choke points, where traffic must go through</li>
+            <li>In general, better to put it inside the firewall. Firewall can filter out some internet noise, reduce false alarms</li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>Protocol Decoding: IDS assembles a protocol transaction across a number of packets. Therefore it must maintain state to take a higher level view of transactions.</div>
+    <div>
+        <br/>
+    </div>
+    <div><b>IDS evasion:</b></div>
+    <div>
+        <ul>
+            <li><b>Fragmentation</b>:</li>
+            <ul>
+                <li>Many fragment streams spread out over long period of time</li>
+                <ul>
+                    <li>IDS must have large buffers, requires significant memory and processing power</li>
+                </ul>
+                <li>Send a flood of fragments to saturates the IDS system. Once saturated, IDS will not be able to detect a new attack</li>
+                <li>Fragment packets in unexpected ways such that IDS does not understand how to properly reassemble the attack packets</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>SNORT: popular open source IDS</div>
+    <div>
+        <ul>
+            <li>Enhanced sniffer</li>
+            <li>user can create signature for traffics want to detect</li>
+            <li>Components:</li>
+            <ul>
+                <li>Packet decoder</li>
+                <li>Preprocessor: detect anomalies in packet headers, defragmentation, etc</li>
+                <li>Detection engine: apply rules to packets</li>
+                <li>Logging and alerting system</li>
+                <li>Output modules</li>
+            </ul>
+        </ul>
+    </div>
+    <div>Netflow</div>
+    <div>
+        <ul>
+            <li>Provides network and security monitoring, network planning, traffic analysis, and IP accounting</li>
+            <li>collect metadata of packets</li>
+            <ul>
+                <li>flow is defined by seven unique keys</li>
+                <ul>
+                    <li>source IP address</li>
+                    <li>destination IP address</li>
+                    <li>source port</li>
+                    <li>destination port</li>
+                    <li>layer 3 protocol</li>
+                    <li>TOS</li>
+                    <li>input interface</li>
+                </ul>
+            </ul>
+            <li>The same attacks will have the same/similar flow entries</li>
+            <li><span style="line-height: 1.45;">How to identify a security attack?</span></li>
+        </ul>
+    </div>
+    <div>
+        <ul>
+            <li>Sudden increase in overall traffic</li>
+            <li>Higher CPU and memory utilization of network devices</li>
+            <li>Unexpectedly large amount of traffic generated by individual hosts</li>
+            <li>Increased number of NetFlow flows generated</li>
+            <li>Multiple NetFlow records with abnormal content</li>
+            <li>A changed mix of traffic applications</li>
+            <li>An increase of certain traffic types and messages</li>
+            <li>An increasing number of ACL violations</li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><b>Honeypots/Honeynets</b></div>
+    <div>
+        <ul>
+            <li>Honeypot is an information system resource that is meant to look like a valuable resource to attract attackers. normal user won't touch it</li>
+            <li>Honeynet is a network of honeypots</li>
+            <li>Types:</li>
+            <ul>
+                <li>Low-interaction:</li>
+                <ul>
+                    <li>emulates services, applications, and OSs</li>
+                    <li>easier to deploy, low risk, but only capture limited info, easier to be detected by attacker</li>
+                </ul>
+                <li>High-interaction:</li>
+                <ul>
+                    <li>real service, application and OSs with vulnerability</li>
+                    <li>capture extensive information but high risk and hard to maintain</li>
+                </ul>
+                <li>Server honeypots</li>
+                <ul>
+                    <li>listen for incoming network connections</li>
+                    <li>analyze attacks targeting host's users</li>
+                </ul>
+                <li>Client honeypots</li>
+                <ul>
+                    <li>pretend to be clients, reach out and interact with remote potentially malicious resources</li>
+                    <li>analyze attacks targeting clients and users</li>
+                </ul>
+            </ul>
+            <li>Server honeypots: self-contained honeynet data control, data capture, and data management system</li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><a name="firewall"></a><span style="font-size: 16pt; font-weight: bold;">10 Firewalls and Perimeter Security</span></div>
+    <div>Network Perimeter Security: <u>Data firewall isolates an internal net from an untrusted network</u> (e.g. the Internet). <u>Control flows between different zones</u>.</div>
+    <div>Firewall rules are checked from top to bottom one by one, whichever matches first wins. If no match, drop the packet by default.</div>
+    <div>Types of firewalls:</div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold; line-height: 1.45;">Router based:</span> <span style="line-height: 1.45;">analyze datagrams going through it, traffics between two networks</span></li>
+            <ul>
+                <li><span style="font-weight: bold;">Packet filtering firewall</span>: ACL, on traditional router, blindly look at rules</li>
+                <li><span style="font-weight: bold;">Stateful inspection firewall</span>:&nbsp;&nbsp;</li>
+                <ul>
+                    <li>follow rules, but also track states of connections (e.g. TCP) by remembering past packets</li>
+                    <li>maintain a stateful table to keep track of connection states</li>
+                    <ul>
+                        <li>log each TCP connection initiated through firewall</li>
+                        <li>Timeout entries which see no activity</li>
+                    </ul>
+                </ul>
+            </ul>
+            <li><span style="font-weight: bold;">Host based</span>: designed to protect the computer on which it is installed, protect host OS</li>
+            <li><span style="font-weight: bold;">Proxy/Gateways:</span></li>
+            <ul>
+                <li><span style="font-weight: bold;">Application proxy</span>: at application level, terminating connection, re-originate connection (FTP proxy)</li>
+                <ul>
+                    <li>1. Client sends a request to the server</li>
+                    <li>2. Proxy intercepts the request, terminates it, re-originates request on its behave to the server</li>
+                    <li>3. Server replies to the proxy</li>
+                    <li>4. Proxy re-originate reply to the client</li>
+                    <li><span style="text-decoration: underline;">The proxy can inspect the application data at any level of detail</span>. Can be&nbsp;&nbsp;configured&nbsp;&nbsp;to filter specific user applications</li>
+                </ul>
+                <li><span style="font-weight: bold;">Circuit-level proxy</span>:&nbsp;&nbsp;</li>
+                <ul>
+                    <li>A transport level gateway,&nbsp;&nbsp;<span style="line-height: 1.45;">re-originate connection at circuit-level</span></li>
+                    <li><span style="line-height: 1.45;">can do IPv4 NAT</span></li>
+                </ul>
+                <li><span style="line-height: 1.45;">Advantages of&nbsp;&nbsp;Proxy/Gateways:</span></li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <ul>
+            <ul>
+                <li>can log all connections, activity in connection</li>
+                <li>can do intelligent filtering based on content</li>
+            </ul>
+            <li><span style="line-height: 1.45;">Disadvantages of&nbsp;&nbsp;Proxy/Gateways:</span><span style="line-height: 1.45;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></li>
+        </ul>
+    </div>
+    <div>
+        <ul>
+            <ul>
+                <li>Not available for all services</li>
+                <li>requires modification of client</li>
+                <li>performance</li>
+            </ul>
+            <li>Deep Inspection Application Gateways</li>
+            <ul>
+                <li>similar to application proxy, but without terminating connection.</li>
+                <li>can dig into payload data, recognize application</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="font-weight: bold;">Network Address Translation (NAT)</span></div>
+    <div>
+        <ul>
+            <li>translates public IP address to private IP address</li>
+            <li><span style="font-weight: bold;">Static NAT</span>: permnanent mapping of public to private addresses</li>
+            <li><span style="font-weight: bold;">Dynamic Mapping</span>: map when needed</li>
+            <li><span style="font-weight: bold;">PAT (Port Address Translation)</span>: multiple internal addresses mapped to same public address but with different port numbers</li>
+            <li>Process:</li>
+            <ul>
+                <li><img src="/images/CS6823/5DAB0CD0-73B7-4B0E-B60F-20B6C68DA84B.png" height="60%" width="60%" /></li>
+                <li>First build a packet with private IP address and use ephemeral port</li>
+                <li>Then router translate source IP address to public IP address, map private IP and port number to public IP and port number on outside interface</li>
+                <li>The destination server replies to public IP address and outside port number, router then translate public IP address and port number back to private ones.</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>TLS/SSL Stripping in firewalls</div>
+    <div>
+        <ul>
+            <li>In order to inspect TLS, proxy must pretend to be external TLS server</li>
+            <li>Proxy creates proxy server certificates that are trusted by internal machines.</li>
+            <li><span style="text-decoration: underline;">Proxy terminates TLS at firewall, then re-originate TLS to outside network</span></li>
+            <li><img src="/images/CS6823/3147B41F-5532-422B-A708-805193E78306.png" height="60%" width="60%" /></li>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>DeMilitarized Zone (DMZ)</div>
+    <div>
+        <ul>
+            <li>Place services that are public available in DMZ, separate from internal networks</li>
+            <li>a way to separate trust levels</li>
+            <li><img src="/images/CS6823/3174F277-B579-4131-99FD-BA97A23F32F2.png" height="60%" width="60%" /></li>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>Netfilter</div>
+    <ul>
+        <li>A set of hooks inside the Linux kernel that allows kernel modules to register callback functions with the network stack. A registered callback function is then called back for every packet that traverses the respective hook within the network stack.</li>
+    </ul>
+    <div>IPtables</div>
+    <div>
+        <ul>
+            <li>IPtables is the successor if IPchains</li>
+            <li>IPtables is stateful, while IPchains is not.</li>
+            <li>A generic table structure for the definition of rulesets (ACL).</li>
+            <li>rules:&nbsp;&nbsp;<span style="line-height: 1.45;">Tables; commands; classifiers; actions;</span></li>
+            <ul>
+                <li><span style="line-height: 1.45;">Tables:</span></li>
+                <ul>
+                    <li><span style="line-height: 1.45;">FILTER</span></li>
+                    <ul>
+                        <li><span style="line-height: 1.45;">Chains: a chain consists of a set of rules</span></li>
+                        <ul>
+                            <li><span style="line-height: 1.45;">INPUT: incoming packet desitined to firewall</span></li>
+                            <li><span style="line-height: 1.45;">OUTPUT: outgoing packet originated from firewall</span></li>
+                            <li><span style="line-height: 1.45;">FORWARD: all packets passing through the firewall</span></li>
+                        </ul>
+                    </ul>
+                    <li><span style="line-height: 1.45;">NAT</span></li>
+                    <ul>
+                        <li><span style="line-height: 1.45;">DNAT (Destination NAT): deal with packets from Internet to our&nbsp;&nbsp;</span>Internet<span style="line-height: 1.45;">&nbsp;&nbsp;exposed servers</span></li>
+                        <li><span style="line-height: 1.45;">SNAT (static NAT): translates only the IP addresses, port number is preserved. (faster)</span></li>
+                        <li><span style="line-height: 1.45;">MASQUERADE: multiplex all internal traffics to a single outside IP address</span></li>
+                    </ul>
+                    <li><span style="line-height: 1.45;">MANGLE</span></li>
+                </ul>
+            </ul>
+            <li><span style="line-height: 1.45;">Can use Netfilter/IPtables to:</span></li>
+            <ul>
+                <li>build internet firewalls</li>
+                <li>use NAT to implement transparent proxies</li>
+                <li>build Quality of Service and policy-based routing</li>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><a name="ipv6-intro"></a><span style="font-size: 16pt; font-weight: bold;">11 IPv6 Introduction</span></div>
+    <div>Why IPv6?&nbsp;&nbsp;<span style="line-height: 1.45;">more IP addresses.</span></div>
+    <div><span style="line-height: 1.45;">Why not NAT?&nbsp;&nbsp;</span></div>
+    <div>
+        <ul>
+            <li>breaks end-to-end model and slow down growth of transparent application</li>
+            <li>break security, complicates mergers</li>
+        </ul>
+    </div>
+    <div>Benefits of IPv6</div>
+    <div>
+        <ul>
+            <li>Huge address space: 2^128</li>
+            <li>Simplified header format: more efficient packet handling, removed checksum, fragmentation moved to end hosts</li>
+            <li>Hierarchical&nbsp;&nbsp;network architecture: routing efficiency</li>
+            <li>Auto-configuration&nbsp;&nbsp;and plug-and-play support</li>
+        </ul>
+        <div><img src="/images/CS6823/Image%2015.png" height="60%" width="60%" /></div>
+    </div>
+    <div>Ipv6 base header is fixed 40 bytes.</div>
+    <div>Next header tells you what is following next.</div>
+    <div><img src="/images/CS6823/Image%2016.png" height="60%" width="60%" /></div>
+    <div><span style="font-weight: bold;">MTU Issues:</span></div>
+    <div>
+        <ul>
+            <li><u>Minimum link MTU for v6 is 1280 octets</u> (vs 68 octets for v4), r<span style="line-height: 1.45;">equires every link in the internet to have an MTU of this size.</span></li>
+            <ul>
+                <li>On any link that cannot convey a 1280-octet packet in one piece, link&nbsp;&nbsp;specific&nbsp;&nbsp;fragmentation and reassembly must be provided at a layer below IPv6</li>
+            </ul>
+            <li><span style="font-weight: bold;">Path MTU Discovery</span></li>
+            <ul>
+                <li>use ICMPv6 message "Path MTU Discovery"</li>
+                <li>sender sends this message, some router will reply its MTU if the packet is too big. After sender receives the MTU value, it will resend.</li>
+                <ul>
+                    <li>In v6, first ping message might timeout, because the MTU is too big and message get dropped</li>
+                </ul>
+            </ul>
+        </ul>
+        <div><span style="font-weight: bold;">Addressing:</span></div>
+    </div>
+    <div>
+        <ul>
+            <li>IPv6 128bits vs IPv4 32 bits: 2^96 times more addresses</li>
+            <li>Represented as 32 numbers (4-bit&nbsp;&nbsp;hexadecimal) that are&nbsp;&nbsp;separated&nbsp;&nbsp;by ":" in group of 4&nbsp;&nbsp;</li>
+            <li>Abbreviations possible:</li>
+            <ul>
+                <li>contiguous "0000" blocks can be represented by :: (can only appear once)</li>
+                <li>leading 0 can be omitted</li>
+                <li>multiple 0 can be reduced to one</li>
+                <li>e.g.</li>
+                <ul>
+                    <li>2001:0db8:0000:130F:0000:0000:087C:140B</li>
+                    <li>2001:db8:0:130F::87C:140B</li>
+                </ul>
+            </ul>
+            <li>Prefix representation just like CIDR, use slash notation to attach prefix length</li>
+            <ul>
+                <li>e.g. 2001:db8:12::/48</li>
+            </ul>
+            <li>Address representation</li>
+            <ul>
+                <li>loopback&nbsp;&nbsp;address ::1</li>
+                <li>unspecified address ::</li>
+            </ul>
+            <li>Addressing Model</li>
+            <ul>
+                <li><u>Interface expected to have multiple addresses</u></li>
+                <li>Addresses have lifetime</li>
+                <li><b>Address scopes</b></li>
+                <ul>
+                    <li><span style="font-weight: bold;">Aggregatable Global Unicast Address</span>: for generic use of IPv6, structured as a hierarchy to keep aggregation</li>
+                    <ul>
+                        <li>start with 2 or 3</li>
+                    </ul>
+                    <li><span style="font-weight: bold;">Unique Local</span>: for local communications, inter-site VPNs, not routable on the internet</li>
+                    <ul>
+                        <li>It is unique to each individual organization (e.g. lab, office)</li>
+                        <li>can generate using ULA v6 calculate, use an algorithm to generate non-routable address, based on mac address, unique point in time, and a random number</li>
+                        <li>when two networks merge, should not have conflicts because local addresses are unique.&nbsp;&nbsp;</li>
+                        <li>start with FC00::/7</li>
+                    </ul>
+                    <li><span style="font-weight: bold;">Link Local</span>: for communications between two devices on the same local network</li>
+                    <ul>
+                        <li>Mandatory address for communication between two IPv6 device</li>
+                        <li>Automatically assigned by router as soon as IPv6 is enabled, also has another global address for communications to outside network</li>
+                        <li>only link specific scope</li>
+                        <li>start with FE80::/10</li>
+                    </ul>
+                </ul>
+                <li><b>Address types:</b></li>
+                <ul>
+                    <li><span style="font-weight: bold;">Unicast</span>: address of a single interface, for one-to-one delivery to single interface</li>
+                    <ul>
+                        <li>ways of generating unicast addresses</li>
+                        <ul>
+                            <li><span style="font-weight: bold;">EUI-64</span>: derived from MAC address (48bits). Split MAC address, insert FFFE (16bits) to the center</li>
+                            <li>Use pseudo-random number (for privacy)</li>
+                            <li>Assigned via DHCP</li>
+                            <li>Manually configured</li>
+                        </ul>
+                    </ul>
+                    <li><span style="font-weight: bold;">Multicast</span>: address of a set of interfaces, for one-to-many delivery to all interfaces in the set</li>
+                    <ul>
+                        <li>start with FF00::/8</li>
+                        <li>the second octet defines the lifetime and scope</li>
+                        <li>there are well known multicast addresses for different purposes</li>
+                    </ul>
+                    <li><span style="font-weight: bold;">Anycast</span>: address of a set of interfaces. One-to-one-of-many delivery to a single interface in the set that is closest</li>
+                    <ul>
+                        <li>e.g. Google DNS server 8.8.8.8</li>
+                    </ul>
+                    <li><span style="text-decoration: underline;">No more broadcast addresses, no ARP</span></li>
+                </ul>
+            </ul>
+            <li>Prefix allocation</li>
+            <ul>
+                <li>IANA&nbsp;&nbsp;assigns&nbsp;&nbsp;address to different regional authority. Regional authority distributes addresses to ISPs.&nbsp;&nbsp;<span style="line-height: 1.45;">The site/individual gets address from ISPs.</span></li>
+                <li><span style="line-height: 1.45; text-decoration: underline;">The longest subnet mask permitted is /64.</span></li>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div><img src="/images/CS6823/Image%2017.png" height="60%" width="60%" /></div>
+    <div><span style="font-weight: bold;">ICMPv6</span></div>
+    <div>
+        <ul>
+            <li>Significant change from ICMPv4, more relied upon</li>
+            <li>similar message types: Destination unreachable, packet too big, time exceeded, parameter problem, echo request/reply</li>
+        </ul>
+    </div>
+    <div><span style="font-weight: bold;">Neighbor Discovery</span></div>
+    <div>
+        <ul>
+            <li>Uses ICMPv6 message, r<span style="line-height: 1.45;">eplaces ARP</span></li>
+            <ul>
+                <li><span style="line-height: 1.45;">very similar to ARP, but on top of ICMPv6, and use multicast</span></li>
+            </ul>
+            <li>Five messages, use link-local address</li>
+            <ul>
+                <li><span style="font-weight: bold;">Router solicitation (RS)</span>: sent by booting nodes to request RAs for configuring the interfaces</li>
+                <li><span style="font-weight: bold;">Router advertisement (RA)</span>: routers send periodic RA to all-nodes multicast address</li>
+                <li><span style="font-weight: bold;">Neighbor solicitation (NS)</span>: similar to ARP request</li>
+                <li><span style="font-weight: bold;">Neighbor advertisement (NA)</span>: similar to ARP reply</li>
+                <li>Redirect</li>
+            </ul>
+            <li>Duplicate Address Detection (DAD)</li>
+        </ul>
+    </div>
+    <div><span style="font-weight: bold;">DNS</span></div>
+    <div>
+        <ul>
+            <li>IPv6 Address Resource Records (RR): AAAA (quad A record)</li>
+            <li>Pointer record (PTR) / reverse lookup records: map IP address to the domain name</li>
+            <ul>
+                <li>v6 reverse lookup addresses have a different format</li>
+            </ul>
+        </ul>
+        <div><span style="font-weight: bold;">DHCP</span></div>
+    </div>
+    <div>
+        <ul>
+            <li><img src="/images/CS6823/Image%2018.png" height="60%" width="60%" /></li>
+            <li>Use multicast to find DHCP server, then DHCP reply back using Unicast</li>
+            <li>Process:</li>
+            <ul>
+                <li>Client first detect the presence of routers on the link</li>
+                <li>if found, then examines router advertisements to determine if DHCP can be used</li>
+                <li>If no router found or if DHCP can be used, then send DHCP Solicit messages to the All-DHCP-Agents multicast-addresses</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="font-weight: bold;">IPv4/IPv6 Transition &amp; Coexistence</span></div>
+    <div>
+        <ul>
+            <li>Three categories of techniques:</li>
+            <ul>
+                <li><span style="font-weight: bold;">Dual-stack</span>: allow IPv4 and IPv6 to co-exist in the same devices and networks</li>
+                <ul>
+                    <li>most common</li>
+                    <li>can run v4 and v6 in parallel, usually give v6 higher priority</li>
+                    <li>can switch back and forth between v4 and v6, choose the one performance better to give user a better experience</li>
+                    <li>routers need to keep track of both v4 and v6 routing table</li>
+                    <li>devices know whether a packet is v4 or v6 by looking at the frame protocol ID</li>
+                    <li>query DNS for both v4 and v6 records</li>
+                </ul>
+                <li><span style="font-weight: bold;">Tunneling</span>: tunnel v6 traffics through v4 network</li>
+                <ul>
+                    <li>avoid order dependencies when ungrading hosts, routers, or regions</li>
+                    <li>e.g. GRE tunnel, or manually configured tunnel</li>
+                    <li>6 to 4 tunnel:</li>
+                    <ul>
+                        <li>automatic tunnel method using 2002:IPv4::/48 range</li>
+                        <li>IPv6 address[17:48] is IPv4 address of the gateway router where the tunnel should terminate</li>
+                        <ul>
+                            <li>e.g. 2002:<u>c80f:0f01</u>:: &nbsp;&nbsp;--> &nbsp;&nbsp;200.15.15.1</li>
+                        </ul>
+                        <li>tunnel endpoints have to be IPv4 and IPv6 aware (dual stack)</li>
+                    </ul>
+                    <li>6 to 4 Relay service:</li>
+                    <ul>
+                        <li>use anycast address 192.88.99.1 for closest 6 to 4 relay routers that ISP setup</li>
+                        <li>User can initiate tunnels to this address which in turn will connect you to v6 network</li>
+                    </ul>
+                </ul>
+                <li><span style="font-weight: bold;">Translation</span>: translate between v4 and v6</li>
+                <ul>
+                    <li>allow IPv6-only devices to communicate with IPv4-only devices</li>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><a name="ipv6-security"></a><span style="font-size: 16pt; font-weight: bold;">12 IPv6 Security</span></div>
+    <div><span style="font-weight: bold;">Reconnaissance:</span></div>
+    <div>
+        <ul>
+            <li>impossible to scan the whole subnet because of huge address space, smallest subnet is /64</li>
+            <ul>
+                <li>potential&nbsp;&nbsp;DoS attacks on routers by keep asking routers to do neighbors discovery</li>
+                <li>for point-to-point link between two routers in the core of a network, can have subnets that are smaller than /64</li>
+            </ul>
+            <li>Possible scanning methods</li>
+            <ul>
+                <li>More information will be on DNS due to increased deployment/reliance on dynamic DNS</li>
+                <ul>
+                    <li>Dynamic DNS: DHCP server will update DNS records when ip address changes</li>
+                </ul>
+                <li>Using peer-to-peer clients gives IPv6 addresses of peers</li>
+                <li>administrators may adopt easy-to-remember addresses</li>
+                <li>by compromising hosts in a network, an attacker can learn new addresses to scan by looking into network cache</li>
+            </ul>
+            <li><u>Use pre-defined multicast addresses to find specific servers</u> that we are looking for</li>
+            <ul>
+                <li>e.<span style="line-height: 1.45;">g. all-routers (FF05::2),&nbsp;&nbsp;</span><span style="line-height: 1.45;">mDNSv6 (FF05::FB),&nbsp;&nbsp;</span><span style="line-height: 1.45;">all DHCP servers (FF05::1:3)</span></li>
+                <li><span style="line-height: 1.45;">no longer need reconnaissance</span></li>
+            </ul>
+        </ul>
+        <div><span style="font-weight: bold;"><br/></span></div>
+        <div><span style="font-weight: bold;">IPv6 Privacy Extensions</span></div>
+    </div>
+    <div>
+        <ul>
+            <li>If we use EUI-64 method to generate v6 address, when we move to another network, first 64 bits of network address changes, but last 64 bits don't.&nbsp;&nbsp;</li>
+            <li>Becomes a super cookie, the site can recognize you and know you are at a different network.</li>
+            <li>Use privacy&nbsp;&nbsp;extensions&nbsp;&nbsp;to protect privacy. Generate random 64 bit interface ID, and run Duplicate Address Detection before using it.</li>
+            <li>Hard to define authorization policy when users IPv6 addresses keeps changing</li>
+            <li>Recommendation: use privacy extension for external communication, use EUI-64 for internal traffics for easier access control and backward&nbsp;&nbsp;compatibility</li>
+        </ul>
+    </div>
+    <div><span style="font-weight: bold;"><br/></span></div>
+    <div><span style="font-weight: bold;">Level 3 Spoofing</span></div>
+    <div>
+        <ul>
+            <li>Spoofing is still similar, but defense is slightly deffierent</li>
+            <li>Primary defense: <span style="font-weight: bold;">Unicast Reverse Path Forward (uRPF)</span></li>
+            <ul>
+                <li>look at the router when packets coming in, whether we have a route to that source address in the routing table. If an address is spoofed, we don't have a route.</li>
+                <li>Loose mode: no route to the address</li>
+                <li>Strict mode: no route to that address from the inbound interface</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><b>ICMPv6</b></div>
+    <div>
+        <ul>
+            <li>Significant changes, ICMP policy on firewalls needs to change</li>
+            <ul>
+                <li>e.g. need to allow "packet too big" message to enable MTU discovery</li>
+            </ul>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><b>Parsing the Extension Header Chain</b></div>
+    <div>
+        <ul>
+            <li>finding the layer 4 information is not easy in v6</li>
+            <ul>
+                <li>Skip all known extension headers</li>
+                <li>until either known layer 4 header found (SUCCESS)</li>
+                <li>or unknown extension header/layer 4 header found (FAILURE)</li>
+                <li>or end of extension header (FAILURE)</li>
+            </ul>
+            <li>Attacks:</li>
+            <ul>
+                <li>Incorrect ordering</li>
+                <li>Put a huge chain of extension headers, exhaust end station resources (DoS)</li>
+            </ul>
+            <li><span style="line-height: 1.45;">Fragment Header:</span></li>
+        </ul>
+    </div>
+    <div>
+        <ul>
+            <ul>
+                <li>Even though IPv6 fragmentation is done only by end system, if we use tunnels, tunnel end-points are end systems. Thus, re-assembly can happen inside the network</li>
+                <li>Attacker can fragment in intermediate system on purpose, great obfuscation tool</li>
+            </ul>
+            <li>Extension headers chain can be so large that it is fragmented</li>
+            <ul>
+                <li>First fragment is all extension header</li>
+                <li>Second fragment contains data</li>
+                <li>can be used to bypass firewall because cannot find matching rules, let first one pass through, then let second pass through b/c already let first one pass through</li>
+            </ul>
+            <li>Routing Header&nbsp;&nbsp;</li>
+            <ul>
+                <li>processed by the listed intermediate routers, can be use like source routing, which allows end stations to specify which hops to take</li>
+                <li>bad for security, can be used to bypass firewalls and other security control</li>
+                <li><span style="line-height: 1.45;">Amplification attack (ping-pong attack):</span></li>
+                <ul>
+                    <li>attacker sends a packet with routing header containing (A-&gt;B-&gt;A-&gt;B-A-&gt;B....)</li>
+                    <li>packet will loop multiple time on the the link (amplified)</li>
+                </ul>
+                <li><span style="line-height: 1.45;">Defense:</span></li>
+                <ul>
+                    <li><span style="line-height: 1.45;">block Routing Header type 0</span></li>
+                    <li>turn off ipv6 source-route</li>
+                </ul>
+            </ul>
+        </ul>
+    </div>
+    <div><span style="font-weight: bold;"><br/></span></div>
+    <div><span style="font-weight: bold;">Neighbor Discovery Issue</span></div>
+    <div>
+        <ul>
+            <li>RA/RS does not have any authentication, similar to ARP spoof, now NDP spoofing</li>
+            <li>Attacker can pretend to be a router by sending out fake RA, can then do DoS or MITM</li>
+            <li>Defense:&nbsp;&nbsp;</li>
+            <ul>
+                <li><span style="font-weight: bold;">Secure Neighbor Discovery (SEND):&nbsp;&nbsp;</span><span style="line-height: 1.45;">NDP + crypto, using digital certificate, but slower</span></li>
+                <li>use private VLAN</li>
+                <li>use Port security</li>
+                <li>use 801.x: an authentication mechanisum to devices withing to attach to a LAN or WLAN</li>
+            </ul>
+        </ul>
+    </div>
+    <div><span style="font-weight: bold;"><br/></span></div>
+    <div><span style="font-weight: bold;">Broadcasts(Multicast) Issue</span></div>
+    <div>
+        <ul>
+            <li>Broadcast address can be used for amplification attacks (DoS)</li>
+            <ul>
+                <li>e.g. spoof source address of ICMP request message to be victim, send it to broadcast address, then all machines on the subnet will reply back to the victim</li>
+            </ul>
+            <li>No broadcast address in v6, but multicast address can be used for same purpose</li>
+            <li>Defense: anti spoofing blocks&nbsp;&nbsp;amplification&nbsp;&nbsp;attacks</li>
+        </ul>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div><span style="font-weight: bold;">IPv6 specific issues</span></div>
+    <div>
+        <ul>
+            <li><span style="font-weight: bold;">Header manipulation</span></li>
+            <ul>
+                <li>Unlimited size of header chain can make filtering difficult, don't know where to stop inspecting headers</li>
+                <li>DoS with poor IPv6 stack implementations</li>
+            </ul>
+            <li><span style="font-weight: bold;">IPsec Issues:</span></li>
+            <ul>
+                <li>IPv6 mandates the implementation of IPsec</li>
+                <li>But if use IPsec everywhere, many security measure becomes useless as they need traffics to be unencrypted</li>
+                <li>recommendation: do not use IPsec for end-to-end connection within an administrative domain</li>
+            </ul>
+            <li><span style="font-weight: bold;">Transition challenges</span></li>
+            <ul>
+                <li><span style="font-weight: bold;">Dual-stack</span>: need to consider security for both protocols</li>
+                <ul>
+                    <li>Some devices are not&nbsp;&nbsp;knowledgeable&nbsp;&nbsp;about v6. v4 firewall might work fine, but v6 firewall is not enabled. Attacker can step around the rules you created.</li>
+                    <li>Dual-stack is enabled by default. Whether or not you have v6 network configured, it is still on and&nbsp;&nbsp;communicating. Even though you are not aware of it, attacker can still send router advertisement to configure your host silently to v6 and step by your security control.</li>
+                </ul>
+                <li><span style="font-weight: bold;">Tunnels</span>: bypass firewalls, can cause asymmetric traffic, hence breaking stateful firewalls</li>
+                <ul>
+                    <li>Most transition mechanisms have no authentication built in</li>
+                    <li>An IPv4 attacker can inject traffics into tunnel traffics if spoofing on IPv4 and IPv6 addresses (DoS)</li>
+                    <li>ISATAP: Allows end station to interoperate with v6 network</li>
+                    <ul>
+                        <li>ISATAP router is the router which all end stations talk to</li>
+                        <li>attacker can pretend to be ISATAP router</li>
+                        <li>Direct communication is allowed, doesn't have to go through centralized router (bypass firewall)</li>
+                    </ul>
+                    <li>6 to 4 tunnels bypass ACL</li>
+                    <ul>
+                        <li>all traffics between routers are supposed to go through centralized relay, because there are firewalls and ACL</li>
+                        <li>but we can have direct tunnels between spoken routers, which can bypass ACL</li>
+                    </ul>
+                </ul>
+            </ul>
+        </ul>
+        <div>
+            <br/>
+        </div>
+    </div>
+    <div>Teredo: a tunneling mechansim on windows by default</div>
+    <div>
+        <ul>
+            <li>try to reach out to Teredo servers out on internet to establish v6 connectivity (tunnel)</li>
+            <li>designed to work with NAT</li>
+            <li>With Teredo, we have a tunnel established between point to point connection on the Internet and intranet, which can bypass the firewall because it is over udp.</li>
+            <li>Attacker can use the tunnel for an ingress mechanism to bypass firewall.</li>
+            <li>Defense: block teredo traffics</li>
+        </ul>
+    </div>
+</div>
+<div>
+    <br/>
+</div>
