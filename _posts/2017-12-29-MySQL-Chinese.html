@@ -1,0 +1,31 @@
+---
+layout: post
+title: "MySQL Chinese ERROR 1366"
+date: 2017-12-29
+tag: Technical
+---
+
+<div>
+    <span>
+        <div>当你想要往Database里面添加中文的Record的时候，可能会遇到下面的这个错误。这说明当前mySQL的encoding不支持中文。</div>
+        <div><img src="/images/mysqlChinese/Image 1.png" type="image/png" data-filename="Image 1.png"/></div>
+        <div><br/></div>
+        <div>你可以在terminal里面打开MySQL，然后输入下面的指令。你会看到默认使用的是latin1。我们需要把所有这些value都改成utf8。</div>
+        <div><img src="/images/mysqlChinese/Image 2.png" type="image/png" data-filename="Image 2.png"/></div>
+        <div><br/></div>
+        <div>打开MySQL的my.cnf file。在Ubuntu上这个file的位置在/etc/mysql/</div>
+        <div><img src="/images/mysqlChinese/Image 4.png" type="image/png" data-filename="Image 4.png"/></div>
+        <div><br/></div>
+        <div>打开之后加入下面这些code。</div>
+        <div><img src="/images/mysqlChinese/Image 5.png" type="image/png" data-filename="Image 5.png"/></div>
+        <div><br/></div>
+        <div>重启MySQL。</div>
+        <div style="box-sizing: border-box; padding: 8px; font-family: Monaco, Menlo, Consolas, &quot;Courier New&quot;, monospace; font-size: 12px; color: rgb(51, 51, 51); border-radius: 4px; background-color: rgb(251, 250, 248); border: 1px solid rgba(0, 0, 0, 0.15);-en-codeblock:true;">
+            <div>service mysql restart</div>
+        </div>
+        <div><br/></div>
+        <div>再次查看这些variable，可以看到已经都变成utf8了。现在就可以正常的加入中文record了。</div>
+        <div><img src="/images/mysqlChinese/Image 3.png" type="image/png" data-filename="Image 3.png"/></div>
+        <div><br/></div>
+    </span>
+</div>
