@@ -1,28 +1,3 @@
-body {
-    font-family: "Arial", "Verdana", "Times New Roman";
-    font-size: 18px;
-    line-height: 26px;
-}
-p {
-    font-family: "Arial", "Verdana", "Times New Roman";
-    font-size: 18px;
-    line-height: 26px;
-}
-
-p#intro {
-	padding-left: 120px;
-	padding-right: 100px;
-}
-
-h1#title {
-	padding-left: 120px;
-	padding-right: 100px;
-}
-
-div#wikigeo {
-	padding-left: 100px;
-	padding-right: 100px;
-}
 
 div#wikigeo p {
 	color: #A4A4A4;
@@ -30,13 +5,12 @@ div#wikigeo p {
 	font-family: "Arial";
 }
 
-div#wikigeo_content p, h2, h3{
-	padding-left: 100px;
-	padding-right: 100px;
-}
-
 div#wikigeo:hover {
     background-color: #f9f9f9;
+}
+
+#content {
+  font-size: 90%;
 }
 
 .button {
