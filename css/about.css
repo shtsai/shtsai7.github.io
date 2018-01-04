@@ -1,7 +1,3 @@
-h1#title {
-	padding-left: 120px;
-    padding-right: 100px;
-}
 
 table#nyu {
 	padding-left: 100px;
@@ -21,14 +17,6 @@ table#bu td{
     padding: 20px;
 }
 
-table#name {
-	padding-left: 100px;
-    padding-right: 100px;
-}
-
-table#name td{
-    padding: 20px;
-}
 
 .img-circle {
     border-radius: 50%;
