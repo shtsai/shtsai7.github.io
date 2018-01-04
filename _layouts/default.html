@@ -2,31 +2,66 @@
 	<html>
 		<head>
 			<title>{{ page.title }}</title>
-			<!-- link to main stylesheet -->
+			<!-- links to stylesheet -->
+			<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
 			<link rel="stylesheet" type="text/css" href="/css/main.css">
 			{% include analytics.html %}
 			{% seo %}
 		</head>
 		<body>
-			<nav>
-	    		<ul>
-			    <li><a href="/"><font face="Arial" size="6" color="black"><i><b>Shang-Hung Tsai    </b></i></font></a></li>
-				<li><a href="/about"><font size="5">About</font></a></li>
-				<li><a href="/blog"><font size="5">Blog</font></a></li>
-				<li><a href="/project"><font size="5">Project</font></a></li>
-	    		</ul>
-			</nav>
-			<div class="container">
-			
-			{{ content }}
-			
-			</div><!-- /.container -->
-			<footer>
-	    		<ul>
-			    <li><a href="https://github.com/shtsai7"><img src="/images/github-icon.png" alt="github icon" style="height:30px; width:30px"></a></li>
-			    <li><a href="https://www.linkedin.com/in/shanghungtsai/"><img src="/images/linkedin-icon.png" alt="linkedin icon" style="height:30px; width:30px"></a></li>
+			<div class="container mb-2">
+				<nav class="navbar navbar-expand-md navbar-light bg-white">
+				  <a class="navbar-brand" href="/" style="font-size:200%; font-weight: bold;">Shang-Hung Tsai</a>
+				  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				    <span class="navbar-toggler-icon"></span>
+				  </button>
 
-				</ul>
+				  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+				    <ul class="navbar-nav mr-auto">
+				      <li class="nav-item">
+				        <a class="nav-link" href="/about" style="font-size:150%;">About</a>
+				      </li>
+				      <li class="nav-item">
+				        <a class="nav-link" href="/blog" style="font-size:150%;">Blog</a>
+				      </li>
+				      <li class="nav-item">
+				        <a class="nav-link" href="/project" style="font-size:150%;">Project</a>
+				      </li>
+				    </ul>
+				  </div>
+				</nav>
+			</div>
+
+
+			<div class="content">
+			{{ content }}
+			</div>
+			
+
+
+			<footer class="footer">
+				<div class="container">
+					<div class="row">
+						<div class="col-1"></div>
+						<div class="col-8">
+							<ul>
+								<li>
+									<a href="https://github.com/shtsai7"><img src="/images/github-icon.png" alt="github icon" style="height:30px; width:30px"></a>
+								</li>
+								<li>
+									<a href="https://www.linkedin.com/in/shanghungtsai/"><img src="/images/linkedin-icon.png" alt="linkedin icon" style="height:30px; width:30px"></a>
+								</li>
+						</div>				
+						<div class="col-3">
+							<a href="#">Back to top</a>
+						</div>
+					</div>
+				</div>
 			</footer>
+
+			 <!-- Bootstrap core JavaScript -->
+			<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+			<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
 		</body>
 	</html>
