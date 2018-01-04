@@ -4,6 +4,7 @@ html {
 }
 body {
   margin-bottom: 60px; /* Margin bottom by footer height */
+  font-family: "Arial", "Verdana", "Times New Roman";
 }
 
 .footer {
