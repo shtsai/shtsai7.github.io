@@ -12,63 +12,64 @@ NULLCMD = :
 #### Start of system configuration section. ####
 
 srcdir = .
-topdir = /usr/local/Cellar/ruby/2.3.0/include/ruby-2.3.0
+topdir = /usr/include/ruby-2.3.0
 hdrdir = $(topdir)
-arch_hdrdir = /usr/local/Cellar/ruby/2.3.0/include/ruby-2.3.0/x86_64-darwin15
+arch_hdrdir = /usr/include/x86_64-linux-gnu/ruby-2.3.0
 PATH_SEPARATOR = :
 VPATH = $(srcdir):$(arch_hdrdir)/ruby:$(hdrdir)/ruby
-prefix = $(DESTDIR)/usr/local/Cellar/ruby/2.3.0
-rubysitearchprefix = $(rubylibprefix)/$(sitearch)
-rubyarchprefix = $(rubylibprefix)/$(arch)
+prefix = $(DESTDIR)/usr
+rubysitearchprefix = $(sitearchlibdir)/$(RUBY_BASE_NAME)
+rubyarchprefix = $(archlibdir)/$(RUBY_BASE_NAME)
 rubylibprefix = $(libdir)/$(RUBY_BASE_NAME)
 exec_prefix = $(prefix)
-vendorarchhdrdir = $(vendorhdrdir)/$(sitearch)
-sitearchhdrdir = $(sitehdrdir)/$(sitearch)
-rubyarchhdrdir = $(rubyhdrdir)/$(arch)
+vendorarchhdrdir = $(sitearchincludedir)/$(RUBY_VERSION_NAME)/vendor_ruby
+sitearchhdrdir = $(sitearchincludedir)/$(RUBY_VERSION_NAME)/site_ruby
+rubyarchhdrdir = $(archincludedir)/$(RUBY_VERSION_NAME)
 vendorhdrdir = $(rubyhdrdir)/vendor_ruby
 sitehdrdir = $(rubyhdrdir)/site_ruby
 rubyhdrdir = $(includedir)/$(RUBY_VERSION_NAME)
-vendorarchdir = $(vendorlibdir)/$(sitearch)
+vendorarchdir = $(rubysitearchprefix)/vendor_ruby/$(ruby_version)
 vendorlibdir = $(vendordir)/$(ruby_version)
-vendordir = $(DESTDIR)/usr/local/lib/ruby/vendor_ruby
-sitearchdir = $(DESTDIR)./.gem.20171224-92107-1gtzhg1
-sitelibdir = $(DESTDIR)./.gem.20171224-92107-1gtzhg1
-sitedir = $(DESTDIR)/usr/local/lib/ruby/site_ruby
-rubyarchdir = $(rubylibdir)/$(arch)
+vendordir = $(rubylibprefix)/vendor_ruby
+sitearchdir = $(DESTDIR)./.gem.20180104-9991-4hzo6p
+sitelibdir = $(DESTDIR)./.gem.20180104-9991-4hzo6p
+sitedir = $(DESTDIR)/usr/local/lib/site_ruby
+rubyarchdir = $(rubyarchprefix)/$(ruby_version)
 rubylibdir = $(rubylibprefix)/$(ruby_version)
 sitearchincludedir = $(includedir)/$(sitearch)
 archincludedir = $(includedir)/$(arch)
 sitearchlibdir = $(libdir)/$(sitearch)
 archlibdir = $(libdir)/$(arch)
 ridir = $(datarootdir)/$(RI_BASE_NAME)
-mandir = $(datarootdir)/man
+mandir = $(prefix)/share/man
 localedir = $(datarootdir)/locale
 libdir = $(exec_prefix)/lib
 psdir = $(docdir)
 pdfdir = $(docdir)
 dvidir = $(docdir)
 htmldir = $(docdir)
-infodir = $(datarootdir)/info
+infodir = $(prefix)/share/info
 docdir = $(datarootdir)/doc/$(PACKAGE)
 oldincludedir = $(DESTDIR)/usr/include
 includedir = $(prefix)/include
-localstatedir = $(prefix)/var
+runstatedir = $(localstatedir)/run
+localstatedir = $(DESTDIR)/var
 sharedstatedir = $(prefix)/com
-sysconfdir = $(prefix)/etc
+sysconfdir = $(DESTDIR)/etc
 datadir = $(datarootdir)
 datarootdir = $(prefix)/share
-libexecdir = $(exec_prefix)/libexec
+libexecdir = $(prefix)/lib/ruby2.3
 sbindir = $(exec_prefix)/sbin
 bindir = $(exec_prefix)/bin
 archdir = $(rubyarchdir)
 
 
-CC = clang
-CXX = clang++
+CC = gcc
+CXX = g++
 LIBRUBY = $(LIBRUBY_SO)
 LIBRUBY_A = lib$(RUBY_SO_NAME)-static.a
 LIBRUBYARG_SHARED = -l$(RUBY_SO_NAME)
-LIBRUBYARG_STATIC = -l$(RUBY_SO_NAME)-static -framework CoreFoundation
+LIBRUBYARG_STATIC = -l$(RUBY_SO_NAME)-static
 empty =
 OUTFLAG = -o $(empty)
 COUTFLAG = -o $(empty)
@@ -78,40 +79,40 @@ cflags   =  $(optflags) $(debugflags) $(warnflags)
 cxxflags =  $(optflags) $(debugflags) $(warnflags)
 optflags = -O3 -fno-fast-math
 debugflags = -ggdb3
-warnflags = -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wunused-variable -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration -Wdivision-by-zero -Wdeprecated-declarations -Wextra-tokens
-CCDLFLAGS = -fno-common
-CFLAGS   = $(CCDLFLAGS) $(cflags)  -fno-common -pipe -std=c99 $(ARCH_FLAG)
+warnflags = -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wunused-variable -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wimplicit-function-declaration -Wdeprecated-declarations -Wno-packed-bitfield-compat -Wno-maybe-uninitialized
+CCDLFLAGS = -fPIC
+CFLAGS   = $(CCDLFLAGS) -g -O2 -fstack-protector-strong -Wformat -Werror=format-security -fPIC -std=c99 $(ARCH_FLAG)
 INCFLAGS = -I. -I$(arch_hdrdir) -I$(hdrdir)/ruby/backward -I$(hdrdir) -I$(srcdir)
 DEFS     = 
-CPPFLAGS =   -I/usr/local/opt/libyaml/include -I/usr/local/opt/openssl/include -I/usr/local/opt/readline/include -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE -D_DARWIN_UNLIMITED_SELECT -D_REENTRANT $(DEFS) $(cppflags)
-CXXFLAGS = $(CCDLFLAGS) $(cxxflags) $(ARCH_FLAG)
-ldflags  = -L. -fstack-protector -L/usr/local/lib -L/usr/local/opt/libyaml/lib -L/usr/local/opt/openssl/lib -L/usr/local/opt/readline/lib
-dldflags = -Wl,-undefined,dynamic_lookup -Wl,-multiply_defined,suppress -L/usr/local/opt/libyaml/lib -L/usr/local/opt/openssl/lib -L/usr/local/opt/readline/lib 
+CPPFLAGS =  -Wdate-time -D_FORTIFY_SOURCE=2 $(DEFS) $(cppflags)
+CXXFLAGS = $(CCDLFLAGS) -g -O2 -fstack-protector-strong -Wformat -Werror=format-security $(ARCH_FLAG)
+ldflags  = -L. -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now -fstack-protector -rdynamic -Wl,-export-dynamic
+dldflags =  
 ARCH_FLAG = 
 DLDFLAGS = $(ldflags) $(dldflags) $(ARCH_FLAG)
-LDSHARED = $(CC) -dynamic -bundle
-LDSHAREDXX = $(CXX) -dynamic -bundle
+LDSHARED = $(CC) -shared
+LDSHAREDXX = $(CXX) -shared
 AR = ar
 EXEEXT = 
 
-RUBY_INSTALL_NAME = $(RUBY_BASE_NAME)
-RUBY_SO_NAME = ruby.2.3.0
+RUBY_INSTALL_NAME = $(RUBY_BASE_NAME)2.3
+RUBY_SO_NAME = ruby-2.3
 RUBYW_INSTALL_NAME = 
 RUBY_VERSION_NAME = $(RUBY_BASE_NAME)-$(ruby_version)
 RUBYW_BASE_NAME = rubyw
 RUBY_BASE_NAME = ruby
 
-arch = x86_64-darwin15
+arch = x86_64-linux-gnu
 sitearch = $(arch)
 ruby_version = 2.3.0
-ruby = $(bindir)/$(RUBY_BASE_NAME)
+ruby = $(bindir)/$(RUBY_BASE_NAME)2.3
 RUBY = $(ruby)
 ruby_headers = $(hdrdir)/ruby.h $(hdrdir)/ruby/ruby.h $(hdrdir)/ruby/defines.h $(hdrdir)/ruby/missing.h $(hdrdir)/ruby/intern.h $(hdrdir)/ruby/st.h $(hdrdir)/ruby/subst.h $(arch_hdrdir)/ruby/config.h
 
 RM = rm -f
 RM_RF = $(RUBY) -run -e rm -- -rf
-RMDIRS = rmdir -p
-MAKEDIRS = mkdir -p
+RMDIRS = rmdir --ignore-fail-on-non-empty -p
+MAKEDIRS = /bin/mkdir -p
 INSTALL = /usr/bin/install -c
 INSTALL_PROG = $(INSTALL) -m 0755
 INSTALL_DATA = $(INSTALL) -m 644
@@ -122,8 +123,8 @@ TOUCH = exit >
 
 preload = 
 
-libpath = . $(libdir) /usr/local/opt/libyaml/lib /usr/local/opt/openssl/lib /usr/local/opt/readline/lib
-LIBPATH =  -L. -L$(libdir) -L/usr/local/opt/libyaml/lib -L/usr/local/opt/openssl/lib -L/usr/local/opt/readline/lib
+libpath = . $(archlibdir)
+LIBPATH =  -L. -L$(archlibdir)
 DEFFILE = 
 
 CLEANFILES = mkmf.log
@@ -134,15 +135,15 @@ extout =
 extout_prefix = 
 target_prefix = /commonmarker
 LOCAL_LIBS = 
-LIBS = $(LIBRUBYARG_SHARED)  -lpthread -ldl -lobjc 
-ORIG_SRCS = arena.c autolink.c blocks.c buffer.c cmark.c cmark_ctype.c commonmark.c commonmarker.c core-extensions.c ext_scanners.c footnotes.c houdini_href_e.c houdini_html_e.c houdini_html_u.c html.c inlines.c iterator.c latex.c linked_list.c man.c map.c node.c plaintext.c plugin.c references.c registry.c render.c scanners.c strikethrough.c syntax_extension.c table.c tagfilter.c utf8.c xml.c
+LIBS = $(LIBRUBYARG_SHARED)  -lpthread -lgmp -ldl -lcrypt -lm   -lc
+ORIG_SRCS = arena.c iterator.c render.c core-extensions.c registry.c map.c references.c linked_list.c syntax_extension.c plaintext.c strikethrough.c commonmarker.c man.c houdini_html_e.c node.c cmark.c houdini_html_u.c ext_scanners.c cmark_ctype.c plugin.c xml.c autolink.c utf8.c table.c latex.c html.c blocks.c houdini_href_e.c tagfilter.c buffer.c commonmark.c footnotes.c inlines.c scanners.c
 SRCS = $(ORIG_SRCS) 
 OBJS = arena.o autolink.o blocks.o buffer.o cmark.o cmark_ctype.o commonmark.o commonmarker.o core-extensions.o ext_scanners.o footnotes.o houdini_href_e.o houdini_html_e.o houdini_html_u.o html.o inlines.o iterator.o latex.o linked_list.o man.o map.o node.o plaintext.o plugin.o references.o registry.o render.o scanners.o strikethrough.o syntax_extension.o table.o tagfilter.o utf8.o xml.o
-HDRS = $(srcdir)/autolink.h $(srcdir)/buffer.h $(srcdir)/chunk.h $(srcdir)/cmark.h $(srcdir)/cmark_ctype.h $(srcdir)/cmark_export.h $(srcdir)/cmark_extension_api.h $(srcdir)/cmark_version.h $(srcdir)/cmarkextensions_export.h $(srcdir)/commonmarker.h $(srcdir)/config.h $(srcdir)/core-extensions.h $(srcdir)/ext_scanners.h $(srcdir)/footnotes.h $(srcdir)/houdini.h $(srcdir)/html.h $(srcdir)/inlines.h $(srcdir)/iterator.h $(srcdir)/map.h $(srcdir)/node.h $(srcdir)/parser.h $(srcdir)/plugin.h $(srcdir)/references.h $(srcdir)/registry.h $(srcdir)/render.h $(srcdir)/scanners.h $(srcdir)/strikethrough.h $(srcdir)/syntax_extension.h $(srcdir)/table.h $(srcdir)/tagfilter.h $(srcdir)/utf8.h
+HDRS = $(srcdir)/cmarkextensions_export.h $(srcdir)/cmark_export.h $(srcdir)/references.h $(srcdir)/houdini.h $(srcdir)/chunk.h $(srcdir)/commonmarker.h $(srcdir)/cmark_version.h $(srcdir)/cmark_extension_api.h $(srcdir)/utf8.h $(srcdir)/render.h $(srcdir)/node.h $(srcdir)/map.h $(srcdir)/cmark.h $(srcdir)/config.h $(srcdir)/buffer.h $(srcdir)/core-extensions.h $(srcdir)/cmark_ctype.h $(srcdir)/inlines.h $(srcdir)/registry.h $(srcdir)/strikethrough.h $(srcdir)/parser.h $(srcdir)/html.h $(srcdir)/syntax_extension.h $(srcdir)/tagfilter.h $(srcdir)/ext_scanners.h $(srcdir)/plugin.h $(srcdir)/scanners.h $(srcdir)/autolink.h $(srcdir)/iterator.h $(srcdir)/footnotes.h $(srcdir)/table.h
 TARGET = commonmarker
 TARGET_NAME = commonmarker
 TARGET_ENTRY = Init_$(TARGET_NAME)
-DLLIB = $(TARGET).bundle
+DLLIB = $(TARGET).so
 EXTSTATIC = 
 STATIC_LIB = 
 
@@ -155,7 +156,7 @@ HDRDIR        = $(rubyhdrdir)/ruby$(target_prefix)
 ARCHHDRDIR    = $(rubyhdrdir)/$(arch)/ruby$(target_prefix)
 
 TARGET_SO     = $(DLLIB)
-CLEANLIBS     = $(TARGET).bundle 
+CLEANLIBS     = $(TARGET).so 
 CLEANOBJS     = *.o  *.bak
 
 all:    $(DLLIB)
@@ -254,7 +255,6 @@ $(DLLIB): $(OBJS) Makefile
 	$(ECHO) linking shared-object commonmarker/$(DLLIB)
 	-$(Q)$(RM) $(@)
 	$(Q) $(LDSHARED) -o $@ $(OBJS) $(LIBPATH) $(DLDFLAGS) $(LOCAL_LIBS) $(LIBS)
-	$(Q) $(POSTLINK)
 
 
 

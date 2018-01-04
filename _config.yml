@@ -5,5 +5,5 @@ author: Shang-Hung Tsai
 
 permalink: /blog/:year/:month/:day/:title
 
-gems:
+plugins:
     - jekyll-seo-tag
