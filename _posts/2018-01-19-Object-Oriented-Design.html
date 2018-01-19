@@ -1,0 +1,277 @@
+---
+layout: post
+title: "Object Oriented Design"
+date: 2018-01-19
+tag: Note
+---
+
+    <div><span style="font-size: 12pt; font-weight: bold;">Object-Oriented Design</span><span style="font-size: 12pt;">: combines data and methods together into a cohesive whole (object)</span></div>
+    <div><br/></div>
+    <div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Object-Oriented vs Procedural</span></font></div>
+    <div>
+     <ul>
+        <li><span style="font-size: 16px;">Example: Get salt</span></li>
+        <ul>
+           <li><span style="font-size: 16px;">OO: "Please pass me the salt"</span></li>
+           <li><span style="font-size: 16px;">Procedural: "Please move your right hand to the left until it contacts the salt shaker, grasp it, lift it from the table, move it in a natural arc in my direction, stop when it contacts my hand, wait until my hand has closed around it, then release it"</span></li>
+        </ul>
+        <li><span style="font-size: 16px;">OO way:&nbsp;&nbsp;&nbsp;&nbsp;</span></li>
+        <ul>
+           <li><span style="font-size: 16px;">leave it up to the object to carry out the request any way it chooses</span></li>
+           <li><span style="font-size: 16px;"><span style="font-size: 16px; text-decoration: underline;">Objects are responsible for their own actions</span></span></li>
+        </ul>
+     </ul>
+    </div>
+    <div><br/></div>
+    <div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Concepts</span></font></div>
+    <div>
+     <ul>
+        <li><span style="font-size: 12pt; font-weight: bold;">Encapsulation</span><span style="font-size: 12pt;">:&nbsp;&nbsp;</span></li>
+        <ul>
+           <li><span style="font-size: 12pt;">Each object is a "black box" which contains code, data, and methods that can be invoked</span></li>
+           <li><span style="font-size: 12pt;">grouping of related ideas into one unit which we can refer to by a single name</span></li>
+           <ul>
+              <li><font style="font-size: 12pt;"><span style="font-size: 12pt;">e.g. fields, methods, classes</span></font></li>
+           </ul>
+           <li><span style="font-size: 12pt;">providing access to an object only through invoking its method, while keeping the details</span></li>
+           <li><span style="font-weight: bold; font-size: 12pt;">Information hiding</span><span style="font-size: 12pt;">: restrict external visibility of an object's information</span></li>
+        </ul>
+        <li><span style="font-size: 12pt; font-weight: bold;">Class</span><span style="font-size: 12pt;">:&nbsp;&nbsp;</span></li>
+        <ul>
+           <li><span style="font-size: 12pt;">a blue print&nbsp;&nbsp; or specification from which objects are created</span></li>
+           <ul>
+              <li><span style="font-size: 12pt;">define the structure and services of a set of objects</span></li>
+              <li><span style="font-size: 12pt;">define which parts of an object can be accessed from outside</span></li>
+              <li><span style="font-size: 12pt;">implement operations (method)</span></li>
+           </ul>
+           <li><span style="font-size: 16px;">a Class is a type, an object is an instance</span></li>
+        </ul>
+        <li><span style="font-size: 16px;"><b>Object:&nbsp;&nbsp;</b></span></li>
+        <ul>
+           <li><span style="font-size: 16px;">Object is a run time concept</span></li>
+           <li><span style="font-size: 16px;">an object is only created during program execution</span></li>
+        </ul>
+        <li><span style="font-size: 16px;"><span style="font-size: 16px; font-weight: bold;">Access</span>:</span></li>
+        <ul>
+           <li><span style="font-size: 16px;">public: accessible from outside</span></li>
+           <li><span style="font-size: 16px;">private: accessible only from within the class</span></li>
+           <li><span style="font-size: 16px;">protected: accessible from within the class and from within subclasses</span></li>
+        </ul>
+        <li><span style="font-size: 16px;"><span style="font-size: 16px; font-weight: bold;">Inheritance</span>:</span></li>
+        <ul>
+           <li><span style="font-size: 16px;">If class B inherits information from class A, it implicitly acquires the attributes and methods of A</span></li>
+           <ul>
+              <li><span style="font-size: 16px;">B reuses attributes and methods of A</span></li>
+              <li><span style="font-size: 16px;">A is the superclass, B is the subclass</span></li>
+              <li><span style="font-size: 16px;">"is-a" relationship: an object of type B "IS A" object of type A</span></li>
+              <li><span style="font-size: 16px;">B can also have new attributes in addition to the derived parts</span></li>
+           </ul>
+           <li><span style="font-size: 16px;">Inheritance relationship between classes forms a class hierarchy</span></li>
+        </ul>
+        <li><span style="font-size: 16px;"><span style="font-size: 16px; font-weight: bold;">Polymorphism</span>:</span></li>
+        <ul>
+           <li><span style="font-size: 16px;">An object can be of several different types</span></li>
+        </ul>
+     </ul>
+     <div><br/></div>
+    </div>
+    <div><br/></div>
+    <div><span style="font-size: 16px;"><span style="font-size: 16px; font-weight: bold;">Evaluation of OOD</span></span></div>
+    <div>
+     <ul>
+        <li><span style="font-size: 16px;"><span style="font-size: 16px; font-weight: bold;">Coupling</span>: (three types)</span></li>
+        <ul>
+           <li><span style="font-size: 16px;">interaction:&nbsp;&nbsp;</span></li>
+           <ul>
+              <li><span style="font-size: 16px;">when the methods of a class invoke methods of another class</span></li>
+              <ul>
+                 <li><span style="font-size: 16px;">a method of class A should NOT directly manipulate the attributes of another class B</span></li>
+              </ul>
+           </ul>
+           <li><span style="font-size: 16px;">component:&nbsp;&nbsp;</span></li>
+           <ul>
+              <li><span style="font-size: 16px;">when a class A has variables of another class C</span></li>
+              <ul>
+                 <li><span style="font-size: 16px;">A has instance variables of type C</span></li>
+                 <li><span style="font-size: 16px;">A has a method with a parameter of type C</span></li>
+                 <li><span style="font-size: 16px;">A has a method with a local variable of type C</span></li>
+              </ul>
+              <li><span style="font-size: 16px;">when A is coupled with C, it is coupled with all subclasses of C as well</span></li>
+           </ul>
+           <li><span style="font-size: 16px;">inheritance:</span></li>
+           <ul>
+              <li><span style="font-size: 16px;">two classes are coupled if one is a subclass of the other</span></li>
+              <ul>
+                 <li><span style="font-size: 16px;">subclass should only add features (attributes, methods) to its superclass, as opposed to modifying the features it inherits</span></li>
+              </ul>
+           </ul>
+        </ul>
+        <li><span style="font-size: 16px;"><span style="font-size: 16px; font-weight: bold;">Cohesion</span></span></li>
+        <ul>
+           <li><span style="font-size: 16px;">an intramodule concept that focuses on why elements are together</span></li>
+           <ul>
+              <li><span style="font-size: 16px;">only elements tightly related should exist together in a class</span></li>
+              <li><span style="font-size: 16px;">higher cohesion -&gt; lower coupling as many otherwise interacting elements are already contained in the module</span></li>
+           </ul>
+           <li><span style="font-size: 16px;">three types of cohesion</span></li>
+           <ul>
+              <li><span style="font-size: 16px;">method cohesion: all elements within a method help to implement a clearly specified function</span></li>
+              <li><span style="font-size: 16px;">class cohesion: a class itself should be cohesive with each of its methods and attributes contributing to implement the class's clearly specified role</span></li>
+              <li><span style="font-size: 16px;">inheritance cohesion: focuses on why classes are together in a hierarchy</span></li>
+              <ul>
+                 <li><span style="font-size: 16px;">generalization-specialization: good</span></li>
+                 <li><span style="font-size: 16px;">reuse because a pre-existing class does most of what you need: avoid</span></li>
+              </ul>
+           </ul>
+        </ul>
+        <li><span style="font-size: 16px;"><span style="font-size: 16px; font-weight: bold;">Open-closed principle</span></span></li>
+        <ul>
+           <li><span style="font-size: 16px;">classes should be open for extension but closed for modification</span></li>
+           <ul>
+              <li><span style="font-size: 16px;">behavior can be extended to accommodate new requirements, but existing code is not modified</span></li>
+           </ul>
+           <li><span style="font-size: 16px;">satisfied&nbsp;&nbsp;by using inheritance and polymorphism</span></li>
+           <ul>
+              <li><span style="font-size: 16px;">allow creating a new class to extend behavior without changing the original class</span></li>
+           </ul>
+        </ul>
+     </ul>
+     <div><br/></div>
+    </div>
+    <div><span style="font-size: 16px;"><span style="font-size: 16px; font-weight: bold;">Unified Model Language (UML) and Modeling</span></span></div>
+    <div>
+     <ul>
+        <li><span style="font-size: 16px;">UML is a graphical design notation useful for OO analysis and design</span></li>
+        <ul>
+           <li><span style="font-size: 16px;">It contains notations to model both structural and behavioral aspects of these systems</span></li>
+           <ul>
+              <li><span style="font-size: 16px;">structure-related notations</span></li>
+              <ul>
+                 <li><span style="font-size: 16px;">class, object, package, use case, component</span></li>
+              </ul>
+              <li><span style="font-size: 16px;">behavior-related notations</span></li>
+              <ul>
+                 <li><span style="font-size: 16px;">structure, collaboration, state, and activity diagrams</span></li>
+              </ul>
+           </ul>
+           <li><span style="font-size: 16px;">Class diagrams:</span></li>
+           <ul>
+              <li><span style="font-size: 16px;">specify classes in a system, the association between classes, inheritance hierarchy</span></li>
+              <li><span style="font-size: 16px;">represent static structures</span></li>
+           </ul>
+           <li><span style="font-size: 16px;">Interaction diagrams:</span></li>
+           <ul>
+              <li><span style="font-size: 16px;">provide insight into a system's dynamic behavior</span></li>
+              <li><span style="font-size: 16px;">Sequence diagram</span></li>
+              <ul>
+                 <li><span style="font-size: 16px;">objects participating in an interaction are shown at the top</span></li>
+                 <li><span style="font-size: 16px;">for each object, a vertical bar represents its lifeline</span></li>
+                 <li><span style="font-size: 16px;">a message from one object to another is represented as a labeled arrow</span></li>
+                 <li><span style="font-size: 16px;">the ordering or messages is captured along vertical axis</span></li>
+                 <li><br/></li>
+              </ul>
+              <li><span style="font-size: 16px;">Collaboration diagram</span></li>
+              <ul>
+                 <li><span style="font-size: 16px;">Instead of timeline, shows the instantiation of associations between classes at run-time</span></li>
+                 <li><span style="font-size: 16px;">the ordering of a set of messages is captured by numbering them</span></li>
+              </ul>
+           </ul>
+        </ul>
+     </ul>
+    </div>
+    <div><br/></div>
+    <div><span style="font-size: 16px;"><span style="font-size: 16px; font-weight: bold;">OO Design Methodologies</span></span></div>
+    <div>
+     <ul>
+        <li><span style="font-size: 16px;">goal: identify classes, understand their behavior, and relationships</span></li>
+        <li><span style="font-size: 16px;">Steps:</span></li>
+     </ul>
+     <ol>
+        <li><span style="font-size: 16px;">Analyze use cases</span></li>
+        <li><span style="font-size: 16px;">Create activity diagrams for each use case</span></li>
+        <li><span style="font-size: 16px;">Create class diagram based on 1 and 2</span></li>
+        <li><span style="font-size: 16px;">Create interaction diagrams for activities contained in diagrams created in step 2</span></li>
+        <li><span style="font-size: 16px;">Create state diagrams for classes created in step 3</span></li>
+        <li><span style="font-size: 16px;">Iterate, each step above will reveal information about the other models that will need to be updated</span></li>
+     </ol>
+    </div>
+    <div><br/></div>
+    <div><br/></div>
+    <div><b><font style="font-size: 12pt;"><br/></font></b></div>
+    <div><b><font style="font-size: 12pt;">Association between Objects</font></b></div>
+    <div>
+     <ul>
+        <li><font style="font-size: 12pt;"><b>Dependency Association</b>: An object's operation requires another type of object</font></li>
+        <ul>
+           <li><font style="font-size: 12pt;">e.g. a <i>Driver object</i> requires a <i>Car object</i> to drive</font></li>
+        </ul>
+        <li><font style="font-size: 12pt;"><b>Composition Association</b>: An object is composed of other type objects, implies ownership</font></li>
+        <ul>
+           <li><font style="font-size: 12pt;">e.g. a <i>Vehicle object</i> owns a <i>Engine object</i></font></li>
+           <li><font style="font-size: 12pt;">If the owner object no longer exist, its containing object also disappear</font></li>
+        </ul>
+        <li><font style="font-size: 12pt;"><b>Aggregation Association</b>: An object involves other types of object, but does not imply ownership</font></li>
+        <ul>
+           <li><font style="font-size: 12pt;">e.g. a <i>Course object</i> involves a number of <i>Student objects</i></font></li>
+           <li><font style="font-size: 12pt;">If the course no longer exist, student objects are not affected</font></li>
+        </ul>
+     </ul>
+    </div>
+    <div><font style="font-size: 12pt;"><br/></font></div>
+    <div><b><font style="font-size: 12pt;">SOLID Principle</font></b></div>
+    <div>
+     <ul>
+        <li><font style="font-size: 12pt;"><b>Single Responsibility Principle</b></font></li>
+        <ul>
+           <li><font style="font-size: 12pt;">A class should have a single responsibility and only have its primary behaviors</font></li>
+           <li><font style="font-size: 12pt;">It should only need to know things it requires</font></li>
+        </ul>
+        <li><b><font style="font-size: 12pt;">Open Closed Principle</font></b></li>
+        <ul>
+           <li><font style="font-size: 12pt;">software modules should be open for extension and closed for modification</font></li>
+           <li><font style="font-size: 12pt;">we shouldn't modify internal structure of existing classes in order to extend more functionalities</font></li>
+        </ul>
+        <li><b><font style="font-size: 12pt;">Liskov Substitution Principle</font></b></li>
+        <ul>
+           <li><font style="font-size: 12pt;">Subtypes (subclass) must be substitutable for their basetypes (superclass)</font></li>
+           <li><font style="font-size: 12pt;">a subclass must have an "is-a" relationship with its superclass</font></li>
+           <li><font style="font-size: 12pt;">a Subclass should not force changes in its superclass</font></li>
+        </ul>
+        <li><b><font style="font-size: 12pt;">Interface Segregation Principle</font></b></li>
+        <ul>
+           <li><font style="font-size: 12pt;">no client should be forced to depend on methods that they don't use</font></li>
+           <li><font style="font-size: 12pt;">usually occur when the class that is depended on has too many&nbsp;&nbsp;responsibility</font></li>
+           <ul>
+              <li><font style="font-size: 12pt;">The dependent class will need to recompile every time the fat class changes, even if it is not affected by the change</font></li>
+           </ul>
+           <li><font style="font-size: 12pt;">use interface to separate behaviors to prevent tight coupling</font></li>
+           <ul>
+              <li><font style="font-size: 12pt;">reference the object using the interface variable to only access methods required</font></li>
+           </ul>
+        </ul>
+        <li><b><font style="font-size: 12pt;">Dependency Inversion Principle</font></b></li>
+        <ul>
+           <li><font style="font-size: 12pt;">higher level modules should not depend on lower level (which are susceptible to change)</font></li>
+           <li><font style="font-size: 12pt;">Both should depend on Abstractions</font></li>
+           <ul>
+              <li><font style="font-size: 12pt;">because abstract classes and interfaces don't change as often as concrete derivatives</font></li>
+           </ul>
+        </ul>
+     </ul>
+    </div>
+    <div><font style="font-size: 12pt;"><br/></font></div>
+    <div><font style="font-size: 12pt;"><br/></font></div>
+    <div><font style="font-size: 12pt;"><b>Dependency Injection</b></font></div>
+    <div>
+     <ul>
+        <li><font style="font-size: 12pt;">for separating the construction of an object from its eventual use</font></li>
+        <ul>
+           <li><font style="font-size: 12pt;">object should not be responsible for instantiating each other, leads to tight coupling</font></li>
+        </ul>
+        <li><span style="font-size: 16px;">instead of hard coding of a particular implementation, make it more generic by injecting an object in the constructor</span></li>
+        <li><span style="font-size: 16px;">can use a framework to handle the dependency management, which contains rules and instructions&nbsp;&nbsp;for how to correct an instance properly</span></li>
+        <ul>
+           <li><span style="font-size: 16px;">e.g. Spring</span></li>
+        </ul>
+     </ul>
+
