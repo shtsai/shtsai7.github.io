@@ -1,0 +1,179 @@
+---
+layout: default
+title: SJBOX - Music Streaming Service
+---
+<link rel="stylesheet" type="text/css" href="/css/project.css">
+<div class="container">
+    <h1 class="container">SJBOX - Music Streaming Service</h1>
+   
+    <div class="container mx-4" id="content">
+    
+		<div>Sean Tsai & Jennie Yeh </div>
+		<div>December 2017</div>
+		<div><br/></div>
+
+		<div><h4>1. General Design</h4></div>
+		<div class="container ml-4">
+			<div>For this project, we designed a music streaming service using relational databases.</div>
+			<div> </div>
+			<div>We have a User table, which contains user’s information including unique uname(username), name, email, city, and password.</div>
+			<div> </div>
+			<div>We have a table for Artist, that contains artist id, artist name, and a short description. Each artist can perform multiple tracks. Each track has a tid, title, and duration. Each track can only be performed by one artist. Given the dataset provided, we decide to add a constraint that each track must be included in one album. And as a result, we remove the AlbumSong table from our previous design.</div>
+			<div> </div>
+			<div>Each user can create playlists, that has a playlist id, date, status (public/private), and title. A playlist can include tracks from different artist.</div>
+			<div> </div>
+			<div>We record information of each play of tracks by the users in the Play table. We keep track of the play time, and whether it is played from a playlist. When it is not played a playlist, we simply leave this information as NULL.</div>
+			<div> </div>
+			<div>Users can also gives a score between 0 to 10 for each track. Users can like artists, and follow other users. We store the timestamps of time when these actions taken place.</div>
+			<div>  </div>
+		</div>
+		<br>
+
+		<div class="container ml-4">
+			
+			<div>Functionality:</div>
+			<b>
+			<ul>
+			 <li>Search tracks, albums, artists, or users</li>
+			 <li>Access album info (including album title, artists, and release date), and all tracks in that album</li>
+			 <li>Access track info (including artist, album, and duration) and play the track</li>
+			 <li>Rate a track and access its average rating</li>
+			 <li>Access artist info (including title, and description), all his/her albums and top tracks</li>
+			 <li>Suggest similar artists based on the number of common fans (at least 3)</li>
+			 <li>Like/unlike an artist</li>
+			 <li>Follow/unfollow an user</li>
+			 <li>Display a user’s profile, artists he/she likes, users he/she follows, and his/her playlists</li>
+			 <li>Create playlists, which can be either public or private</li>
+			 <li>Add/remove tracks into/from an playlist</li>
+			 <li>Display a customized user feed, including new tracks by artists he/she liked, playlists by users he/she follows (ordered by number of plays), top 10 tracks by average user ratings, and top 10 tracks by number of plays</li>
+			</ul>
+			</b>
+		</div>
+		<br>
+
+		<hr>
+		<div><h4>2. Database Schema</h4></div>
+		<div class="container ml-4">
+			<div>This is the ER diagram of our design.</div>
+			<div><img src="../images/project/sjbox/Picture1.png" width="85%" height="85%"/><br/></div>
+			<div><br/></div>
+			<div><br/></div>
+			<div> </div>
+			<div>Here is the database schema we created:</div>
+			<br>
+			<b>
+			<div>User(Username, Name, Email, City, Password)</div>
+			<div>Artist(ArtistId, ArtistTitle, ArtistDescription)</div>
+			<div>Track(TrackId, TrackName, TrackDuration, TrackArtist, TrackAlbum)</div>
+			<div>Album(AlbumId, AlbumName, AlbumReleaseDate)</div>
+			<div>Playlist(PlaylistId, Username, PlaylistTitle, PlaylistDate, PlaylistStatus)</div>
+			<div>Follow(Username1, Username2, FollowDate)</div>
+			<div>Likes(ArtistId, Username, LikeDate)</div>
+			<div>Rate(Username, TrackId, Score, RateTime)</div>
+			<div>Play(Username, TrackId, PlayTime, PlaylistId)</div>
+			<div>PlaylistSong(PlaylistId, TrackId)</div>
+			</b>
+			
+			<br>
+			<div>Foreign key constraints:</div>
+			<b>
+			<div>Track.TrackArtist is a foreign key referencing Artist.ArtistTitle.</div>
+			<div>Track.AlbumId is a foreign key referencing Album.AlbumId.</div>
+			<div>Playlist.Username is a foreign key referencing User.Username.</div>
+			<div>Follow.Username1 is a foreign key referencing User.Username.</div>
+			<div>Follow.Username2 is a foreign key referencing User.Username.</div>
+			<div>Likes.ArtistId is a foreign key referencing Artist.ArtistId.</div>
+			<div>Likes.Username is a foreign key referencing User.Username.</div>
+			<div>Rate.Username is a foreign key referencing User.Username.</div>
+			<div>Rate.TrackId is a foreign key referencing Track.TrackId.</div>
+			<div>Play.Username is a foreign key referencing User.Username.</div>
+			<div>Play.TrackId is a foreign key referencing Track.TrackId.</div>
+			<div>Play.PlaylistId is a foreign key referencing Playlist.PlaylistId.</div>
+			<div>PlaylistSong.PlaylistId is a foreign key referencing Playlist.PlaylistId.</div>
+			<div>PlaylistSong.TrackId is a foreign key referencing Track.TrackId.</div>
+			</b>
+			<br>
+
+			<div>Assumptions:</div>
+			<ol start="1" type="1">
+			 <li style="mso-list: l0 level1 lfo2;">An artist can have multiple tracks, and a track can only belong to one artist.</li>
+			 <li style="mso-list: l0 level1 lfo2;">A track must belongs to an album.</li>
+			 <li style="mso-list: l0 level1 lfo2;">A user can only follow the same user, like the same artist, or rate the same track at most once.</li>
+			 <li style="mso-list: l0 level1 lfo2;">In Follow table, u1 follows u2.</li>
+			</ol>
+		</div>
+		<br>
+		
+		<hr>
+		<div><h4>3. Implementation details</h4></div>
+		<div class="container ml-4">
+			<div>We use LAMP stack (Linux, Apache, MySQL, PHP) for the implementation of this application.</div>
+			<div><br/></div>
+			<div><b>User session and URLs:</b></div>
+			<div>We use PHP’s session functionality to maintain user session. If the user has not logged in, we disallow the user to access other pages and redirect the user to login page.</div>
+			<br>
+			<div>For URLs, we use get method for pages that contains publicly accessible information so that users can easily create bookmarks. These pages include user profile pages, search pages, track pages, artist pages, album pages, and playlist pages.</div>
+			<br>
+			<div>For other operations that contains confidential information, we use POST method to hide information and make sure the same operation won’t be repeated. These operations include to login, to register, to create playlist, to add a song to the playlist, to follow a user, to like an artist, to rate a track, etc.</div>
+			<br>
+
+			<div><b>SQL injection prevention:</b></div>
+			<div>To prevent SQL injection attacks, we used prepared statements to process all the SQL queries that requires user inputs.</div>
+			<br>
+			<div><b>Cross-site script prevention:</b></div>
+			<div>To prevent Cross-site script attacks, whenever we need to output print user inputs or store them in the database, such as register an account and create new playlist, we use htmlspecialchars() function to preprocess the input strings. Therefore, all malicious inputs will have their special characters removed and won’t be able to be executed as code.</div>
+			<br>
+			<div><b>Concurrence:</b></div>
+			<div>In our design, all users have to login before they can use the application. Therefore, all the reads and writes made by the user are specific to that user account and won’t affect other users. For example, the write operations we have are to register new account, to create new playlist, to follow another user, to like an artist, to rate a track, and to add/remove a track to the user’s playlist. These operations all involve current user’s id and therefore won’t conflict with other users operations. Furthermore, these operations are all atomic and do not involve multiple steps. If an operation fails, there is no need to rollback because there is no intermediate step.</div>
+		</div>
+		<br>
+		
+		<hr>
+		<div><h4>4. Example sessions</h4></div>
+		<div class="container ml-4">
+			<p><b>This is the login page, where user can use their username and password to login. Users are required to login before they can access the app.</b></p>
+			<div><img src="../images/project/sjbox/Screen%20Shot%202018-01-18%20at%209.55.47%20PM.png" width="30%" height="30%"/><br/></div>
+			<hr>
+			<p><b>After users login, they will be taken to the discover page, where they can see a customized feed with contents that they might be interested in, including new tracks by artists they like, playlists by users they follow, top 10 tracks ordered by user ratings, and top 10 tracks ordered by number of plays.</b></p>
+			<br>
+			<div><img src="../images/project/sjbox/Screen%20Shot%202018-01-18%20at%2010.10.51%20PM.png" width="85%" height="85%"/><br/></div>
+			<div><img src="../images/project/sjbox/Screen%20Shot%202018-01-18%20at%209.56.56%20PM.png" width="85%" height="85%"/><br/></div>
+			<hr>
+			<p><b>Home page contains user’s information, the artists they like, other users they follow, and playlists they created.</b></p>
+			<br>
+			<div><img src="../images/project/sjbox/Screen%20Shot%202018-01-18%20at%209.57.20%20PM.png" width="85%" height="85%"/><br/></div>
+			<hr>
+			<p><b>Search page allows user to search for tracks, artists, albums or users based on their input keywords.</b></p>
+			<div><img src="../images/project/sjbox/Screen%20Shot%202018-01-18%20at%209.57.45%20PM.png" width="85%" height="85%"/><br/></div>
+			<hr>
+			<p><b>After the user clicks on the search button,  the result will look like the picture below.</b></p>
+			<div><img src="../images/project/sjbox/Screen%20Shot%202018-01-18%20at%2010.00.04%20PM.png" width="85%" height="85%"/><br/></div>
+			<hr>
+			<p><b>Track page display information about a track, including its artist, album, duration, and average user rating. The play record will be created once the user enter this page. We use API from Spotify to show a preview of the track.</b></p>
+			<div><img src="../images/project/sjbox/Screen%20Shot%202018-01-18%20at%2010.00.28%20PM.png" width="85%" height="85%"/><br/></div>
+			<hr>
+			<p><b>The user will see the average rating of each track. The user can also rate the track. Note that user can only rate a track at most once. Subsequent rate will overwrite previous rate record.</b></p>
+			<div><img src="../images/project/sjbox/Screen%20Shot%202018-01-18%20at%2010.00.56%20PM.png" width="85%" height="85%"/><br/></div>
+			<hr>
+			<p><b>The user can click on the “+” button to add a track to his playlist. To remove it from the playlist, just click on the “x” button.</b></p>
+			<div><img src="../images/project/sjbox/Picture2.png" width="60%" height="60%"/><br/></div>
+			<hr>
+			<p><b>Artist page displays information about the artist, including the artist’s title and description. The user can see the artist’s album and top 20 songs by number of plays. There is a link at the end allowing you to see all tracks by this artist. The user can like an artist, which will affect his/her customized feed.</b></p>
+			<div><img src="../images/project/sjbox/Screen%20Shot%202018-01-18%20at%2010.01.21%20PM.png" width="85%" height="85%"/><br/></div>
+			<div><img src="../images/project/sjbox/Screen%20Shot%202018-01-18%20at%2010.01.41%20PM.png" width="85%" height="85%"/><br/></div>
+			<hr>
+			<p><b>The user can also see a list of similar artists, which are defined as artists who have a certain number of common fans.</b></p>
+			<div><img src="../images/project/sjbox/Picture3.png" width="85%" height="85%"/><br/></div>
+			<hr>
+			<p><b>Album page displays information about the album, including album name, artists (can be multiple artists), and all the tracks in this album.</b></p>
+			<div><img src="../images/project/sjbox/Screen%20Shot%202018-01-18%20at%2010.02.24%20PM.png" width="85%" height="85%"/><br/></div>
+		</div>
+		<br>
+
+		<hr>
+		<div>For more detail, check my repository at <a href="http://github.com/shtsai7/sjbox">github.com/shtsai7/sjbox</a> </div>
+		
+		<div><br/></div>
+   
+	</div>
+</div><!-- /.blurb -->
