@@ -1,0 +1,138 @@
+---
+layout: default
+title: Face Recognition - Eigenface Method
+---
+<link rel="stylesheet" type="text/css" href="/css/project.css">
+<div class="container">
+    <h1 class="container">Face Recognition - Eigenface Method</h1>
+   
+    <div class="container mx-4" id="content">
+	    <p>This is a class project that I developed for CS6643: Computer Vision in Fall 2017 at New York University.</p>
+
+	    <br>
+	    <h4>Introduction</h4>
+	    <hr>
+	    <p>In this project, I develop a face recognition program using the Eigenface method. The way it works is that you first provide a set of training images. The program will perform Principle Component Analysis (PCA) on the training images and create a eigenface space. Any face image (seen or unseen) can be then projected onto the face space and represented by a set of PCA coefficients.</p>
+
+	    <p>For any input face image, we first reconstruct the original image using a linear combination of the eigenfaces by using the PCA coefficients as weights. Then we compute the Euclidean distance between the PCA coefficients of two faces and match them based on a criteria. If an input image is close enough to a training image, we classify it to that class.</p>
+
+	    <p>The Eigenface is relatively simple, but it is very fast and quite robust. Note that this method is quite sentitive to lighting changes. It is not good at matching the same face when lighting condition differs.</p>
+
+	    <br>
+	    <h4>Installation and Compilation</h4>
+	    <hr>
+	    <p>The language I used for this face recognition project is C++. I used OpenCV library to read and write images, and I used Eigen 3 library to performance matrix/vector arithmetic operations.<p>
+	 
+		<p>To run my code, you will first need to have OpenCV library installed because that is what I used to load and display images. More information on how to install OpenCV in this <a href=" https://docs.opencv.org/2.4/doc/tutorials/introduction/linux_install/linux_install.html">link</a>.</p>
+	 
+		<p>Eigen 3 library has been included in the folder “Eigen3”, and I wrote the makefile to automatically include it when I compile my code.</p>
+	 
+		<p>Once you unzip my zipfile, go into the “face_recognition” folder. You can see an executable file named “face_recognition”, and this is what you want to run. There is no argument needed to run the program, as all training images and test images will load automatically. The training images are located in “trainingg_images” folder, and test images are located in “test_images” folder. Outputs images, such as eigenfaces, meanfaces, and reconstructed faces, are located in the “output_images” folder.</p>
+	 
+		<p>To run the program, type:
+			<code>./face_recognition</code>
+		</p>
+	 
+		<p>If for some reason you modify the code and want to recompile, you can type:
+	    	<code>make</code>
+	    </p>
+	    <p>If it doesn’t work, you might want to modify the CMakeLists.txt first by doing:
+	    	<code>cmake .</code>
+	    </p>
+
+		<p>Then try <code>make</code> again.</p>
+ 
+		<br>
+	    <h4>Example Test</h4>
+	    <hr>
+	    <p>Here are the eight training images</p>
+	    <img src="/images/project/eigenface/training_images/subject01.normal.jpg" alt="subject01" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/training_images/subject02.normal.jpg" alt="subject02" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/training_images/subject03.normal.jpg" alt="subject03" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/training_images/subject07.normal.jpg" alt="subject07" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/training_images/subject10.normal.jpg" alt="subject10" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/training_images/subject11.normal.jpg" alt="subject11" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/training_images/subject14.normal.jpg" alt="subject14" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/training_images/subject15.normal.jpg" alt="subject15" width="10%" height="10%"/>
+	    <br><br>
+
+	    <p>Here are the 18 test images</p>
+	    <img src="/images/project/eigenface/test_images/apple1_gray.jpg" alt="test_subject01" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject01.centerlight.jpg" alt="test_subject02" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject01.happy.jpg" alt="test_subject03" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject01.normal.jpg" alt="test_subject04" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject02.normal.jpg" alt="test_subject05" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject03.normal.jpg" alt="test_subject06" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject07.centerlight.jpg" alt="test_subject07" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject07.happy.jpg" alt="test_subject08" width="10%" height="10%"/>
+	   	<img src="/images/project/eigenface/test_images/subject07.normal.jpg" alt="test_subject09" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject10.normal.jpg" alt="test_subject10" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject11.centerlight.jpg" alt="test_subject11" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject11.happy.jpg" alt="test_subject12" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject11.normal.jpg" alt="test_subject13" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject12.normal.jpg" alt="test_subject14" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject14.happy.jpg" alt="test_subject15" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject14.normal.jpg" alt="test_subject16" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject14.sad.jpg" alt="test_subject17" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/test_images/subject15.normal.jpg" alt="test_subject18" width="10%" height="10%"/>
+	    <br><br>
+
+
+		<p>This is the mean face.</p>
+ 		<img src="/images/project/eigenface/meanface0.jpg" alt="meanface" width="10%" height="10%"/>
+ 		<br><br>
+
+		<p>Below are the 8 eigenfaces. Note that I normalized the pixel values to 0-255 for display purpose.</p>
+ 		<img src="/images/project/eigenface/eigenface0.jpg" alt="eigenface00" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/eigenface1.jpg" alt="eigenface01" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/eigenface2.jpg" alt="eigenface02" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/eigenface3.jpg" alt="eigenface03" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/eigenface4.jpg" alt="eigenface04" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/eigenface5.jpg" alt="eigenface05" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/eigenface6.jpg" alt="eigenface06" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/eigenface7.jpg" alt="eigenface07" width="10%" height="10%"/>
+	    <br><br>
+ 
+		<p>Here are the reconstructed images of the test images.</p>
+	    <img src="/images/project/eigenface/reconstructed0-0.jpg" alt="recontructed00" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed1-0.jpg" alt="recontructed01" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed2-0.jpg" alt="recontructed02" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed3-0.jpg" alt="recontructed03" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed4-0.jpg" alt="recontructed04" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed5-0.jpg" alt="recontructed05" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed6-0.jpg" alt="recontructed06" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed7-0.jpg" alt="recontructed07" width="10%" height="10%"/>
+	   	<img src="/images/project/eigenface/reconstructed8-0.jpg" alt="recontructed08" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed9-0.jpg" alt="recontructed09" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed10-0.jpg" alt="recontructed10" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed11-0.jpg" alt="recontructed11" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed12-0.jpg" alt="recontructed12" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed13-0.jpg" alt="recontructed13" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed14-0.jpg" alt="recontructed14" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed15-0.jpg" alt="recontructed15" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed16-0.jpg" alt="recontructed16" width="10%" height="10%"/>
+	    <img src="/images/project/eigenface/reconstructed17-0.jpg" alt="recontructed17" width="10%" height="10%"/>
+	    <br><br> 
+ 
+ 
+		<p>Here are the classification results for each test image without thresholding.</p>
+		<p>Apple1_gray, subject01.centerlight, subject07.centerlight, subject12.normal are incorrectly classified. So the success rate is (18-4) / 18 = 77.78%</p>
+ 	    <img src="/images/project/eigenface/classification1.png" alt="classification1" width="60%" height="60%"/>
+	    <img src="/images/project/eigenface/classification2.png" alt="classification2" width="60%" height="60%"/>
+	    <br><br>
+
+	    <p>Here are the classification results for each test image with thresholding.</p>
+		<p>T0 = 1000000000000 (10^12)</p>
+		<p>T1 = 86500000</p>
+		<p>subject01.centerlight, subject07.centerlight, subject07.happy and subject11.centerlight are incorrectly classified. So the success rate is still (18-4) / 18 = 77.78%                                </p>
+		<p>We can see that Eigenface method is really sensitive to light changes. It is not good at classifying faces when lighting changes.</p>
+ 
+	    <img src="/images/project/eigenface/classification3.png" alt="classification3" width="60%" height="60%"/>
+	    <img src="/images/project/eigenface/classification4.png" alt="classification4" width="60%" height="60%"/>
+	    <br><br>
+        
+ 		<hr>
+		<p>For further detail, you can check out my <a href="https://github.com/shtsai7/face-recognition">Github repo</a> if you want to learn more about this project.</p>
+		<br>
+	</div>
+</div><!-- /.blurb -->
