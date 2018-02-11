@@ -1,0 +1,2278 @@
+---
+layout: post
+title: "System Desgin"
+date: 2018-02-10
+tag: Note
+---
+
+
+      <div><span style="font-weight: bold;">Lecture 1: Introduction &amp; News Feed System</span></div>
+      <div>System design</div>
+      <ul>
+         <li>逻辑设计: how everything works</li>
+         <li>架构设计: sharding, distributed system</li>
+      </ul>
+      <div><br/></div>
+      <div>System design != Object Oriented Design</div>
+      <ul>
+         <li>System design：</li>
+         <ul>
+            <li>focus on 宏观层面</li>
+            <li>数据库，cache，webs server, file systems, messages</li>
+         </ul>
+         <li>ODD：</li>
+         <ul>
+            <li>微观设计</li>
+            <li>fields. methods, inheritance, class</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>Question type</div>
+      <ul>
+         <li>design system</li>
+         <ul>
+            <li>e.g design twitter, design facebook, design uber</li>
+         </ul>
+         <li>troubleshooting</li>
+         <ul>
+            <li>what happened if we can not access a website</li>
+            <li>what happened if a web server is too slow</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">评分标准</span></div>
+      <ul>
+         <li>work solution 25%: did you solve the problem</li>
+         <li>special case 20%: how do you handle special cases</li>
+         <li>analysis 25%</li>
+         <li>tradeoff 15%</li>
+         <li>knowledge base 15%</li>
+      </ul>
+      <div><br/></div>
+      <div>Don't overkill. Use technology based on number of users and requirements.</div>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">4S分析法</span></div>
+      <ul>
+         <li>Scenario: </li>
+         <ul>
+            <li>需要设计哪些功能</li>
+            <li>ask, features, QPS(queries per second), DAU (daily active user), interfaces</li>
+         </ul>
+         <li>Service:</li>
+         <ul>
+            <li>将大系统拆分小服务</li>
+            <li>split, application, module</li>
+            <li>SOA (Service Oriented Architecture)</li>
+         </ul>
+         <li>Storage:</li>
+         <ul>
+            <li>数据如何存储和访问</li>
+            <li>schema, data, SQL, NoSQL, File system</li>
+         </ul>
+         <li>Scale:</li>
+         <ul>
+            <li>升级，解决缺陷，处理可能遇到的问题</li>
+            <li>Optimize + maintenance</li>
+            <li>Sharding, optimize, special case</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>Example: Design Twitter</div>
+      <div><span style="font-weight: bold;">Scenario</span>: </div>
+      <ul>
+         <li><span style="font-size: 10pt;">ask</span></li>
+         <ul>
+            <li><span style="font-size: 13.3333px;">enumerate functionalities: register, login, upload, post, share...</span></li>
+            <li><span style="font-size: 10pt;">ask DAU, QPS</span></li>
+         </ul>
+         <li>sort, find all key functionality (b/c we cannot design everything in a limited time)</li>
+         <ul>
+            <li>post a tweet, timeline, news feed, follow/unfollow, register/login</li>
+         </ul>
+         <li>Analysis and predict</li>
+         <ul>
+            <li>compute concurrent user: (QPS) = DAU * average query / seconds in a day </li>
+            <ul>
+               <li>150M * 60 /86400 ~ 100k</li>
+            </ul>
+            <li>estimate peak = average concurrent user * 3</li>
+            <ul>
+               <li>100 k * 3 ~ 300k</li>
+            </ul>
+            <li>write QPS and read QPS</li>
+            <ul>
+               <li>write QPS ~ 5k</li>
+               <li>read QPS ~ 300k</li>
+               <li>用户相关的系统读多写少， 机器相关(网络爬虫)的系统读少写多</li>
+            </ul>
+            <li>hardware requirement</li>
+            <ul>
+               <li>QPS = 100</li>
+               <ul>
+                  <li>laptop is enough</li>
+               </ul>
+               <li>QPS = 1k</li>
+               <ul>
+                  <li>a decent web server, sing point of failure</li>
+               </ul>
+               <li>QPS = 1m</li>
+               <ul>
+                  <li>1000 web server, need to worry about maintainance</li>
+               </ul>
+               <li>relationship between QPS and Web Server/ Database</li>
+               <ul>
+                  <li>a web server = 1k QPS</li>
+                  <li>a SQL database (MySQL) = 1k QPS</li>
+                  <li>a NoSQL database (MongoDB, Cassandra) = 10k QPS  (still use database)</li>
+                  <li>a NoSQL database (Redis, Memcached) = 1M QPS (memory based)</li>
+               </ul>
+            </ul>
+         </ul>
+      </ul>
+      <div><span style="font-weight: bold;">Service</span>:</div>
+      <ul>
+         <li><span style="font-size: 10pt;">Can think of each service as a class, its functions are its method</span></li>
+         <li><span style="font-size: 10pt;">put same set of problems in a service</span></li>
+         <li><span style="font-size: 13.3333px;">split the system into a number of small services</span></li>
+      </ul>
+      <div><br/></div>
+      <ol start="1">
+         <li>Replay: go through each requirement, add a service for each</li>
+         <li>Merge: merge the same service</li>
+      </ol>
+      <div><br/></div>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Storage</span>:</div>
+      <ol start="1">
+         <li>Select storage</li>
+         <ul>
+            <li>use what storage</li>
+         </ul>
+         <li>design schema</li>
+         <ul>
+            <li>design table, primary keys, foreign keys</li>
+            <li>what attributes, what type</li>
+         </ul>
+      </ol>
+      <div><br/></div>
+      <ul>
+         <li>Database</li>
+         <ul>
+            <li>SQL database</li>
+            <ul>
+               <li>user table</li>
+            </ul>
+            <li>NoSQL database</li>
+            <ul>
+               <li>tweets, social graph (followers)</li>
+            </ul>
+         </ul>
+         <li>File System</li>
+         <ul>
+            <li>images, videos</li>
+         </ul>
+         <li>Cache</li>
+         <ul>
+            <li>non-persistent</li>
+            <li>e.g. Redis, Mecached</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-style: italic;">Difference between Database and file system?</span></div>
+      <ul>
+         <li><span style="font-size: 10pt;">Both stored on disk, but not only the same level</span></li>
+         <li><span style="font-size: 10pt;">File system is built on top of OS. </span></li>
+         <ul>
+            <li><span style="font-size: 10pt;">only support read(path), and write(path, value)</span></li>
+            <li><span style="font-size: 10pt;">can be used to store data, but not efficient</span></li>
+            <ul>
+               <li><span style="font-size: 10pt;">e.g. /cs/2016/student_name</span></li>
+            </ul>
+            <li><span style="font-size: 10pt;">hard to support query and filter</span></li>
+            <li><span style="font-size: 10pt;">good for storing files that don't need to be queried or don't require modification</span></li>
+            <ul>
+               <li><span style="font-size: 10pt;">e.g. images, videos</span></li>
+            </ul>
+            <li><span style="font-size: 13.3333px;">e.g. Amazon S3 (cloud file system)</span></li>
+         </ul>
+         <li><span style="font-size: 13.3333px;">Database is built on top of file system, high level</span></li>
+         <ul>
+            <li><span style="font-size: 13.3333px;">organize data and store them into file system</span></li>
+            <li><span style="font-size: 13.3333px;">provide convenient interfaces  </span></li>
+            <li><span style="font-size: 13.3333px;">allows for efficient querying and filtering</span></li>
+            <li><span style="font-size: 13.3333px;">allows complex SQL queries</span></li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Scale</span></div>
+      <ol start="1">
+         <li>Optimize</li>
+         <ul>
+            <li>Solve problems</li>
+            <li>more features</li>
+            <li>special cases</li>
+         </ul>
+         <li>Maintenance</li>
+      </ol>
+      <ul>
+         <li>Robustness</li>
+         <li>Scalability</li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">How to create and store News Feeds?</span></div>
+      <ul>
+         <li><span style="font-size: 10pt;">e.g. Facebook, twitter</span></li>
+         <li><span style="font-size: 10pt;">Need follow and follower, everyone has a unique feed</span></li>
+         <li><span style="font-size: 13.3333px; font-weight: bold;">Pull model</span> <span style="font-size: 13.3333px;">(user actively ask for feeds)</span></li>
+         <ul>
+            <li><span style="font-size: 13.3333px;">algorithm: get top 100 tweets from all friends</span></li>
+            <ul>
+               <li><span style="font-size: 13.3333px;">Merge K sorted arrays</span></li>
+            </ul>
+            <li><span style="font-size: 13.3333px;">complexity:</span></li>
+            <ul>
+               <li><span style="font-size: 13.3333px;">read: </span></li>
+               <ul>
+                  <li><span style="font-size: 13.3333px;">assume N friends, need N DB reads + k-way merge (merge can be ignored b/c in-memory)</span></li>
+                  <li><span style="font-size: 13.3333px; text-decoration: underline;">DB reads become bottleneck</span></li>
+                  <li><span style="font-size: 13.3333px;">can be improved by concurrency and distributed system</span></li>
+               </ul>
+               <li><span style="font-size: 13.3333px;">post: </span>1 DB write</li>
+            </ul>
+            <li><img src="/images/SystemDesign/Image%202_5.png" height="421" width="914"/><br/></li>
+         </ul>
+         <li><span style="font-size: 13.3333px; font-weight: bold;">Push model</span> <span style="font-size: 13.3333px;">(created news feed before hand, wait for user to get)</span></li>
+         <ul>
+            <li><span style="font-size: 13.3333px;">algorithm: </span></li>
+            <ul>
+               <li><span style="font-size: 13.3333px;">create a list for each user's news feed</span></li>
+               <li><span style="font-size: 13.3333px;">when a user post a tweet, add it to all its followers' list</span></li>
+               <ul>
+                  <li><span style="font-size: 13.3333px;">"fanout"</span></li>
+               </ul>
+               <li><span style="font-size: 13.3333px;">do not really need to create a list for every user, can use a database table</span></li>
+               <ul>
+                  <li><span style="font-size: 13.3333px;">id, owner_id, tweet_id, created_at</span></li>
+               </ul>
+            </ul>
+            <li><span style="font-size: 13.3333px;">complexity:</span></li>
+            <ul>
+               <li><span style="font-size: 13.3333px;">read: 1 DB read to get tweets in the list</span></li>
+               <li><span style="font-size: 13.3333px;">post: N followers, need N DB writes</span></li>
+               <ul>
+                  <li><span style="font-size: 13.3333px; text-decoration: underline;">but it can be done in the backend, user doesn't have to wait</span></li>
+                  <ul>
+                     <li><span style="font-size: 13.3333px;">can use asynchronous task server 异步任务</span></li>
+                     <li><span style="font-size: 13.3333px;">do not block user</span></li>
+                     <li><span style="font-size: 13.3333px;">message queue: assign task for producer and consumer</span></li>
+                     <ul>
+                        <li><span style="font-size: 13.3333px;">assign tasks into message queue</span></li>
+                        <li><span style="font-size: 13.3333px;">workers get tasks from message queue to do work</span></li>
+                        <li><span style="font-size: 13.3333px;">e.g. RabbitMQ, ZeroMQ, Redis, Kafka</span></li>
+                     </ul>
+                     <li><span style="font-size: 13.3333px;">use this when operation is slow, or the speed of producer and consumer differ</span></li>
+                  </ul>
+               </ul>
+            </ul>
+            <li><span style="font-size: 13.3333px;">drawback: if the number of follower is large, need a lot of writes and can cause delay</span></li>
+            <li><img src="/images/SystemDesign/Image%203_2.png" height="411" width="931"/><br/></li>
+         </ul>
+         <li><span style="font-size: 13.3333px; font-weight: bold;">Pull vs Push</span></li>
+         <ul>
+            <li><span style="font-size: 13.3333px;">e.g Facebook- pull, twitter-pull, Instagram-push + pull (push for normal user, pull for celebrity)</span></li>
+            <li><span style="font-size: 13.3333px;">push is good because</span></li>
+            <ul>
+               <li><span style="font-size: 13.3333px;">less resources</span></li>
+               <li><span style="font-size: 13.3333px;">less code</span></li>
+               <li><span style="font-size: 13.3333px;">less posts</span></li>
+               <li><span style="font-size: 13.3333px;">no celebrity problem, bidirectional friendship relationship</span></li>
+            </ul>
+            <li><span style="font-size: 13.3333px;">pull is good because</span></li>
+            <ul>
+               <li><span style="font-size: 13.3333px;">more resource</span></li>
+               <li><span style="font-size: 13.3333px;">low latency</span></li>
+               <li><span style="font-size: 13.3333px;">many posts</span></li>
+               <li><span style="font-size: 13.3333px;">can have celebrity problem (following relationship)</span></li>
+            </ul>
+            <li><span style="font-size: 13.3333px;">don't switch between models too often, improve on current model with minimum improvement</span></li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-size: 13.3333px; font-weight: bold;">Scale</span> <span style="font-size: 13.3333px;">(how to improve)</span></div>
+      <ul>
+         <li><span style="font-size: 13.3333px; font-weight: bold;">pull model</span></li>
+         <ul>
+            <li><span style="font-size: 13.3333px;">bottleneck is user read, need a lot of DB reads</span></li>
+            <li>solution:</li>
+            <ul>
+               <li>check cache before DB reads</li>
+               <li>cache user's timeline (current week's contents)</li>
+               <li>cache user's news feed, when refresh, only need to get new posts after a certain time-stamp </li>
+            </ul>
+         </ul>
+         <li><span style="font-weight: bold;">push model</span></li>
+         <ul>
+            <li>disk usage (disk is cheap)</li>
+            <li>inactive user (rank followers by weight (e.g. last login time))</li>
+            <li>followers &gt;&gt; following (celebrity)</li>
+            <ul>
+               <li>push + pull: </li>
+               <ul>
+                  <li>mark as special users (e.g. &gt;1m)</li>
+                  <li>don't push their feeds to users, let users pull from them</li>
+               </ul>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><br/></div>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Lecture 2: Databases and Memcache</span></div>
+      <div>Sample problem: <span style="font-weight: bold;">Design User System</span></div>
+      <ul>
+         <li>register, login, lookup, relationship</li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Scenario</span></div>
+      <ul>
+         <li>which feature is most used? read query</li>
+         <li>assume 100M DAU</li>
+         <li>1 RPS (request per second) = 10 QPS</li>
+         <ul>
+            <li>a request can lead to multiple queries</li>
+         </ul>
+         <li>QPS (look up into databases)</li>
+         <ul>
+            <li>register, login, modification</li>
+            <ul>
+               <li>0.1 per user per day (once every ten days)</li>
+               <li>100 QPS, Peak 300 QPS</li>
+            </ul>
+            <li>query</li>
+            <ul>
+               <li>100 per user per day</li>
+               <li>100k QPS, peak 300k QPS</li>
+            </ul>
+         </ul>
+         <li>more read than write, can use cache to optimize</li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Cache</span></div>
+      <ul>
+         <li>缓存</li>
+         <li>key-value structure</li>
+         <li>e.g.</li>
+         <ul>
+            <li>Memcached (no data persistency)</li>
+            <li>Redis (support data persistency)</li>
+         </ul>
+         <li>Cache doesn’t have to be in the memory</li>
+         <ul>
+            <li>can use file system as cache</li>
+            <ul>
+               <li>for network</li>
+               <li>to store intermediate results</li>
+            </ul>
+            <li>can be on client side</li>
+         </ul>
+         <li>Cache hit: data exists in the cache</li>
+         <ul>
+            <li>hit rate &gt; 95% for user system</li>
+            <li>high for system that has more read than write</li>
+         </ul>
+         <li>Cache aside</li>
+         <ul>
+            <li>server talk to cache and databases separately</li>
+            <li>cache doesn’t talk to database</li>
+            <li>e.g. Memcached + MySQL</li>
+         </ul>
+         <li>Cache through</li>
+         <ul>
+            <li>server talk to cache only</li>
+            <li>cache will communicate with database, responsible for data persistency</li>
+            <li>e.g. Redis</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Memcache</span></div>
+      <ul>
+         <li>Cache in memory, a concept</li>
+         <li>Memcached: a popular software </li>
+         <ul>
+            <li>set(key, value) and get(key)</li>
+            <li>can set ttl (Time To Live)</li>
+            <li>evict values</li>
+         </ul>
+         <li>Need to make sure database and cache consistent</li>
+         <ul>
+            <li>try not to use lock if possible, hurts performance</li>
+         </ul>
+         <li>update</li>
+         <ol>
+            <li>database.set()       // update to new value</li>
+            <li>cache.delete(key)  // evict old value</li>
+         </ol>
+         <ul>
+            <li>eventual consistency</li>
+            <ul>
+               <li>allow temporary inconsistency</li>
+               <ul>
+                  <li>if cache.delete fails</li>
+               </ul>
+               <li>cache entries has ttl, will eventually be updated</li>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Service</span></div>
+      <ul>
+         <li>Authentication Service - login and register</li>
+         <li>User Service - store and lookup user information</li>
+         <li>Friendship Service - store user relationships</li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Session</span></div>
+      <ul>
+         <li>How to maintain login state</li>
+         <li>When user login</li>
+         <ul>
+            <li>create a session object</li>
+            <li>return session_key as cookie value to the browser</li>
+            <li>browser stores this cookie value</li>
+            <li>whenever user sends a request to the browser, it will automatically appends that cookie</li>
+            <li>when server verify the session_key, user is logged in</li>
+         </ul>
+         <li>session table</li>
+         <ul>
+            <li>session_key: a hash value, globally unique</li>
+            <li>user_id: foreign key pointing to user table</li>
+            <li>expire_at: a timestamp indicating expiration date</li>
+         </ul>
+         <li>when user logout</li>
+         <ul>
+            <li>delete data from session table</li>
+         </ul>
+         <li>Session table can be stored in</li>
+         <ul>
+            <li>cache</li>
+            <ul>
+               <li>when power failure, lose all session data, all user will need to re-login</li>
+            </ul>
+            <li>databases</li>
+            <ul>
+               <li>persistent, but slower</li>
+            </ul>
+            <li>combine both</li>
+         </ul>
+         <li>session is on server side, cookie in on client side</li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Friendship service</span></div>
+      <ul>
+         <li>单向</li>
+         <ul>
+            <li>store from_user_id and to_user_id</li>
+         </ul>
+         <li>双向</li>
+         <ol>
+            <li>store as two records, A-&gt;B and B-&gt;A</li>
+            <li>store as one records, but need two queries</li>
+            <ul>
+               <li>smaller_user_id and bigger_user_id (to avoid duplicates)</li>
+               <li>when lookup all friends of a user, need two conditions in where clause</li>
+               <li>smaller_user_id = id OR bigger_user_id = id</li>
+            </ul>
+         </ol>
+      </ul>
+      <div><br/></div>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">SQL vs NoSQL</span></div>
+      <ul>
+         <li>most of time, both will work</li>
+         <li>choose SQL when need transaction</li>
+         <li>SQL is more mature, can support many features. need to implement serialization, secondary index … in NoSQL</li>
+         <li>use NoSQL when you want to save some resource, NoSQL has higher performance</li>
+         <li>use SQL for high reliability</li>
+         <li>SQL use row as unit, schema is pre-defined</li>
+         <li>NoSQL uses grid (cell) as unit, row_key + column_key + value = a record, column is dynamic, can be infinitely large</li>
+         <li>NoSQL is often distributed database and is easier to scale</li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">NoSQL Databases</span></div>
+      <ul>
+         <li><span style="font-weight: bold;">Key/Value based</span></li>
+         <ul>
+            <li>match keys with values, similar to dictionary</li>
+            <li>no structure nor relation</li>
+            <li>extremely performant, efficient and scalable</li>
+            <li>e.g. </li>
+            <ul>
+               <li>Redis: in-memory K/V store with optional persistence</li>
+               <li>Riak: Highly distributed, replicated K/V store</li>
+               <li>MemcacheDB: Distributed memory-based K/V store</li>
+            </ul>
+            <li>when to use?</li>
+            <ul>
+               <li>caching: quickly storing data for future use</li>
+               <li>queueing: Redis supports lists, sets, queues</li>
+               <li>distributing information/tasks: to implement pub/sub</li>
+               <li>keeping live information: for app that need to keep a state</li>
+            </ul>
+         </ul>
+         <li><span style="font-weight: bold;">Column based</span></li>
+         <ul>
+            <li>create collections of one or more key/value pairs that match a record</li>
+            <li>use column key to find all corresponding key/value pairs</li>
+            <li>very scalable</li>
+            <li>e.g. </li>
+            <ul>
+               <li>Cassandra: based on BigTable and DynamoDB</li>
+               <li>HBase: Data store for Hadoop based on ideas from BigTable</li>
+            </ul>
+            <li>when to use?</li>
+            <ul>
+               <li>keeping unstructured, non-volatile information</li>
+               <li>scaling: highly scalable by nature</li>
+            </ul>
+         </ul>
+         <li><span style="font-weight: bold;">Document based</span></li>
+         <ul>
+            <li>Similar to column-based, but allow much deeper nesting and complex structures</li>
+            <li>any complex and arbitrary structure can form a document</li>
+            <li>query and update can be inefficient</li>
+            <li>e.g. </li>
+            <ul>
+               <li>MongoDB</li>
+               <li>Couchbase: JSON-based, memcached-compatible</li>
+               <li>CouchDB</li>
+            </ul>
+            <li>when to use?</li>
+            <ul>
+               <li>nested information: allow nested and complex data structures</li>
+               <li>JavaScript friendly</li>
+            </ul>
+         </ul>
+         <li><span style="font-weight: bold;">Graph based</span></li>
+         <ul>
+            <li>use tree-like structures with nodes and edges connecting each other through relations</li>
+            <li>e.g. </li>
+            <ul>
+               <li>OrientDB: a very fast graph and document based hybrid NoSQL data store</li>
+               <li>Neo4J: schema-free </li>
+            </ul>
+            <li>when to use?</li>
+            <ul>
+               <li>handling complex relational information: such as connections between two entities and various degrees of other entities indirectly related to them</li>
+               <li>modeling and handling classifications</li>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Cassandra (Hbase) - column based</span></div>
+      <ul>
+         <li>three layer NoSQL database</li>
+         <li>layer one: row_key</li>
+         <ul>
+            <li><span style="font-style: italic;">hash_key</span>, partition key, the key in key-value pair</li>
+            <li>all queries need to have this key, cannot do range query </li>
+            <li>can be used for sharding, to determine which machine the data is on</li>
+            <li>e.g. user_id</li>
+         </ul>
+         <li>layer two: column_key</li>
+         <ul>
+            <li>sorted, can do range query</li>
+            <li>can be composite value</li>
+         </ul>
+         <li>layer three: value</li>
+         <ul>
+            <li>usually string</li>
+            <li>if need to store multiple information, can perform serialization</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">How to Scale</span></div>
+      <ul>
+         <li><span style="font-weight: bold;">Single Point Failure</span></li>
+         <ul>
+            <li>Solution:</li>
+            <ul>
+               <li><span style="font-weight: bold;">sharding</span></li>
+               <ul>
+                  <li>split data to different machine</li>
+                  <li>SQL doesn’t have sharding built-in</li>
+                  <li>NoSQL comes with sharding</li>
+               </ul>
+               <li><span style="font-weight: bold;">replica</span></li>
+               <ul>
+                  <li>copy data into multiple copies</li>
+                  <li>can be used to improve read performance</li>
+               </ul>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Sharding (partition)</span></div>
+      <ul>
+         <li>vertical sharding</li>
+         <ul>
+            <li>put different tables into different machine</li>
+            <li>split data based on characteristics</li>
+            <li>e.g. put data that doesn’t change into one database, put data that changes a lot into a another table</li>
+            <li>problems:</li>
+            <ul>
+               <li>won’t work if the table becomes too big, can no longer split</li>
+            </ul>
+         </ul>
+         <li>horizontal sharding</li>
+         <ul>
+            <li>naive solution: % number of machine</li>
+            <ul>
+               <li>need to move many data when add more machines</li>
+            </ul>
+            <li>need consistent hashing</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><br/></div>
+      <div>Google 三驾马车：GFS, MapReduce, Bigtable</div>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Lecture 3: Consistent Hashing </span></div>
+      <div><span style="font-weight: bold;">Consistent Hashing</span></div>
+      <ul>
+         <li>Naive solution</li>
+         <ul>
+            <li>% n (n is the number of machine)</li>
+            <li>When n =&gt; n + 1, many keys will move</li>
+            <li><img src="/images/SystemDesign/Image%201_4.png" height="302" width="851"/><br/></li>
+            <li>Inconsistent</li>
+         </ul>
+         <li><span style="font-weight: bold;">Simple consistent hashing</span></li>
+         <ul>
+            <li>% a large fixed number</li>
+            <li>split this large number to n machines, each machine is responsible for an interval</li>
+            <li>to search for a record, get its value, then go to the machine that is responsible for that value</li>
+            <li><img src="/images/SystemDesign/Image%202_6.png" height="249" width="736"/><br/></li>
+            <li>Drawbascks</li>
+            <ul>
+               <li>When have more than three machines, hard to keep data evenly distributed</li>
+               <li>Migration from old machines to new machine will create high work load for old machine</li>
+            </ul>
+         </ul>
+         <li><span style="font-weight: bold;">Better consistent hashing</span></li>
+         <ul>
+            <li>treat the entire Hash range as a ring (0~2^64-1)</li>
+            <li>treat all machines and data as points on the ring</li>
+            <li>use <span style="font-weight: bold;">virtual nodes</span></li>
+            <ul>
+               <li>a physical machine corresponds to 1000 virtual nodes</li>
+            </ul>
+            <li>When a data comes in</li>
+            <ul>
+               <li>get its hash value, and find its position on the ring</li>
+               <li>each data is stored at the first virtual node on the clockwise direction</li>
+            </ul>
+            <li>When adding a new machine</li>
+            <ul>
+               <li>1000 virtual nodes request data from the previous virtual nodes that are responsible for their range</li>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Replica</span></div>
+      <ul>
+         <li>Difference between backup</li>
+         <ul>
+            <li>backup</li>
+            <ul>
+               <li>periodic</li>
+               <li>offline</li>
+               <li>used to restore data</li>
+            </ul>
+            <li>relica</li>
+            <ul>
+               <li>real-time</li>
+               <li>copy of the data</li>
+               <li>can be used to handle read query</li>
+               <li>improve redundancy</li>
+            </ul>
+         </ul>
+         <li>MySQL Replica (default)</li>
+         <ul>
+            <li>Master slave </li>
+            <ul>
+               <li>Master: read and write</li>
+               <li>Slave: read</li>
+            </ul>
+            <li>Write Ahead Log</li>
+            <ul>
+               <li>keep a log of all operation</li>
+               <li>Whenever master performs an action, notify slave to read log to replay</li>
+               <li>can cause slight delay</li>
+            </ul>
+            <li>Master down</li>
+            <ul>
+               <li>promote a slave to be master</li>
+               <li>can cause data loss and inconsistency</li>
+            </ul>
+         </ul>
+         <li>NoSQL Replica (default)</li>
+         <ul>
+            <li>store three replicas on three virtual nodes ahead clockwise on the Consistent Hashing ring</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Sample problem: Design Tiny URL</span></div>
+      <ul>
+         <li>Scenario</li>
+         <ul>
+            <li>functionality</li>
+            <ul>
+               <li>Long URL =&gt; Short URL</li>
+               <li>Short URL =&gt; Long URL</li>
+            </ul>
+            <li>one-to-one or one-to-many mapping?</li>
+            <li>release tiny url after a while?</li>
+            <ul>
+               <li>No, because user might access it in the future, might lead to other website, affect user experience</li>
+            </ul>
+            <li>QPS + Storage</li>
+            <ul>
+               <li>100M DAU</li>
+               <li>assume create 0.1 query per user per day =&gt; 100 QPS</li>
+               <li>assume read 1 query per user per day =&gt; 1k QPS</li>
+               <li>A single MySQL server can handle</li>
+            </ul>
+         </ul>
+         <li>Service</li>
+         <ul>
+            <li>encode(long_url)</li>
+            <li>decode(short_url)</li>
+         </ul>
+         <li>Storage</li>
+         <ul>
+            <li>SQL vs NoSQL</li>
+            <ul>
+               <li>Need transaction? No =&gt; NoSQL</li>
+               <li>Need complicated SQL query? No =&gt; NoSQL</li>
+               <li>Complicated code? No =&gt; NoSQL</li>
+               <li>QPS high? No =&gt; SQL </li>
+               <li>Scalability ? No =&gt; SQL</li>
+               <li>SequentialID ? Yes (SQL) : No(NoSQL) </li>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Designs</span></div>
+      <ol>
+         <li>Hash function (Not feasible)</li>
+         <ul>
+            <li>take last 6 bits of Hash value</li>
+            <li>cannot avoid collision</li>
+         </ul>
+         <li><span style="font-weight: bold;">Random number + DB remove duplicates                                                             </span></li>
+         <ul>
+            <li>Randomly generate a 6 bit short url</li>
+            <li>check if it has been used, if not, add it to the database. Otherwise, retry.</li>
+            <li>Advantage: Easy to implement</li>
+            <li>Disadvantage: Generation speed will decrease as the number of tiny urls increases (more retry)</li>
+         </ul>
+         <li><span style="font-weight: bold;">Base 62</span></li>
+         <ul>
+            <li>Use incremental sequential ID, convert id to base 62</li>
+            <li>Advantage: Efficient</li>
+            <li>Disadvantage: But rely on global sequential ID</li>
+         </ul>
+      </ol>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Scale</span></div>
+      <ul>
+         <li>More read than write, use cache aside to improve read</li>
+         <li>use geographic information to speed up</li>
+         <li>centralized MySQL + Distributed Memcached</li>
+         <li>Distributed databases </li>
+      </ul>
+      <div><br/></div>
+      <div><br/></div>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Lecture 4: Distributed System - Google File System</span></div>
+      <div>Distributed system: use multiple machines to solve problems that one problem cannot solve</div>
+      <ul>
+         <li>not enough storage space</li>
+         <li>QPS too high</li>
+      </ul>
+      <div><br/></div>
+      <div>Two solutions:</div>
+      <ul>
+         <li>Distributed system with a large number of normal machines (Google)</li>
+         <li>Super machines (Sun)</li>
+      </ul>
+      <div><br/></div>
+      <div>Google三剑客</div>
+      <ul>
+         <li>Google File System </li>
+         <ul>
+            <li>How to store data</li>
+            <li>NoSQL needs to run top of a file system</li>
+         </ul>
+         <li>Bigtable</li>
+         <ul>
+            <li>NoSQL database</li>
+            <li>How to connect file system and map reduce</li>
+         </ul>
+         <li>MapReduce</li>
+         <ul>
+            <li>how to process data quickly</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>Examples</div>
+      <ul>
+         <li>GFS (Google file system)</li>
+         <ul>
+            <li>C++</li>
+         </ul>
+         <li>HDFS (Hadoop Distributed File Sytstem)</li>
+         <ul>
+            <li>Yahoo, Open source</li>
+            <li>Java</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Scenario</span></div>
+      <ul>
+         <li>Google's goal was to store the entire Internet (html files), ~1000TB/day</li>
+         <li>Requirement</li>
+         <ul>
+            <li>user can read and write very big files</li>
+            <li>store them in multiple machines</li>
+            <ul>
+               <li>Google (2007), 100,000 machines</li>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Service</span></div>
+      <ul>
+         <li>Client</li>
+         <ul>
+            <li>request data and write data</li>
+         </ul>
+         <li>Server</li>
+         <ul>
+            <li>complete client requests</li>
+         </ul>
+         <li>Two models</li>
+         <ul>
+            <li>Peer to Peer 社会主义</li>
+            <ul>
+               <li>every machine is equal</li>
+               <li>each machine is responsible for 1/n of data</li>
+               <li>no single point of failure (can still work even after a server fails)</li>
+               <li>hard to synchronize, time consuming to get consistency</li>
+               <li>e.g. Cassandra, BitComet</li>
+               <li><img src="/images/SystemDesign/Image%201_3.png" height="393" width="828"/><br/></li>
+            </ul>
+            <li>Master Slave 资本主义</li>
+            <ul>
+               <li>A master machine that is responsible for assigning tasks to slaves</li>
+               <li>simple design</li>
+               <li>easy to synchronize</li>
+               <li>single point of failure (master)</li>
+               <li>e.g. GFS, HDFS</li>
+               <li>Architecture</li>
+               <ul>
+                  <li>Master - Manager, doesn't store data</li>
+                  <li>Slave - Partitions, store data</li>
+               </ul>
+               <li><img src="/images/SystemDesign/Image%202_2.png" height="514" width="685"/><br/></li>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Storage</span></div>
+      <div>Store big files in File System (hard disk)</div>
+      <div>How to store a normal file in the file system?</div>
+      <ul>
+         <li>Need to store:</li>
+         <ul>
+            <li>Actual file</li>
+            <li>Metadata</li>
+            <ul>
+               <li>format, file name, size, etc</li>
+            </ul>
+         </ul>
+         <li>Store meta data and actual file separately</li>
+         <ul>
+            <li>access meta data more frequently</li>
+         </ul>
+         <li>Store files</li>
+         <ul>
+            <li>continuously (Windows)</li>
+            <ul>
+               <li>faster read and easier error checking</li>
+               <li>but create disk fragmentation</li>
+            </ul>
+            <li>into several chunks (Linux)</li>
+            <ul>
+               <li>more efficient use of space, but slower read</li>
+            </ul>
+         </ul>
+         <li><span style="font-weight: bold;">block</span></li>
+         <ul>
+            <li>1KB or 4KB</li>
+         </ul>
+         <li><img src="/images/SystemDesign/Image%203_3.png" height="457" width="642"/><br/></li>
+      </ul>
+      <div><br/></div>
+      <div>How to store a <span style="font-weight: bold;">LARGE</span> file in the file system?</div>
+      <ul>
+         <li>block size is not big enough</li>
+         <ul>
+            <li>if use block, will create a lot of small metadata</li>
+         </ul>
+         <li><span style="font-weight: bold;">chunk</span></li>
+         <ul>
+            <li>64M</li>
+            <li>reduce size of metadata</li>
+            <li>but waste space for small files</li>
+         </ul>
+         <li><img src="/images/SystemDesign/Image%204_1.png" height="481" width="528"/><br/></li>
+      </ul>
+      <div><br/></div>
+      <div>How to save a <span style="font-weight: bold;">LARGE</span> file <span style="text-decoration: underline;">in several machines</span>?</div>
+      <ul>
+         <li><span style="font-weight: bold;">One master + many ChunkServers</span></li>
+         <ul>
+            <li>chunk servers = slave servers</li>
+         </ul>
+         <li><span style="text-decoration: underline;">Master has a global view</span>, knows where the file is stored, </li>
+         <ul>
+            <li>store meta data</li>
+            <ul>
+               <li>How much meta data?</li>
+               <li>1 chunk = 64 MB, needs 64B meta data</li>
+            </ul>
+            <li>store mapping (chunk list)</li>
+            <ul>
+               <li>file name + chunk index -&gt; chunk server</li>
+            </ul>
+            <li>write to less utilized chunk servers</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>How to read and write files?</div>
+      <ul>
+         <li>one write vs multiple writes</li>
+         <ul>
+            <li>one write</li>
+            <ul>
+               <li>if error, need to rewrite the entire thing</li>
+            </ul>
+            <li><span style="font-weight: bold;">multiple write</span></li>
+            <ul>
+               <li>if error, only need to rewrite a small portion</li>
+               <li>the size of each write can be chunk size</li>
+               <li>let client split file, then write to the file system</li>
+            </ul>
+         </ul>
+         <li><span style="font-weight: bold;">write</span></li>
+         <ul>
+            <li>client communicate with master to know where to write</li>
+            <li>master assign chunk servers to client</li>
+            <li>then client writes directly to the assigned chunk server</li>
+            <li><img src="/images/SystemDesign/Image%205_1.png" height="491" width="1044"/><br/></li>
+         </ul>
+         <li><span style="font-weight: bold;">modification</span> (one time to write, many time to read)</li>
+         <ul>
+            <li>modify on hard disk directly</li>
+            <ul>
+               <li>very hard, disk only support overwrite</li>
+            </ul>
+            <li>read to memory, modify, then write back</li>
+            <ul>
+               <li>hard to handle when size changes</li>
+            </ul>
+            <li><span style="font-weight: bold;">read to memory, modify, then write to new location</span></li>
+            <ul>
+               <li>best solution</li>
+            </ul>
+         </ul>
+         <li><span style="font-weight: bold;">read</span></li>
+         <ul>
+            <li>client request file information from master</li>
+            <li>master returns a chunk list to client</li>
+            <li>client reads data from chunk servers in the chunk list</li>
+            <li><img src="/images/SystemDesign/Image%206.png" height="470" width="792"/><br/></li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>Single Master Failure</div>
+      <ul>
+         <li><span style="font-size: 10pt;">Single Master is enough in most of case (90%)</span></li>
+         <ul>
+            <li><span style="font-size: 10pt;">master has best hardware</span></li>
+         </ul>
+         <li><span style="font-size: 10pt;">Can also have double master, even multiple master (paxos)</span></li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">CheckSum</span></div>
+      <ul>
+         <li><span style="font-size: 10pt;">identify whether a chunk on the disk is broken</span></li>
+         <li><span style="font-size: 13.3333px;">detect one bit error</span></li>
+         <ul>
+            <li><span style="font-size: 10pt;">perform XOR on all chunks, and store their checksum</span></li>
+            <li><span style="font-size: 10pt;">after read, perform checksum again, and compare with stored checksum</span></li>
+            <li><span style="font-size: 10pt;">if checksum changed, an error is detected</span></li>
+         </ul>
+         <li><span style="font-size: 10pt;">More sophisticate version e.g. MD5, SHA1</span></li>
+         <li><span style="font-size: 13.3333px;">Add a checksum for each chunk</span></li>
+         <li><span style="font-size: 13.3333px;">write checksum after a write operation</span></li>
+         <li><span style="font-size: 13.3333px;">check checksum when read</span></li>
+      </ul>
+      <div><br/></div>
+      <div>How to avoid data loss?</div>
+      <ul>
+         <li><span style="font-weight: bold;">Replica</span></li>
+         <li>usually three replica</li>
+         <ul>
+            <li>put two replica relatively close to each other, for easy access</li>
+            <li>and last copy far away</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>How to recover when a chunk is broken?</div>
+      <ul>
+         <li>ask master for help, to get the location of replica server</li>
+         <li>read from replica to recover</li>
+      </ul>
+      <div><br/></div>
+      <div>How to find whether a chunk server is down?</div>
+      <ul>
+         <li><span style="font-weight: bold;">Heartbeat</span></li>
+         <li>chunk servers periodically send heartbeat messages to the master</li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Scale</span></div>
+      <div>How to solve client bottleneck during write?</div>
+      <ul>
+         <li>Because client needs to write three copies (replica)</li>
+         <li><span style="font-weight: bold;">leader</span></li>
+         <ul>
+            <li>When client writes, only need to write to one chunk server (leader)</li>
+            <li>leader then write to the other two servers</li>
+            <li><img src="/images/SystemDesign/Image%207.png" height="506" width="1017"/><br/></li>
+         </ul>
+         <li>How to choose leader?</li>
+         <ul>
+            <li>closest one (fast)</li>
+            <li>less busy one (load balance)</li>
+         </ul>
+         <li>How to solve chunk server failure during write?</li>
+         <ul>
+            <li>silent </li>
+            <ul>
+               <li>don't do anything, can still have two copies</li>
+            </ul>
+            <li>speak up</li>
+            <ul>
+               <li>let client know this operation has failed</li>
+               <li>client then retry</li>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Lecture 5: Web Crawler &amp; Typeahead</span></div>
+      <div>Internet services</div>
+      <ul>
+         <li>email (70s)</li>
+         <li>web (90s) - a part of the the Internet</li>
+         <ul>
+            <li>web server + web browser</li>
+         </ul>
+         <li>bit torrent</li>
+      </ul>
+      <div><br/></div>
+      <div>Web Crawler (网络爬虫）</div>
+      <ul>
+         <li>Used for collecting information on the Web</li>
+         <ul>
+            <li>url -&gt; html files</li>
+         </ul>
+         <li>can then be used by search engine to quickly find relative url</li>
+         <ul>
+            <li>key word -&gt; html files -&gt; urls</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>Web model</div>
+      <ul>
+         <li>directional graph</li>
+         <li>each url is a node</li>
+         <li>each hyperlink is an edge from an url to another url</li>
+         <li>BFS  + Priorityqueue</li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Scenario</span></div>
+      <div>How many web pages? How long? How large?</div>
+      <ul>
+         <li>crawl 1.6M web pages per second</li>
+         <ul>
+            <li>1 trillion web pages</li>
+            <li>crawl all of them every week</li>
+            <li>1 trillion / 86400 / 7 = 1.6M</li>
+         </ul>
+         <li>10 petabyte web page storage</li>
+         <ul>
+            <li>average size of a web page: 10k</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>Crawler</div>
+      <ul>
+         <li>news crawler (simple)</li>
+         <ul>
+            <li>given the URL of news list page</li>
+            <li>send an HTTP request and grab the content of the news list page</li>
+            <li>extract all the news titles from the news list page</li>
+            <ul>
+               <li>use regular expression matching to extract title</li>
+            </ul>
+         </ul>
+         <li><span style="font-weight: bold;">web crawler (single thread)</span></li>
+         <ul>
+            <li>input: url seeds</li>
+            <li>output: list of urls</li>
+            <li>BFS</li>
+            <ul>
+               <li>dequeue a url from the queue</li>
+               <li>get html file and store it</li>
+               <li>extract all urls in the file and add them to queue</li>
+               <li>repeat</li>
+            </ul>
+            <li>too slow</li>
+            <ul>
+               <li>CPU sit there waiting due to web response time, not efficient</li>
+            </ul>
+         </ul>
+         <li><span style="font-weight: bold;">web crawler (multi-thread)</span></li>
+         <ul>
+            <li>a thread crawls a url, while waiting for its response, CPU can switch to another thread and crawls another url</li>
+            <li>improve CPU utilization</li>
+            <li>a single machine can have ~1000 threads, 1000 times faster</li>
+            <li>but still not fast enough</li>
+            <li>solutions to conflicts, race condition</li>
+            <ul>
+               <li>sleep</li>
+               <ul>
+                  <li>when shared resource is occupied by others, leave and come back later</li>
+               </ul>
+               <li>condition variable</li>
+               <ul>
+                  <li>stay alert and keep trying,</li>
+               </ul>
+               <li>semaphore</li>
+               <ul>
+                  <li>a resource can shared by several threads</li>
+                  <li>limit the number of threads</li>
+               </ul>
+            </ul>
+         </ul>
+         <li><span style="font-weight: bold;">Distributed web crawler</span></li>
+         <ul>
+            <li>disadvantage of using a single machine?</li>
+            <ul>
+               <li>context switch cost (CPU number limitation)</li>
+               <ul>
+                  <li>multiple threads shares a CPU</li>
+               </ul>
+               <li>thread (port) number limitation</li>
+               <ul>
+                  <li>TCP/IP packet needs a port number</li>
+                  <li>a single machine has limited ports (2^16 = 25536)</li>
+               </ul>
+               <li>network bottleneck for single machine</li>
+               <ul>
+                  <li>network bandwidth is limited</li>
+               </ul>
+               <li>storage not enough</li>
+            </ul>
+            <li>One machine is responsible for managing shared queue</li>
+            <ul>
+               <li>this queue will be very very large</li>
+               <ul>
+                  <li>can no longer store this queue in memory, need to store in disk</li>
+               </ul>
+               <li>task table</li>
+               <ul>
+                  <li>id, url, state, priority, time, hashvalue</li>
+               </ul>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>Producer Consumer Pattern</div>
+      <ul>
+         <li>dequeue - consume</li>
+         <li>enqueue - produce</li>
+         <li>When the speed of consumer and producer doesn't match, need a buffer</li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Storage</span></div>
+      <ul>
+         <li>use db to store task table</li>
+         <li>BigTable to store actual web pages</li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Scale</span></div>
+      <ul>
+         <li>How to handle slow select?</li>
+         <ul>
+            <li>task table can be very very large, lead to slow select</li>
+            <li>horizontal sharding</li>
+            <ul>
+               <li>split to several databases</li>
+            </ul>
+         </ul>
+         <li>How to handle update failure?</li>
+         <ul>
+            <li>failure =&gt; when web page doesn't change</li>
+            <li>exponential back-off</li>
+            <ul>
+               <li>success: crawl after 1 week</li>
+               <li>no.1 failure: crawl after 2 weeks</li>
+               <li>no.2 failure: crawl after 4 weeks</li>
+               <li>no.3 failure: crawl after 8 weeks</li>
+            </ul>
+            <li>update more active website more frequently</li>
+         </ul>
+         <li>How to handle dead cycle?</li>
+         <ul>
+            <li>dead cycle =&gt; crawl the same website too much</li>
+            <li>e.g. at a given point, crawl 50% of pages of sina, 50% other pages</li>
+            <li>human intervention, set quota</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Typeahead</span></div>
+      <ul>
+         <li>type ahead view</li>
+         <ul>
+            <li>prefix -&gt; top n hot key words</li>
+            <li>e.g. Google Suggestion</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Senario</span></div>
+      <ul>
+         <li>Google suggestion</li>
+         <li>DAU: 500m</li>
+         <li>search: 4 * 6 * 500m =  12b</li>
+         <ul>
+            <li>assume every user search 6 times, types 4 letters every day</li>
+            <li>typeahead is evoked for every character user types</li>
+         </ul>
+         <li>QPS = 12b / 86400 = 138k</li>
+         <li>Peak QPS = QPS * 2 = 276k</li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Service</span></div>
+      <ul>
+         <li>Query Service</li>
+         <ul>
+            <li>handle client queries</li>
+            <li>trie (in memory)</li>
+            <li>serialized tries (on disk)</li>
+            <ul>
+               <li>backup</li>
+            </ul>
+         </ul>
+         <li>Data Collection Service</li>
+         <ul>
+            <li>log data</li>
+            <li>manage hot key words</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Storage</span></div>
+      <ul>
+         <li>Query Service</li>
+         <ul>
+            <li>use HashMap</li>
+            <ul>
+               <li>key word and count</li>
+               <li>fast for exact search</li>
+               <li>slow for prefix matching</li>
+            </ul>
+            <li>convert HashMap to prefix -&gt; top keywords</li>
+            <ul>
+               <li>key = prefix</li>
+               <li>value = top n keywords and their counts</li>
+               <li>can quick find top key words</li>
+               <li>空间换时间, reduce query time</li>
+            </ul>
+            <li><span style="font-weight: bold;">Trie</span></li>
+            <ul>
+               <li>fast for prefix matching</li>
+               <li>save space, can be put in memory</li>
+               <li>store top n keywords at trie node</li>
+               <li>search: O(len)</li>
+            </ul>
+         </ul>
+         <li>Data collection service</li>
+         <ul>
+            <li>store users' search key word</li>
+            <li>update keyword collection daily</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Scale</span></div>
+      <ul>
+         <li>How to further reduce response time?</li>
+         <ul>
+            <li>Client side cache</li>
+            <li>pre-fetch</li>
+         </ul>
+         <li>What if trie gets too large for memory?</li>
+         <ul>
+            <li>distributed memory</li>
+         </ul>
+         <li>how to reduce the size of log file?</li>
+         <ul>
+            <li>log data in data collection service</li>
+            <li>doesn't have to be very accurate</li>
+            <li><span style="font-weight: bold;">probabilistic logging:</span></li>
+            <ul>
+               <li>for every client search, generate a random number (1 ~ 100)</li>
+               <li>if this number is 1, add to log</li>
+               <li>top key word doesn't change</li>
+               <li>reduce disk space by 100 times</li>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Lecture 6 MapReduce</span></div>
+      <div>Map reduce problem</div>
+      <ul>
+         <li>多台机器并行处理数据</li>
+         <li>count word frequency</li>
+         <li>build inverted index</li>
+      </ul>
+      <div><br/></div>
+      <div>Map Reduce</div>
+      <ul>
+         <li><span style="font-size: 10pt;">distributed computing framework</span></li>
+         <li><span style="font-size: 13.3333px;">big data</span></li>
+      </ul>
+      <div><br/></div>
+      <div>Example Problem: Count the word frequency on a web page</div>
+      <ul>
+         <li>Solution 1: For loop</li>
+         <ul>
+            <li>build frequency map</li>
+            <li>for each word in webpage: wordcount[word]++</li>
+            <li>drawback:</li>
+            <ul>
+               <li>slow, on one machine</li>
+            </ul>
+         </ul>
+         <li>Solution 2: For loop on multiple machines</li>
+         <ul>
+            <li>each machine counts word frequency for a part of page</li>
+            <li>then merge results</li>
+            <li>drawback:</li>
+            <ul>
+               <li>merge process becomes bottleneck</li>
+               <li>merge process is not parallel</li>
+            </ul>
+         </ul>
+         <li>Solution 3: Map Reduce, multiple machines</li>
+         <ul>
+            <li>Map （分）:</li>
+            <ul>
+               <li>each machine counts word frequency for a part of page</li>
+            </ul>
+            <li>Reduce （合）:</li>
+            <ul>
+               <li>each machine merge the result for a part of keys</li>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Map Reduce Steps:</span></div>
+      <ul>
+         <li>Input</li>
+         <li>Split</li>
+         <ul>
+            <li>split input file to smaller parts, then assign them to map workers</li>
+         </ul>
+         <li><span style="font-weight: bold;">Map</span></li>
+         <ul>
+            <li>create &lt;key, value&gt; pairs</li>
+            <li><span style="text-decoration: underline;">don't merge intermediate result</span>, because data is huge, cannot maintain a hashmap on a single machine</li>
+         </ul>
+         <li>partition and sort</li>
+         <ul>
+            <li>use partition function to store key-value pairs to different partitions</li>
+            <li>sort each partition</li>
+         </ul>
+         <li>fetch and merge sort</li>
+         <ul>
+            <li>fetch partitions from map workers</li>
+            <li>perform k-way merge to get sorted key-value pairs</li>
+         </ul>
+         <li><span style="font-weight: bold;">Reduce</span></li>
+         <ul>
+            <li>merge intermediate result for a set of keys</li>
+         </ul>
+         <li>Output</li>
+         <ul>
+            <li>store results in a file</li>
+         </ul>
+         <li><img src="/images/SystemDesign/Image%201_1.png" height="302" width="857"/><br/></li>
+      </ul>
+      <div><br/></div>
+      <div>Our task is to write <span style="font-weight: bold;">map()</span> and <span style="font-weight: bold;">reduce()</span> function.</div>
+      <div>MapReduce framework handles other tasks for us.</div>
+      <ul>
+         <li>map()</li>
+         <ul>
+            <li>input</li>
+            <ul>
+               <li>key: document address</li>
+               <li>value: document content</li>
+            </ul>
+         </ul>
+         <li>reduce()</li>
+         <ul>
+            <li>input</li>
+            <ul>
+               <li>key: key in map result</li>
+               <li>value: value in map value</li>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>Example Problem: Inverted index with MapReduce</div>
+      <div>Map()</div>
+      <ul>
+         <li>input</li>
+         <ul>
+            <li>key: document address</li>
+            <li>value: document content</li>
+         </ul>
+         <li>create &lt;word, document address&gt; pairs</li>
+      </ul>
+      <div>Reduce()</div>
+      <ul>
+         <li>input: output of map()</li>
+         <li>merge intermediate results of the same word</li>
+         <li>we now have the addresses of all documents that contains key word</li>
+      </ul>
+      <div><br/></div>
+      <div>Example Problem: anagram with MapReduce</div>
+      <div>Map()</div>
+      <ul>
+         <li>input</li>
+         <ul>
+            <li>key: document address</li>
+            <li>value: document content</li>
+         </ul>
+         <li>scan through words and sort each word by char</li>
+         <li>create &lt;sorted_word, original word&gt; pairs</li>
+      </ul>
+      <div>Reduce()</div>
+      <ul>
+         <li>input: output of map()</li>
+         <li>merge intermediate results of the same sorted word</li>
+         <li>we now group all words that are anagrams</li>
+      </ul>
+      <div>Distributed execution overview</div>
+      <ul>
+         <li><img src="/images/SystemDesign/Image%202_4.png" height="445" width="803"/><br/></li>
+      </ul>
+      <ol>
+         <li>User program starts master and workers</li>
+         <li>master split input files and assign tasks to map and reduce workers</li>
+         <li>mapper reads split input files and do map job</li>
+         <li>mapper write intermediate results to their local disk</li>
+         <li>reducer fetch intermediate results from mapper's disk</li>
+         <li>reducer do reduce job and write results to output files</li>
+      </ol>
+      <div><br/></div>
+      <div>Problems</div>
+      <ul>
+         <li>more machines, faster computation?</li>
+         <ul>
+            <li>less work on each machine, faster processing</li>
+            <li>machine start time and maintaining time increases</li>
+         </ul>
+         <li>more machines on reduce work, faster?</li>
+         <ul>
+            <li>also depends on number of keys, at least one key per machine</li>
+         </ul>
+         <li>Can mapper and reducer work at the same time?</li>
+         <ul>
+            <li>usually run mapper first then do reducer</li>
+         </ul>
+         <li>What happen when a worker dies?</li>
+         <ul>
+            <li>maintain a worker pool (backups), when a worker dies, get another worker to replace it </li>
+            <li>died machine restarts, and join worker pool</li>
+         </ul>
+         <li>What happen when a reducer has a key that has many many value?</li>
+         <ul>
+            <li>e.g. popular urls, fb.com</li>
+            <li>this reducer becomes bottleneck</li>
+            <li>solution: append a random value to the key</li>
+            <ul>
+               <li><a href="http://fb.com-1/">fb.com-1</a>, <a href="http://fb.com-2/">fb.com-2</a>, fb.com-3</li>
+            </ul>
+            <li>distribute this key to several reducer</li>
+            <li>need merge these results at the end</li>
+         </ul>
+         <li>When do you store input and out?</li>
+         <ul>
+            <li>GFS</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><br/></div>
+      <div style="box-sizing: border-box; margin: 0px; padding: 0px; font-size: medium; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span style="box-sizing: border-box; margin: 0px; padding: 0px; font-size: medium; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; color: rgb(0, 0, 0); font-family: &quot;Segoe UI&quot;; font-variant-caps: normal; font-variant-ligatures: normal; font-weight: bold;">Lecture 7 Location Based Service (LBS)</span></div>
+      <div><br/></div>
+      <div>Example problem:</div>
+      <ul>
+         <li>design Uber （实时性）</li>
+         <li>design Yelp （fixed location）</li>
+         <li>design Pokemon Go</li>
+      </ul>
+      <div><br/></div>
+      <div>Uber Technology</div>
+      <ul>
+         <li>RingPop</li>
+         <ul>
+            <li>distributed architecture</li>
+            <li>a ring of nodes, each node contains web server and database</li>
+            <li>when the data requested is not on local db, redirect this request to the responsible node</li>
+         </ul>
+         <li>TChannel</li>
+         <ul>
+            <li>efficient RPC protocol</li>
+            <li>RPC: Remote Procedure Call</li>
+         </ul>
+         <li>Google S2</li>
+         <ul>
+            <li>a location storage and query algorithm</li>
+         </ul>
+         <li>Riak (database)</li>
+         <ul>
+            <li>open source version of Dynamo DB</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Scenario</span></div>
+      <ul>
+         <li>Features</li>
+         <ul>
+            <li>Drivers report locations</li>
+            <li>Riders request Uber, match a driver with rider</li>
+            <li>Driver deny/accept a request</li>
+            <li>Driver cancel a matched request</li>
+            <li>Rider cancel a request</li>
+            <li>Driver pick up a rider / start a trip</li>
+            <li>Driver drop off a rider / end a trip</li>
+         </ul>
+         <li>QPS</li>
+         <ul>
+            <li>Ask</li>
+            <ul>
+               <li>How many cars/drivers?</li>
+               <li>How many QPS?</li>
+               <li>How many cities?</li>
+            </ul>
+            <li>Driver QPS = 200k / 4 =50k</li>
+            <ul>
+               <li>assume 200k drivers</li>
+               <li>driver reports locations every 4 seconds</li>
+            </ul>
+            <li>Peak QPS = 50k * 3 = 150k</li>
+            <li>Rider QPS can be ignored, because rider only sends location when request a ride, much fewer than Driver QPS</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Service</span></div>
+      <ul>
+         <li>GeoService</li>
+         <ul>
+            <li>Driver: save driver location</li>
+            <li>Rider: find nearby drivers</li>
+         </ul>
+         <li>Dispatch Service (match ride requests with drivers)</li>
+         <ul>
+            <li>Drivers report location, returns matched request</li>
+            <li>Riders request Uber, returns matched driver</li>
+         </ul>
+         <li><img src="/images/SystemDesign/Image%202_1.png" height="324" width="829"/><br/></li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Storage</span></div>
+      <ul>
+         <li>GeoService: Location table</li>
+         <ul>
+            <li>store location of drivers (driver, location, time)</li>
+            <li>more write than read (constantly update location)</li>
+         </ul>
+         <li>Dispatch Service: Trip Table</li>
+         <ul>
+            <li>store trip information (rider, driver, time, location, status, etc)</li>
+            <li>more read than write</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">How to find nearby drivers?</span></div>
+      <ul>
+         <li>If store coordinates in relational database, need to scan through all records, hard to find</li>
+         <ul>
+            <li>cannot have two indices</li>
+         </ul>
+         <li><span style="font-weight: bold;">Google S2</span></li>
+         <ul>
+            <li>Hilbert curve</li>
+            <ul>
+               <li>convert 2D points to 1D</li>
+               <li>two points that are close to each other on 2D has a high probability to have close 1D value</li>
+            </ul>
+            <li>Map geo space to 2^64 integer space</li>
+            <li>two physically close points map to two close integers</li>
+         </ul>
+         <li><span style="font-weight: bold;">Geohash</span></li>
+         <ul>
+            <li>Peano Curve</li>
+            <li>Base32 code</li>
+            <li>divide 纬度 into 4 parts, divide 经度 into 8 parts</li>
+            <li>get the code for current block</li>
+            <li>then recursively get code for smaller block</li>
+            <li><span style="text-decoration: underline;">The longer common prefix is, the closer two points are</span></li>
+            <ul>
+               <li>get geohash of rider, then find drivers with the same prefix (with desired precision)</li>
+            </ul>
+            <li><img src="/images/SystemDesign/Image%203.png" height="432" width="474"/><br/></li>
+            <li>Example:</li>
+            <ul>
+               <li>Google HQ: <span style="color: rgb(227, 0, 0);">9q9</span>hvu7wbq2s</li>
+               <li>Facebook HQ: <span style="color: rgb(222, 87, 0);">9q9</span>j45zvr0se</li>
+            </ul>
+            <li>Problem:</li>
+            <ul>
+               <li>two close points across the boundary of two blocks</li>
+            </ul>
+            <li>How to store geohash in Database?</li>
+            <ul>
+               <li>SQL</li>
+               <ul>
+                  <li>create index on geohash</li>
+                  <li>use LIKE</li>
+               </ul>
+               <li>NoSQL - Cassandra</li>
+               <ul>
+                  <li>set geohash as column key</li>
+                  <li>use range query</li>
+               </ul>
+               <li>NoSQL - Redis/Memcached</li>
+               <ul>
+                  <li>store driver location on different level of precisions</li>
+                  <li>e.g. When there are not driver in 6-digit precision, check 5-digit precision</li>
+                  <li>when driver report location, only update if their geohash value changes</li>
+               </ul>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Scale</span></div>
+      <ul>
+         <li>What if Redis server is down?</li>
+         <ul>
+            <li>DB Sharding</li>
+            <ul>
+               <li>load balance</li>
+               <li>avoid single point of failure</li>
+               <li>sharding based on city</li>
+               <ul>
+                  <li>Geo Fence</li>
+                  <ul>
+                     <li>represents city by polygon</li>
+                     <li>check if a point is in that range</li>
+                  </ul>
+                  <li>400 cities, not very large</li>
+               </ul>
+            </ul>
+         </ul>
+         <li>How to check rider is in Airport?</li>
+         <ul>
+            <li>Can also use Geo Fence</li>
+            <ul>
+               <li>but too many airports, slow to check all</li>
+            </ul>
+            <li>Two level fence query</li>
+            <ul>
+               <li>First find city, then find airport</li>
+            </ul>
+         </ul>
+         <li>How to reduce impact on db crash?</li>
+         <ul>
+            <li>Replica by  Redis</li>
+            <ul>
+               <li>Master - slave</li>
+            </ul>
+            <li>Replica by yourself</li>
+            <li>Use NoSQL databases to handle (Riak/Cassandra)</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><br/></div>
+      <div><span style="box-sizing: border-box; font-size: medium; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; color: rgb(0, 0, 0); font-family: &quot;Segoe UI&quot;; font-variant-caps: normal; font-variant-ligatures: normal; font-weight: bold;">Lecture 8 Big Table</span></div>
+      <div>NoSQL database</div>
+      <ul>
+         <li>Example</li>
+         <ul>
+            <li>Bigtable: Google</li>
+            <li>HBase: Yahoo Open Source of Bigtable</li>
+            <li>Cassandra: Facebook</li>
+            <li>DynamoDB: Amazon</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>Scenario</div>
+      <ul>
+         <li>query(key) -&gt; return value</li>
+      </ul>
+      <div><br/></div>
+      <div>Storage</div>
+      <ul>
+         <li>data are not stored as a table</li>
+         <li>all data is converted into a string (serialization) and store in a file</li>
+      </ul>
+      <div><br/></div>
+      <div>How to implement read</div>
+      <ul>
+         <li>load entire file into memory and create hashmap</li>
+         <ul>
+            <li>allows for quick lookup</li>
+            <li>memory is limited, usually unable to load all into memory</li>
+         </ul>
+         <li><span style="font-weight: bold;">store data in sorted order by key</span></li>
+         <ul>
+            <li>do binary search to find k</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>How to implement modification, write, delete?</div>
+      <ul>
+         <li>modify in the file</li>
+         <ul>
+            <li>hard to directly modify file</li>
+         </ul>
+         <li>read entire file, modify, then write back</li>
+         <ul>
+            <li>time consuming</li>
+         </ul>
+         <li><span style="font-weight: bold;">don't modify, append action to the end of the file</span></li>
+         <ul>
+            <li>fast, but break sorted order</li>
+            <li>need to reorganize file periodically</li>
+            <li>Better solution:</li>
+            <ul>
+               <li>break file into sorted block <span style="font-weight: bold;">(Sstable)</span></li>
+               <li><span style="font-weight: bold;">SStable (Sorted String Table)</span></li>
+               <li>last block is unsorted, responsible for storing new data</li>
+               <li>when last block is full, sort it and convert it into sorted block, and create a new unsorted block</li>
+               <ul>
+                  <li>How to convert?</li>
+                  <ul>
+                     <li>Load into memory and quicksort</li>
+                     <ul>
+                        <li>need write to disk, read back, and write back, 3 disk I/O</li>
+                     </ul>
+                     <li>Disk external sort</li>
+                     <ul>
+                        <li>unnecessary</li>
+                     </ul>
+                     <li><span style="font-weight: bold;">Store in the memory initially (Skip List)</span></li>
+                     <ul>
+                        <li>in memory, use skip list to maintain sorted list</li>
+                        <li>write to disk when block is full</li>
+                        <li>but memory is not persistent</li>
+                        <ul>
+                           <li><span style="font-weight: bold;">Write Ahead Log (WAL)</span></li>
+                           <ul>
+                              <li>used for data recovery</li>
+                              <li>very easy, no need to organize, only append</li>
+                           </ul>
+                        </ul>
+                     </ul>
+                  </ul>
+               </ul>
+               <li>merge sorted block periodically to remove duplicates (k-way merge)</li>
+            </ul>
+            <li>How to improve read (multiple versions of data exist)</li>
+            <ul>
+               <li>look into memory (unsorted block), if exist, return it</li>
+               <li>otherwise, look into last sorted block, do binary search</li>
+               <li>if multiple version exists, can compare time stamp to find the version we want</li>
+               <li>can also build index for sorted blocks, store in the memory, allows for faster search</li>
+            </ul>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Bloom Filter</span></div>
+      <ul>
+         <li>Like a Hash Table, can insert values, can check if a value is in the bloom filter</li>
+         <li>When insert values, compute several hash values, mark the corresponding cells as true</li>
+         <li><img src="/images/SystemDesign/Image%202_3.png" height="212" width="883"/><br/></li>
+         <li>When check for values, compute hash values, check if all corresponding cells are true</li>
+         <li><img src="/images/SystemDesign/Image%201.png" height="228" width="878"/><br/></li>
+         <li>False is always false, true may be true.</li>
+         <ul>
+            <li>inaccurate rate very low</li>
+         </ul>
+         <li>accuracy is related to</li>
+         <ul>
+            <li>number of hash functions</li>
+            <li>size of array</li>
+            <li>number of strings to add</li>
+         </ul>
+         <li>Can be very useful in <span style="text-decoration: underline;">read</span></li>
+         <ul>
+            <li>before reading a block, use bloom filter to check if the value exists in the block</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>Scale</div>
+      <ul>
+         <li><span style="font-size: 10pt;">How to read/write key:value from 1PB file?</span></li>
+         <ul>
+            <li><span style="font-size: 10pt;">Sharding</span></li>
+            <ul>
+               <li><span style="font-size: 10pt;">vertical sharding</span></li>
+               <ul>
+                  <li><span style="font-size: 10pt;">no a good idea, may need to look up relevant attributes</span></li>
+               </ul>
+               <li><span style="font-size: 10pt; font-weight: bold;">horizontal sharding</span></li>
+               <ul>
+                  <li><span style="font-size: 13.3333px;">use consistent hashing to divide table into several machines</span></li>
+               </ul>
+            </ul>
+         </ul>
+         <li><span style="font-size: 13.3333px;">How do we read in bigtable with multi-server</span></li>
+         <ul>
+            <li><span style="font-size: 13.3333px;">client sends read(key) to master</span></li>
+            <li><span style="font-size: 13.3333px;">master get row key from key, looks up its map and returns the slave server id</span></li>
+            <li>slave machine returns values</li>
+         </ul>
+         <li>How do we write a key?</li>
+         <ul>
+            <li>client sends write(key:value) to master</li>
+            <li>master get row key from key, use row key to get slave server id</li>
+            <li>slave server writes key:value</li>
+         </ul>
+         <li>Slave machine can run out of storage</li>
+         <ul>
+            <li>store all data to GFS</li>
+            <li>advantage:</li>
+            <ul>
+               <li>disk size, can be very large</li>
+               <li>replica</li>
+               <li>failure and recovery</li>
+            </ul>
+         </ul>
+         <li>How to write Sstable into GFS?</li>
+         <ul>
+            <li>unit of bigtable is sstable</li>
+            <li>unit of GFS is chunk</li>
+            <li>solution:</li>
+            <ul>
+               <li>treat every sstable as a file</li>
+               <li>GFS will take care of how to store sstable file</li>
+            </ul>
+            <li><img src="/images/SystemDesign/Image%203_1.png" height="201" width="869"/><br/></li>
+         </ul>
+         <li>difference between slaver servers</li>
+         <ul>
+            <li>bigtable slaver server</li>
+            <ul>
+               <li>high memory, low storage</li>
+               <li>need more processing, store result into GFS</li>
+            </ul>
+            <li>GFS slaver server</li>
+            <ul>
+               <li>low memory, high storage</li>
+               <li>not much processing, need to store a lot of data</li>
+            </ul>
+         </ul>
+         <li>what if read and write the same key at the same time? (Race condition)</li>
+         <ul>
+            <li>need distributed lock</li>
+            <ul>
+               <li>Chubby</li>
+               <li>Zookeeper</li>
+            </ul>
+            <li>use a lock server</li>
+            <li>when client write a key, acquire a lock on the key from lock server</li>
+            <li>only one server is allowed to modify a key at a time</li>
+            <li>advantages:</li>
+            <ul>
+               <li>metadata is stored on the lock server</li>
+               <li>no need to store metadata on master server</li>
+            </ul>
+            <li>GFS won't have race condition because write once</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div>Read Summary</div>
+      <div><img src="/images/SystemDesign/Image%205.png" height="408" width="762"/><br/></div>
+      <div>Write Summary</div>
+      <div><img src="/images/SystemDesign/Image%204.png" height="390" width="779"/><br/></div>
+      <div><br/></div>
+      <div>Bigtable Naming</div>
+      <ul>
+         <li>tablet</li>
+         <ul>
+            <li>smaller tables after sharding</li>
+         </ul>
+         <li>tablet server</li>
+         <ul>
+            <li>slave servers that store tablet </li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Lecture 9: Message System, Rate Limiter</span></div>
+      <div><span style="font-weight: bold;">Scenario</span></div>
+      <ul>
+         <li>Features</li>
+         <ul>
+            <li>Register/login</li>
+            <li>Contacts page</li>
+            <li>send messages</li>
+            <li>group chat</li>
+            <li>online status</li>
+            <li>chat history</li>
+            <li>multi devices</li>
+         </ul>
+         <li>QPS</li>
+         <ul>
+            <li>100M DAU</li>
+            <li>QPS: Assume 20 messages per user daily, 100M * 20 / 86400 = 20k</li>
+            <li>peak QPS = 20k * 5 = 100k</li>
+            <li>Storage: assume each messages is 30 bytes, 100M * 20 * 30B = 60GB</li>
+         </ul>
+      </ul>
+      <div> </div>
+      <div>Service</div>
+      <ul>
+         <li>Message Service: responsible for managing messages</li>
+         <li>Real-time service: responsible for sending push notification to clients</li>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Storage</span></div>
+      <ul>
+         <li>Questions</li>
+         <ul>
+            <li>is chat system point-to-point?</li>
+            <ul>
+               <li>better privacy, hard to be tracked and filtered</li>
+               <li>need both participant be online</li>
+               <li>cannot store chat history</li>
+               <li>Good for video chat, both online, no need to store chat history</li>
+            </ul>
+            <li>do messages go through server?</li>
+            <ul>
+               <li>can store chat history, filter</li>
+            </ul>
+            <li>do messages need to be stored?</li>
+         </ul>
+         <li><span style="font-weight: bold;">Message Table</span></li>
+         <ul>
+            <li>Schema</li>
+            <ul>
+               <li>message_id</li>
+               <li>from_user_id</li>
+               <li>to_user_id</li>
+               <li>content</li>
+               <li>timestamp</li>
+            </ul>
+            <li>Store in NoSQL</li>
+            <ul>
+               <li>A lot of data</li>
+               <li>No modification needed, like logs</li>
+               <li>better performance</li>
+            </ul>
+         </ul>
+         <li><span style="font-weight: bold;">Thread Table</span> (会话）</li>
+      </ul>
+      <ul>
+         <li>Inbox has a list of Threads</li>
+         <li>Thread has a list of Messages</li>
+         <li>Store key information about threads for display in Inbox</li>
+         <ul>
+            <li>Participant names</li>
+            <li>Last update time</li>
+            <li>Last message</li>
+            <li>number of unread messages</li>
+         </ul>
+         <li>Also store private thread information </li>
+         <ul>
+            <li>(Store these in the same table to improve performance)</li>
+            <li>(use ThreadID + OwnerID to get private information)</li>
+            <li>is_muted</li>
+            <li>nickname</li>
+         </ul>
+         <li>Better to store in SQL databases</li>
+         <ul>
+            <li>need both indexing on</li>
+            <ul>
+               <li>Owner ID + Thread ID (primary key)</li>
+               <li>Owner ID + Updated time (display threads in the order of last updated time)</li>
+            </ul>
+            <li>NoSQL doesn't support secondary index well</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Scale</span></div>
+      <ul>
+         <li>Sharding</li>
+         <ul>
+            <li>Thread table</li>
+            <ul>
+               <li>horizontal sharding on owner_id</li>
+               <li>store all threads of the same owner on the same machine</li>
+            </ul>
+            <li>Message Table</li>
+            <ul>
+               <li>horizontal sharding on thread_id</li>
+               <li>store all messages of a thread on the same machine</li>
+            </ul>
+         </ul>
+         <li>How to speed up?</li>
+         <ul>
+            <li>Original design - pull every 10 seconds - can cause delay</li>
+            <li>Need <span style="font-weight: bold;">Socket</span></li>
+            <li>Need a new service - <span style="font-weight: bold;">Push Service</span></li>
+            <ul>
+               <li>Push service provide socket connection, maintain TCP connection with client</li>
+               <li>When user opens the app, connect with push service to get a unique socket</li>
+               <li>when message service receives a message, send it to client using push service</li>
+            </ul>
+            <li>When user becomes inactive, terminates connection, release port</li>
+            <li>After socket connection is terminated, how to get new data?</li>
+            <ul>
+               <li>active poll when open the App</li>
+               <li>Push Notification service on mobile phone</li>
+               <ul>
+                  <li>Android GCM</li>
+                  <li>IOS APNS</li>
+               </ul>
+            </ul>
+            <li>Difference between socket connection and HTTP connection</li>
+            <ul>
+               <li><span style="font-weight: bold;">HTTP</span>: <span style="text-decoration: underline;">client asks for data from server</span></li>
+               <li><span style="font-weight: bold;">socket</span>: <span style="text-decoration: underline;">server can push data to client actively</span></li>
+            </ul>
+            <li>pull vs poll</li>
+            <ul>
+               <li>pull: client request read/write data from server</li>
+               <li>poll: periodic behavior of pulls made by client to server</li>
+            </ul>
+            <li><span style="font-weight: bold;">Work Flow</span></li>
+            <ul>
+               <li>When client <span style="color: rgb(45, 79, 201);">A</span> opens App, request <span style="color: rgb(227, 0, 0); font-style: italic;">push server</span> IP from <span style="color: rgb(65, 173, 28); font-style: italic;">web server</span></li>
+               <li>Client <span style="color: rgb(45, 79, 201);">A</span> creates socket connection with <span style="color: rgb(227, 0, 0); font-style: italic;">push server</span></li>
+               <li>When client <span style="color: rgb(250, 122, 0);">B</span> sends a message to <span style="color: rgb(45, 79, 201);">A</span>, message is sent to <span style="color: rgb(65, 173, 28); font-style: italic;">web server</span></li>
+               <li>After message is stored by the <span style="color: rgb(65, 173, 28); font-style: italic;">web server</span> , it asks <span style="color: rgb(227, 0, 0); font-style: italic;">push server</span>  to send notification to <span style="color: rgb(45, 79, 201);">A</span></li>
+               <li><span style="color: rgb(45, 79, 201);">A</span> receives real-time notification from <span style="color: rgb(227, 0, 0); font-style: italic;">push server</span>  </li>
+               <li><img src="/images/SystemDesign/Image%201_2.png" height="273" width="576"/><br/></li>
+            </ul>
+            <li>Real-time Push Service</li>
+            <ul>
+               <li>a large number of push server</li>
+               <li>sharding by user_id</li>
+               <li>each push server is responsible for a number of sockets</li>
+            </ul>
+         </ul>
+         <li>How to support group chat?</li>
+         <ul>
+            <li>by original design - need to sends push notification to all people in the group</li>
+            <ul>
+               <li>a large percent of users in the group are not online, wasteful to send notification to everyone every time</li>
+            </ul>
+            <li>Need <span style="font-weight: bold;">Channel Service</span></li>
+            <ul>
+               <li>Add channel information to every thread</li>
+               <li>for larger group, online clients need to subscribe to the channel</li>
+            </ul>
+            <li>Separate one-to-one messages and group messages into different channels</li>
+            <li>Channel service has many channel servers and sharding by channel id</li>
+            <li>Only need memory, data storage not important</li>
+            <li><img src="/images/SystemDesign/Image%202.png" height="399" width="794"/><br/></li>
+         </ul>
+         <li>How to store media (images, videos)?</li>
+         <ul>
+            <li>Need <span style="font-weight: bold;">Media Service</span></li>
+            <li>When clients want to send a media file</li>
+            <ul>
+               <li>APP requests ip address of media server from web server</li>
+               <li>Then APP create connections between media server, then upload media</li>
+               <li>media serve can process media</li>
+               <ul>
+                  <li>content filtering</li>
+                  <li>format conversion</li>
+                  <li>create thumbnail</li>
+               </ul>
+               <li>media server returns URL of the media to client or Web server</li>
+            </ul>
+         </ul>
+         <li>How to check / update online status?</li>
+         <ul>
+            <li>server needs to know who is online: <span style="font-weight: bold;">pull</span></li>
+            <li>client needs to know their friends who are online: <span style="font-weight: bold;">pull</span></li>
+            <li>client sends heartbeat messages to server</li>
+            <li>server will tell clients their online friends in the reply of the heartbeat message</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><span style="font-weight: bold;">Rate Limiter</span></div>
+      <div><b>Scenario</b></div>
+      <div>
+         <ul>
+            <li>Limit user’s behaviors within a given interval of time<br/></li>
+            <li>Based on different features</li>
+            <ul>
+               <li>IP address (unlogged in)</li>
+               <li>User id (logged in)</li>
+               <li>Email (register, login, activate)</li>
+            </ul>
+            <li>Different level of accuracy</li>
+            <ul>
+               <li>unit of time (s, m, h, d)</li>
+               <li>usually unnecessary to use very precise measure</li>
+               <ul>
+                  <li>2/30s =&gt; 1/m (better)</li>
+               </ul>
+            </ul>
+         </ul>
+         <div><br/></div>
+      </div>
+      <div><b>Storage</b></div>
+      <ul>
+         <li>need to log which <i>feature</i> performs what <i>event</i> at what <i>time</i></li>
+         <li>Memcached</li>
+         <ul>
+            <li>only need to store these information for at most one day</li>
+            <ul>
+               <li>information becomes irrelevant after the interval passes</li>
+               <li><u>no need for persistency</u></li>
+            </ul>
+            <li><u>Need very fast read/write performance</u></li>
+            <li>Memcached doesn’t support range query, need to for loop through every unit in the interval</li>
+         </ul>
+         <li>Key: event+feature+timestamp</li>
+         <li>Log an event</li>
+         <ul>
+            <li>memcached.increament(key, ttl=60s)</li>
+            <ul>
+               <li>increment the event by 1</li>
+               <li>set time to live</li>
+            </ul>
+         </ul>
+         <li>Check if reach limit</li>
+         <ul>
+            <li>for t in 0~59:</li>
+            <ul>
+               <li>key = event+feature+(current_timestamp-t)</li>
+               <li>sum += memcached.get(key, default=0)</li>
+            </ul>
+            <li>check if sum is in limitation</li>
+            <li>performance is acceptable, memory based, read very fast, better than database access</li>
+         </ul>
+         <li>Level Storage (分级存储）</li>
+         <ul>
+            <li>for any time interval, store log data using smaller interval size</li>
+            <li>e.g. limit access within a hour</li>
+            <ul>
+               <li>store data with minute as unit</li>
+            </ul>
+            <li>may not be perfectly precise</li>
+            <ul>
+               <li>usually slightly underestimate</li>
+               <li>usually OK, no need for very accurate limit</li>
+            </ul>
+            <li>if want high level of precision, need multi-level storage (s, m, h)</li>
+         </ul>
+      </ul>
+      <div><br/></div>
+      <div><b>Datadog</b><br/></div>
+      <div><b>Scenario</b></div>
+      <div>
+         <ul>
+            <li>features</li>
+            <ul>
+               <li>log user access to urls</li>
+               <li>keep track of number of visits to each url</li>
+               <li>keep track of total number of visits</li>
+               <li>generate visit curves for recent x hours/days/month/year</li>
+            </ul>
+            <li>QPS</li>
+            <ul>
+               <li>assume 2k</li>
+            </ul>
+         </ul>
+      </div>
+      <div><br/></div>
+      <div><b>Storage</b></div>
+      <ul>
+      <ul>
+         <ul/></ul>
+      </ul>
+      <div>
+         <ul>
+            <li>more write than read</li>
+            <ul>
+               <li>automatically logging</li>
+            </ul>
+            <li>need persistent storage</li>
+            <li>NoSQL</li>
+            <ul>
+               <li>key: url</li>
+               <li>value: all access records</li>
+               <ul>
+                  <li>store number of access with the time unit</li>
+                  <li>multiple time units (hour/minute/…)</li>
+                  <li>e.g.</li>
+                  <ul>
+                     <li>2016/02/26 23 1h 200</li>
+                     <li>2016/03/01 23:55 5m 30</li>
+                  </ul>
+                  <li>older records have larger time unit</li>
+               </ul>
+            </ul>
+            <li><b>Retention</b></li>
+            <ul>
+               <li><u>periodically compress older data</u></li>
+               <li>aggregate the number of access using large time unit</li>
+               <li>doesn’t need high precision for older data</li>
+            </ul>
+            <li>Logging</li>
+            <ul>
+               <li>web server runs a logging thread </li>
+               <li>record all activities of users in the web server</li>
+               <li>periodically dump records to the monitor (data dog)</li>
+               <li>significantly reduce requests to monitor</li>
+            </ul>
+         </ul>
+      </div>
+      <div><br/></div>
+      <div><br/></div>
+      <div><br/></div>
+      <div><br/></div>
+      <div><br/></div>
+      <div><br/></div>
