@@ -1,4 +1,13 @@
 
+table#jet {
+	padding-left: 100px;
+    padding-right: 100px;
+}
+
+table#jet td{
+    padding: 20px;
+}
+
 table#nyu {
 	padding-left: 100px;
     padding-right: 100px;
@@ -22,6 +31,9 @@ table#bu td{
     border-radius: 50%;
 }
 
+div#jetblock:hover {
+    background-color: #f9f9f9;
+}
 div#nyublock:hover {
     background-color: #f9f9f9;
 }
